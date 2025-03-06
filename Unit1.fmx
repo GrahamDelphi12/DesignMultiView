@@ -1,0 +1,353 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  ActiveControl = TabItem1
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 980
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object ToolBar1: TToolBar
+    Size.Width = 980.000000000000000000
+    Size.Height = 40.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object Button1: TButton
+      Align = Left
+      Size.Width = 80.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'drawertoolbutton'
+      TabOrder = 0
+      Text = 'Button1'
+      TextSettings.Trimming = None
+    end
+    object Button2: TButton
+      Action = PreviousTabAction1
+      Align = Left
+      ImageIndex = -1
+      Position.X = 80.000000000000000000
+      Size.Width = 49.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'arrowlefttoolbuttonbordered'
+      TabOrder = 1
+      TextSettings.Trimming = None
+    end
+    object Button3: TButton
+      Action = NextTabAction1
+      Align = Right
+      ImageIndex = -1
+      Position.X = 916.000000000000000000
+      Size.Width = 64.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'arrowrighttoolbutton'
+      TabOrder = 2
+      TextSettings.Trimming = None
+    end
+    object ComboBox1: TComboBox
+      Align = Center
+      Items.Strings = (
+        'Design 1'
+        'Design 2'
+        'Design 3'
+        'Design 4'
+        'Design 5')
+      ItemIndex = 2
+      Padding.Left = 30.000000000000000000
+      Placement = TopCenter
+      Size.Width = 100.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'comboboxstyle'
+      TabOrder = 3
+      OnChange = ComboBox1Change
+    end
+    object BtnScaleUp: TButton
+      Align = Right
+      Position.X = 816.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      Text = ' Scale Up'
+      TextSettings.Trimming = None
+      OnClick = BtnScaleUpClick
+    end
+    object BtnScaleDown: TButton
+      Align = Left
+      Position.X = 129.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 5
+      Text = 'Scale Down'
+      TextSettings.Trimming = None
+      OnClick = BtnScaleDownClick
+    end
+  end
+  object ToolBar2: TToolBar
+    Align = Bottom
+    Position.Y = 432.000000000000000000
+    Size.Width = 980.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object Button6: TButton
+      Align = Left
+      Position.X = 80.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 10
+      Text = 'Button6'
+      TextSettings.Trimming = None
+      OnClick = Button6Click
+    end
+    object Button5: TButton
+      Align = Left
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 9
+      Text = 'Button5'
+      TextSettings.Trimming = None
+      OnClick = Button5Click
+    end
+  end
+  object TabControl1: TTabControl
+    Align = Client
+    Size.Width = 980.000000000000000000
+    Size.Height = 392.000000000000000000
+    Size.PlatformDefault = False
+    TabIndex = 0
+    TabOrder = 0
+    TabPosition = Dots
+    Sizes = (
+      980s
+      392s
+      980s
+      392s)
+    object TabItem1: TTabItem
+      CustomIcon = <
+        item
+        end>
+      TextSettings.Trimming = None
+      IsSelected = True
+      Size.Width = 8.000000000000000000
+      Size.Height = 8.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      ExplicitSize.cx = 8.000000000000000000
+      ExplicitSize.cy = 8.000000000000000000
+      object Panel1: TPanel
+        Align = Left
+        Position.X = 321.000000000000000000
+        Size.Width = 259.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object Button4: TButton
+          Position.X = 31.000000000000000000
+          Position.Y = 8.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Button4'
+          TextSettings.Trimming = None
+        end
+        object Edit3: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 1
+          Text = 'Graham'
+          Position.X = 31.000000000000000000
+          Position.Y = 120.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object DateEdit2: TDateEdit
+          Date = 45721.000000000000000000
+          Position.X = 31.000000000000000000
+          Position.Y = 57.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 2
+        end
+        object DateEdit3: TDateEdit
+          Date = 45721.000000000000000000
+          Position.X = 31.000000000000000000
+          Position.Y = 189.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 3
+        end
+      end
+      object Panel2: TPanel
+        Align = Left
+        Size.Width = 281.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object DateEdit1: TDateEdit
+          Date = 45722.000000000000000000
+          TodayDefault = True
+          Padding.Left = 20.000000000000000000
+          Position.X = 30.000000000000000000
+          Position.Y = 189.000000000000000000
+          Size.Width = 105.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 3
+        end
+        object ComboBox2: TComboBox
+          DropDownCount = 20
+          Items.Strings = (
+            'Peter'
+            'John')
+          ItemIndex = 0
+          DropDownKind = Custom
+          Position.X = 29.000000000000000000
+          Position.Y = 258.000000000000000000
+          Size.Width = 106.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 4
+        end
+        object BtnConfirm: TButton
+          Anchors = [akLeft, akBottom]
+          Position.X = 30.000000000000000000
+          Position.Y = 320.000000000000000000
+          Size.Width = 105.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Confirm'
+          TextSettings.Trimming = None
+          OnClick = BtnConfirmClick
+        end
+        object Edit2: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 2
+          Position.X = 30.000000000000000000
+          Position.Y = 120.000000000000000000
+          Size.Width = 105.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object Name: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 1
+          Position.X = 29.000000000000000000
+          Position.Y = 57.000000000000000000
+          Size.Width = 106.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          StyledSettings = [Family, Style, FontColor]
+        end
+        object Label3: TLabel
+          Position.X = 30.000000000000000000
+          Position.Y = 14.000000000000000000
+          Size.Width = 88.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Name'
+          TabOrder = 9
+        end
+      end
+      object Splitter1: TSplitter
+        Align = Left
+        Cursor = crHSplit
+        MinSize = 20.000000000000000000
+        Position.X = 281.000000000000000000
+        Size.Width = 40.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object Panel3: TPanel
+        Align = Client
+        Size.Width = 400.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+      end
+    end
+    object TabItem2: TTabItem
+      CustomIcon = <
+        item
+        end>
+      TextSettings.Trimming = None
+      IsSelected = False
+      Size.Width = 8.000000000000000000
+      Size.Height = 8.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      ExplicitSize.cx = 8.000000000000000000
+      ExplicitSize.cy = 8.000000000000000000
+      object Label2: TLabel
+        Position.X = 232.000000000000000000
+        Position.Y = 160.000000000000000000
+        Text = 'Tab 2'
+        TabOrder = 0
+      end
+    end
+  end
+  object MultiView1: TMultiView
+    DrawerOptions.TouchAreaSize = 15.000000000000000000
+    MasterButton = Button1
+    Mode = Drawer
+    NavigationPaneOptions.CollapsedWidth = 97.000000000000000000
+    Size.Width = 113.000000000000000000
+    Size.Height = 400.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 3
+    object ListBox1: TListBox
+      Align = Client
+      Size.Width = 113.000000000000000000
+      Size.Height = 400.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      OnChange = ListBox1Change
+      Viewport.Width = 109.000000000000000000
+      Viewport.Height = 396.000000000000000000
+      object ListBoxItem1: TListBoxItem
+        TabOrder = 0
+        Text = 'ListBoxItem1'
+      end
+      object ListBoxItem2: TListBoxItem
+        Position.Y = 19.000000000000000000
+        TabOrder = 1
+        Text = 'ListBoxItem2'
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Left = 616
+    Top = 64
+    object PreviousTabAction1: TPreviousTabAction
+      Category = 'Tab'
+      TabControl = TabControl1
+      OnUpdate = PreviousTabAction1Update
+    end
+    object NextTabAction1: TNextTabAction
+      Category = 'Tab'
+      TabControl = TabControl1
+      OnUpdate = NextTabAction1Update
+    end
+  end
+end
