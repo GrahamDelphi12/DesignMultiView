@@ -22,7 +22,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'drawertoolbutton'
-      TabOrder = 0
+      TabOrder = 1
       Text = 'Button1'
       TextSettings.Trimming = None
     end
@@ -35,7 +35,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowlefttoolbuttonbordered'
-      TabOrder = 1
+      TabOrder = 2
       TextSettings.Trimming = None
     end
     object Button3: TButton
@@ -47,7 +47,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowrighttoolbutton'
-      TabOrder = 2
+      TabOrder = 3
       TextSettings.Trimming = None
     end
     object ComboBox1: TComboBox
@@ -65,7 +65,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'comboboxstyle'
-      TabOrder = 3
+      TabOrder = 4
       OnChange = ComboBox1Change
     end
     object BtnScaleUp: TButton
@@ -74,7 +74,7 @@ object Form1: TForm1
       Size.Width = 100.000000000000000000
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 4
+      TabOrder = 5
       Text = ' Scale Up'
       TextSettings.Trimming = None
       OnClick = BtnScaleUpClick
@@ -85,10 +85,22 @@ object Form1: TForm1
       Size.Width = 100.000000000000000000
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 5
+      TabOrder = 6
       Text = 'Scale Down'
       TextSettings.Trimming = None
       OnClick = BtnScaleDownClick
+    end
+    object BtnTakePhoto: TButton
+      Align = Left
+      Position.X = 229.000000000000000000
+      Size.Width = 113.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'cameratoolbutton'
+      TabOrder = 0
+      Text = 'BtnTakePhoto'
+      TextSettings.Trimming = None
+      OnClick = BtnTakePhotoClick
     end
   end
   object ToolBar2: TToolBar
@@ -118,6 +130,61 @@ object Form1: TForm1
       Text = 'Button5'
       TextSettings.Trimming = None
       OnClick = Button5Click
+    end
+    object BtnIterate: TButton
+      Align = Left
+      Position.X = 160.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 11
+      Text = 'Iterate DB'
+      TextSettings.Trimming = None
+      OnClick = BtnIterateClick
+    end
+    object BtnDeleteAll: TButton
+      Align = Left
+      Position.X = 240.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 12
+      Text = 'Delete All'
+      TextSettings.Trimming = None
+      OnClick = BtnDeleteAllClick
+    end
+    object BtnSynch: TButton
+      Align = Left
+      Position.X = 320.000000000000000000
+      Size.Width = 105.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 13
+      Text = 'Synch Force Queue'
+      TextSettings.Trimming = None
+      OnClick = BtnSynchClick
+    end
+    object BtnAnonSync: TButton
+      Align = Left
+      Position.X = 425.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 14
+      Text = 'Anon Sync'
+      TextSettings.Trimming = None
+      OnClick = BtnAnonSyncClick
+    end
+    object BtnListNames: TButton
+      Align = Left
+      Position.X = 505.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 15
+      Text = 'List Names'
+      TextSettings.Trimming = None
+      OnClick = BtnListNamesClick
     end
   end
   object TabControl1: TTabControl
@@ -165,7 +232,7 @@ object Form1: TForm1
         end
         object Edit3: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 1
+          TabOrder = 2
           Text = 'Graham'
           Position.X = 31.000000000000000000
           Position.Y = 120.000000000000000000
@@ -180,7 +247,7 @@ object Form1: TForm1
           Size.Width = 100.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 2
+          TabOrder = 3
         end
         object DateEdit3: TDateEdit
           Date = 45721.000000000000000000
@@ -189,7 +256,29 @@ object Form1: TForm1
           Size.Width = 100.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 3
+          TabOrder = 4
+        end
+        object Memo1: TMemo
+          Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+          DataDetectorTypes = []
+          Lines.Strings = (
+            'Issues with Permissiions:'
+            'Ensure that All Platforms permissions are set to false '
+            'apart from Write to External Storage')
+          Position.X = 18.000000000000000000
+          Position.Y = 270.000000000000000000
+          Size.Width = 233.000000000000000000
+          Size.Height = 84.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          Viewport.Width = 229.000000000000000000
+          Viewport.Height = 64.000000000000000000
+        end
+        object Label1: TLabel
+          Position.X = 40.000000000000000000
+          Position.Y = 232.000000000000000000
+          Text = 'Label1'
+          TabOrder = 5
         end
       end
       object Panel2: TPanel
@@ -199,7 +288,7 @@ object Form1: TForm1
         Size.PlatformDefault = False
         TabOrder = 1
         object DateEdit1: TDateEdit
-          Date = 45722.000000000000000000
+          Date = 45726.000000000000000000
           TodayDefault = True
           Padding.Left = 20.000000000000000000
           Position.X = 30.000000000000000000
@@ -279,6 +368,34 @@ object Form1: TForm1
         Size.Height = 392.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 5
+        object ImageContainer: TImage
+          MultiResBitmap = <
+            item
+            end
+            item
+              Scale = 2.000000000000000000
+            end>
+          Align = Client
+          Size.Width = 400.000000000000000000
+          Size.Height = 392.000000000000000000
+          Size.PlatformDefault = False
+          object Panel4: TPanel
+            Align = Top
+            Size.Width = 400.000000000000000000
+            Size.Height = 42.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            object CBoxNames: TComboBox
+              Position.X = 30.000000000000000000
+              Position.Y = 12.000000000000000000
+              Size.Width = 169.000000000000000000
+              Size.Height = 22.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 0
+              OnChange = CBoxNamesChange
+            end
+          end
+        end
       end
     end
     object TabItem2: TTabItem
@@ -308,14 +425,14 @@ object Form1: TForm1
     Mode = Drawer
     NavigationPaneOptions.CollapsedWidth = 97.000000000000000000
     Size.Width = 113.000000000000000000
-    Size.Height = 400.000000000000000000
+    Size.Height = 392.000000000000000000
     Size.PlatformDefault = False
     Visible = False
     TabOrder = 3
     object ListBox1: TListBox
       Align = Client
       Size.Width = 113.000000000000000000
-      Size.Height = 400.000000000000000000
+      Size.Height = 392.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
       DisableFocusEffect = True
@@ -324,7 +441,7 @@ object Form1: TForm1
       DefaultItemStyles.GroupFooterStyle = ''
       OnChange = ListBox1Change
       Viewport.Width = 109.000000000000000000
-      Viewport.Height = 396.000000000000000000
+      Viewport.Height = 388.000000000000000000
       object ListBoxItem1: TListBoxItem
         TabOrder = 0
         Text = 'ListBoxItem1'
@@ -337,8 +454,8 @@ object Form1: TForm1
     end
   end
   object ActionList1: TActionList
-    Left = 616
-    Top = 64
+    Left = 656
+    Top = 8
     object PreviousTabAction1: TPreviousTabAction
       Category = 'Tab'
       TabControl = TabControl1
@@ -348,6 +465,22 @@ object Form1: TForm1
       Category = 'Tab'
       TabControl = TabControl1
       OnUpdate = NextTabAction1Update
+    end
+    object TakePhotoFromLibraryAction1: TTakePhotoFromLibraryAction
+      Category = 'Media Library'
+    end
+    object TakePhotoFromCameraAction1: TTakePhotoFromCameraAction
+      Category = 'Media Library'
+      OnDidFinishTaking = TakePhotoFromCameraAction1DidFinishTaking
+    end
+    object ShowShareSheetAction1: TShowShareSheetAction
+      Category = 'Media Library'
+      OnBeforeExecute = ShowShareSheetAction1BeforeExecute
+    end
+    object ClearImageAction1: TAction
+      Category = 'Media Library'
+      Text = 'ClearImageAction1'
+      OnExecute = ClearImageAction1Execute
     end
   end
 end

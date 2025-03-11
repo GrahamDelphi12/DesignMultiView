@@ -10,6 +10,6 @@
     <Transaction>2025/02/28 12:30:13.000.183,C:\Delphi 12\DesignMultiView\Unit2.dfm=C:\Delphi 12\DesignMultiView\UnDM.dfm</Transaction>
   </Transactions>
 	<ActiveMobileDevice>
-		<NoProfile Android="HGAL549M" Android64=""/>
+		<NoProfile Android="" Android64="HGAL549M"/>
 	</ActiveMobileDevice>
 </BorlandProject>
