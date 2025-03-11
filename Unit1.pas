@@ -9,7 +9,9 @@ uses
   FMX.TabControl, System.Actions, FMX.ActnList, FMX.Edit, FMX.DateTimeCtrls,
   FMX.MediaLibrary, FMX.MediaLibrary.Actions, FMX.StdActns,
   System.Permissions,FMX.DialogService, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
-  System.ImageList, FMX.ImgList, FMX.Objects, FMX.Filter, Data.DB;
+  System.ImageList, FMX.ImgList, FMX.Objects, FMX.Filter, Data.DB,
+  FMX.ListView.Types, FMX.ListView.Appearances, FMX.ListView.Adapters.Base,
+  FMX.ListView;
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -31,15 +33,12 @@ type
     Button2: TButton;
     Button3: TButton;
     ListBoxItem2: TListBoxItem;
-    Label2: TLabel;
     ComboBox1: TComboBox;
     Button4: TButton;
     Panel1: TPanel;
     Edit3: TEdit;
     DateEdit2: TDateEdit;
     DateEdit3: TDateEdit;
-    Button6: TButton;
-    Button5: TButton;
     Panel2: TPanel;
     DateEdit1: TDateEdit;
     ComboBox2: TComboBox;
@@ -57,15 +56,16 @@ type
     ImageContainer: TImage;
     ShowShareSheetAction1: TShowShareSheetAction;
     ClearImageAction1: TAction;
-    BtnTakePhoto: TButton;
-    Memo1: TMemo;
     BtnDeleteAll: TButton;
     Label1: TLabel;
-    BtnSynch: TButton;
     BtnAnonSync: TButton;
-    BtnListNames: TButton;
     Panel4: TPanel;
-    CBoxNames: TComboBox;
+    ListView1: TListView;
+    ImageDisplay: TImage;
+    TabItem3: TTabItem;
+    Memo1: TMemo;
+    BtnTakePhoto: TButton;
+    BtnSynch: TButton;
     procedure ListBox1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
@@ -75,8 +75,6 @@ type
     procedure BtnConfirmClick(Sender: TObject);
     procedure BtnScaleUpClick(Sender: TObject);
     procedure BtnScaleDownClick(Sender: TObject);
-    procedure Button5Click(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
     procedure BtnIterateClick(Sender: TObject);
     procedure BtnTakePhotoClick(Sender: TObject);
 
@@ -86,8 +84,7 @@ type
     procedure BtnDeleteAllClick(Sender: TObject);
     procedure BtnSynchClick(Sender: TObject);
     procedure BtnAnonSyncClick(Sender: TObject);
-    procedure BtnListNamesClick(Sender: TObject);
-    procedure CBoxNamesChange(Sender: TObject);
+    procedure ListView1Change(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
   private
@@ -112,6 +109,8 @@ type
               const AGrantResults: TClassicPermissionStatusDynArray);
     procedure UpdateEffect;
     procedure UpdateUI;
+    procedure SelectedNameView(Name: string);
+    procedure UpdateData;
 
   public
   public
@@ -350,16 +349,6 @@ begin
 
      Child := AParent.Children[I];
 
-     //showmessage('Interate ' + inttostr(I) + ' ' + Child.name);
-//     if (Child is TTabcontrol) or
-//      (Child is TEdit) or
-//      (Child is TDateEdit) or
-//      (Child is TButton) or
-//      (Child is TLabel)  or
-//      (Child is TComboBox)  or
-//      (Child is TListbox) then
-//      begin
-
 
           If TControl(child) is TEdit then
           begin
@@ -452,8 +441,6 @@ begin
             end;
 
 
-      //end;//Component types
-
   end;//i
 
 end;
@@ -540,9 +527,6 @@ begin
         dm.FDQuery1.sql.add('Select * FROM "NAMES"');
         dm.FDQuery1.Open;
 
-           // MemoryStream := TMemoryStream.Create;
-           // MemoryStream.CopyFrom(BlobStream, 0);
-           // MemoryStream.Position := 0;
 
           While not dm.FDQuery1.EOF do
           begin
@@ -554,32 +538,21 @@ begin
 
             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
-            TThread.Sleep(1000);
+            label1.text := (dm.FDQuery1.FieldByName('FIRST').asstring);
 
-        //       For i := 0 to 10 do begin
-        //
-        //        TThread.Synchronize(nil,
-        //          procedure
-        //          begin
-        //            label1.text := 'Fruit ' + inttostr(i);
-        //          end
-        //        );
-        //
-        //
-        //
-        //
-        //      end; //loop
+            TThread.Sleep(2000);
+
+
             dm.FDQuery1.Next;
 
-           // MemoryStream.Free;
-           // BlobStream.Free;
+            MemoryStream.Free;
+            BlobStream.Free;
 
           end;
         end
 
    ).Start;
 
-   //TThread. := nil;
 end;
 
 procedure TForm1.BtnConfirmClick(Sender: TObject);
@@ -599,8 +572,6 @@ begin
      (Edit2.Text <> '') AND
      (ComboBox2.ItemIndex <> -1) then
   begin
-
-     //showmessage('In DB');
 
      try
 
@@ -629,6 +600,16 @@ begin
 
         showmessage('Insert Done');
 
+        UpdateData;
+
+
+        Name.text := '';
+        Edit2.text := '';
+
+         FRawBitmap.SetSize(0, 0);
+         ImageContainer.Bitmap.SetSize(0, 0);
+         ImageContainer.Bitmap.Assign(FRawBitmap);
+
      finally
       MemoryStream.Free;
      end;
@@ -636,6 +617,7 @@ begin
   end;
 
 end;
+
 
 procedure TForm1.BtnDeleteAllClick(Sender: TObject);
 begin
@@ -660,7 +642,10 @@ var
   MemoryStream: TmemoryStream;
   RawBitMap: TBitMap;
 begin
-   //showmessage('Check if replaced app!');
+
+  showmessage('Doesn''t Work - use Threads - left in to illustrate non-working code!');
+  exit;
+
 
   dm.FDConnection1.Connected := true;
 
@@ -669,20 +654,14 @@ begin
       dm.FDQuery1.sql.add(' WHERE FIRST = ' + Trim(quotedstr('Larry')));
   dm.FDQuery1.Open;
 
-  //While not dm.FDQuery1.EOF do
-  //begin
+  While not dm.FDQuery1.EOF do
+  begin
 
 
-   //           label1.text := dm.FDQuery1.fieldbyname('FIRST').asstring;
-
-            // label1.Text := dm.FDQuery1.fieldbyname('FIRST').asstring;
-            // TDialogService.showmessage(dm.FDQuery1.fieldbyname('FIRST').asstring);
              RawBitMap := TBitMap.Create;
              RawBitMap.SetSize(0,0);
              ImageContainer.Bitmap.SetSize(0, 0);
              ImageContainer.Bitmap.Assign(RawBitMap);
-
-
 
              BlobStream := dm.FDQuery1.CreateBlobStream(dm.FDQuery1.FieldByName('PHOTO'), bmRead);
              MemoryStream := TMemoryStream.Create;
@@ -693,36 +672,16 @@ begin
              ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
        //application.ProcessMessages;
-     //MemoryStream.Free;
-     //BlobStream.Free;
+      MemoryStream.Free;
+      BlobStream.Free;
+     sleep(1000);
 
+   dm.FDQuery1.Next;
 
-   //dm.FDQuery1.Next;
-
-  //end;
-
-
-  //dm.FDConnection1.Connected := false;
-
-end;
-
-procedure TForm1.BtnListNamesClick(Sender: TObject);
-begin
-
-  DM.FDConnection1.Connected := true;
-
-  DM.FDQuery1.sql.clear;
-  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
-  DM.FDQuery1.Open;
-
-  While not dm.FDQuery1.EOF do
-  begin
-
-    CBoxNames.Items.Add(dm.FDQuery1.fieldbyname('FIRST').asstring);
-
-    DM.FDQuery1.Next;
   end;
 
+
+  dm.FDConnection1.Connected := false;
 
 end;
 
@@ -766,16 +725,6 @@ var
   RawBitMap: TBitMap;
 begin
 
-//  dm.FDConnection1.Connected := true;
-//
-//  dm.FDQuery1.sql.clear;
-//  dm.FDQuery1.sql.add('Select * FROM "NAMES"');
-//
-//  dm.FDQuery1.Open;
-//
-//  While not dm.FDQuery1.EOF do
-//  begin
-
     label1.text := 'Apple';
 
     TThread.ForceQueue(nil,
@@ -801,45 +750,6 @@ begin
     end,
      8000
    );
-
-//
-//
-//          TThread.Synchronize(nil,
-//            procedure
-//            begin
-//              label1.text := dm.FDQuery1.fieldbyname('FIRST').asstring;
-//
-//            // label1.Text := dm.FDQuery1.fieldbyname('FIRST').asstring;
-//            // TDialogService.showmessage(dm.FDQuery1.fieldbyname('FIRST').asstring);
-////             RawBitMap := TBitMap.Create;
-////             RawBitMap.SetSize(0,0);
-////             ImageContainer.Bitmap.SetSize(0, 0);
-////             ImageContainer.Bitmap.Assign(RawBitMap);
-//
-//             // showmessage('Image Empty Done');
-//
-//             BlobStream := dm.FDQuery1.CreateBlobStream(dm.FDQuery1.FieldByName('PHOTO'), bmRead);
-//             MemoryStream := TMemoryStream.Create;
-//             MemoryStream.CopyFrom(BlobStream, 0);
-//
-//             MemoryStream.Position := 0;
-//
-//             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
-//           end);
-//
-//
-//
-//     //MemoryStream.Free;
-//     //BlobStream.Free;
-//
-//
-//   dm.FDQuery1.Next;
-//
-//  end;
-//
-//
-//  dm.FDConnection1.Connected := false;
-
 
 end;
 
@@ -868,18 +778,6 @@ begin
 
   end;
 
-
-end;
-
-procedure TForm1.Button5Click(Sender: TObject);
-begin
-  //ListAllStyleElements(DateEdit1);
-end;
-
-procedure TForm1.Button6Click(Sender: TObject);
-begin
-
-  //ListStyleresources(DateEdit1);
 
 end;
 
@@ -915,24 +813,33 @@ begin
 
 end;
 
-procedure TForm1.CBoxNamesChange(Sender: TObject);
+procedure TForm1.ListView1Change(Sender: TObject);
+var
+  name: string;
+  ListItem: TListViewItem;
+begin
+
+  ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
+
+  Name := ListItem.Text;
+
+  SelectedNameView(Name);
+end;
+
+procedure TForm1.SelectedNameView(Name: string);
 var
   BlobStream: TStream;
   FileStream: TFileStream;
   MemoryStream: TmemoryStream;
   RawBitMap: TBitMap;
 begin
- // showmessage(CBoxNames.Items[CBoxNames.Itemindex]);
-
- // CBoxNames.clear;
 
   DM.FDConnection1.Connected := true;
 
   DM.FDQuery1.sql.clear;
   DM.FDQuery1.sql.add('Select * FROM "NAMES"');
   DM.FDQuery1.sql.add(' WHERE "FIRST" = ' +
-                      Trim(QuotedStr(CBoxNames.Items[CBoxNames.Itemindex])));
-     // showmessage(DM.FDQuery1.sql.text);
+                            Trim(QuotedStr(Name)));
   DM.FDQuery1.Open;
 
   //showmessage('validate');
@@ -941,20 +848,21 @@ begin
 
   RawBitMap := TBitMap.Create;
   RawBitMap.SetSize(0,0);
-  ImageContainer.Bitmap.SetSize(0, 0);
-  ImageContainer.Bitmap.Assign(RawBitMap);
+  ImageDisplay.Bitmap.SetSize(0, 0);
+  ImageDisplay.Bitmap.Assign(RawBitMap);
 
   MemoryStream := TMemoryStream.Create;
   MemoryStream.CopyFrom(BlobStream, 0);
   MemoryStream.Position := 0;
 
-  ImageContainer.Bitmap.LoadFromStream(MemoryStream);
+  ImageDisplay.Bitmap.LoadFromStream(MemoryStream);
 
- // MemoryStream.Free;
- // BlobStream.Free;
+  MemoryStream.Free;
+  BlobStream.Free;
 
 
- // DM.FDConnection1.Connected := false;
+ DM.FDConnection1.Connected := false;
+
 end;
 
 procedure TForm1.ClearImageAction1Execute(Sender: TObject);
@@ -987,11 +895,43 @@ begin
   ScaleState := 0;
 
   ImageContainer.Bitmap.Assign(FRawBitMap);
+
+
+
 end;
+
+procedure TForm1.UpdateData;
+begin
+
+  DM.FDConnection1.Connected := true;
+
+  DM.FDQuery1.sql.clear;
+  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
+  DM.FDQuery1.Open;
+
+  ListView1.Data.Empty;
+
+  While not dm.FDQuery1.EOF do
+  begin
+
+    with TListViewItem(ListView1.Items.Add) do
+    begin
+      Text := DM.FDQuery1.fieldbyname('FIRST').asstring;// [1000 + Random(1234567)]);
+      Detail := Format('%d kg of paper', [1000 + Random(1234)]);
+    end;
+
+    DM.FDQuery1.Next;
+  end;
+
+end;
+
 
 procedure TForm1.FormShow(Sender: TObject);
 begin
     Form1.StyleBook := DM.StyleBook5;
+
+    UpdateData
+
 end;
 
 procedure TForm1.ListBox1Change(Sender: TObject);

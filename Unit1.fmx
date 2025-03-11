@@ -22,7 +22,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'drawertoolbutton'
-      TabOrder = 1
+      TabOrder = 0
       Text = 'Button1'
       TextSettings.Trimming = None
     end
@@ -35,7 +35,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowlefttoolbuttonbordered'
-      TabOrder = 2
+      TabOrder = 1
       TextSettings.Trimming = None
     end
     object Button3: TButton
@@ -47,7 +47,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowrighttoolbutton'
-      TabOrder = 3
+      TabOrder = 2
       TextSettings.Trimming = None
     end
     object ComboBox1: TComboBox
@@ -65,7 +65,7 @@ object Form1: TForm1
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'comboboxstyle'
-      TabOrder = 4
+      TabOrder = 3
       OnChange = ComboBox1Change
     end
     object BtnScaleUp: TButton
@@ -74,7 +74,7 @@ object Form1: TForm1
       Size.Width = 100.000000000000000000
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 5
+      TabOrder = 4
       Text = ' Scale Up'
       TextSettings.Trimming = None
       OnClick = BtnScaleUpClick
@@ -85,22 +85,10 @@ object Form1: TForm1
       Size.Width = 100.000000000000000000
       Size.Height = 40.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 6
+      TabOrder = 5
       Text = 'Scale Down'
       TextSettings.Trimming = None
       OnClick = BtnScaleDownClick
-    end
-    object BtnTakePhoto: TButton
-      Align = Left
-      Position.X = 229.000000000000000000
-      Size.Width = 113.000000000000000000
-      Size.Height = 40.000000000000000000
-      Size.PlatformDefault = False
-      StyleLookup = 'cameratoolbutton'
-      TabOrder = 0
-      Text = 'BtnTakePhoto'
-      TextSettings.Trimming = None
-      OnClick = BtnTakePhotoClick
     end
   end
   object ToolBar2: TToolBar
@@ -110,81 +98,37 @@ object Form1: TForm1
     Size.Height = 48.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
-    object Button6: TButton
-      Align = Left
-      Position.X = 80.000000000000000000
-      Size.Width = 80.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 10
-      Text = 'Button6'
-      TextSettings.Trimming = None
-      OnClick = Button6Click
-    end
-    object Button5: TButton
+    object BtnIterate: TButton
       Align = Left
       Size.Width = 80.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 9
-      Text = 'Button5'
-      TextSettings.Trimming = None
-      OnClick = Button5Click
-    end
-    object BtnIterate: TButton
-      Align = Left
-      Position.X = 160.000000000000000000
-      Size.Width = 80.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 11
       Text = 'Iterate DB'
       TextSettings.Trimming = None
       OnClick = BtnIterateClick
     end
     object BtnDeleteAll: TButton
       Align = Left
-      Position.X = 240.000000000000000000
+      Position.X = 80.000000000000000000
       Size.Width = 80.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 12
+      TabOrder = 10
       Text = 'Delete All'
       TextSettings.Trimming = None
       OnClick = BtnDeleteAllClick
     end
-    object BtnSynch: TButton
-      Align = Left
-      Position.X = 320.000000000000000000
-      Size.Width = 105.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 13
-      Text = 'Synch Force Queue'
-      TextSettings.Trimming = None
-      OnClick = BtnSynchClick
-    end
     object BtnAnonSync: TButton
       Align = Left
-      Position.X = 425.000000000000000000
-      Size.Width = 80.000000000000000000
+      Position.X = 160.000000000000000000
+      Size.Width = 136.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 14
-      Text = 'Anon Sync'
+      TabOrder = 11
+      Text = 'Cycle DB Threads'
       TextSettings.Trimming = None
       OnClick = BtnAnonSyncClick
-    end
-    object BtnListNames: TButton
-      Align = Left
-      Position.X = 505.000000000000000000
-      Size.Width = 80.000000000000000000
-      Size.Height = 48.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 15
-      Text = 'List Names'
-      TextSettings.Trimming = None
-      OnClick = BtnListNamesClick
     end
   end
   object TabControl1: TTabControl
@@ -196,6 +140,8 @@ object Form1: TForm1
     TabOrder = 0
     TabPosition = Dots
     Sizes = (
+      980s
+      392s
       980s
       392s
       980s
@@ -232,7 +178,7 @@ object Form1: TForm1
         end
         object Edit3: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 2
+          TabOrder = 1
           Text = 'Graham'
           Position.X = 31.000000000000000000
           Position.Y = 120.000000000000000000
@@ -247,7 +193,7 @@ object Form1: TForm1
           Size.Width = 100.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 3
+          TabOrder = 2
         end
         object DateEdit3: TDateEdit
           Date = 45721.000000000000000000
@@ -256,29 +202,24 @@ object Form1: TForm1
           Size.Width = 100.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 4
-        end
-        object Memo1: TMemo
-          Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-          DataDetectorTypes = []
-          Lines.Strings = (
-            'Issues with Permissiions:'
-            'Ensure that All Platforms permissions are set to false '
-            'apart from Write to External Storage')
-          Position.X = 18.000000000000000000
-          Position.Y = 270.000000000000000000
-          Size.Width = 233.000000000000000000
-          Size.Height = 84.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 1
-          Viewport.Width = 229.000000000000000000
-          Viewport.Height = 64.000000000000000000
+          TabOrder = 3
         end
         object Label1: TLabel
           Position.X = 40.000000000000000000
           Position.Y = 232.000000000000000000
           Text = 'Label1'
-          TabOrder = 5
+          TabOrder = 4
+        end
+        object BtnSynch: TButton
+          Position.X = 24.000000000000000000
+          Position.Y = 303.000000000000000000
+          Size.Width = 185.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 10
+          Text = 'Synch Force Queue Trivial'
+          TextSettings.Trimming = None
+          OnClick = BtnSynchClick
         end
       end
       object Panel2: TPanel
@@ -288,7 +229,7 @@ object Form1: TForm1
         Size.PlatformDefault = False
         TabOrder = 1
         object DateEdit1: TDateEdit
-          Date = 45726.000000000000000000
+          Date = 45727.000000000000000000
           TodayDefault = True
           Padding.Left = 20.000000000000000000
           Position.X = 30.000000000000000000
@@ -296,7 +237,7 @@ object Form1: TForm1
           Size.Width = 105.000000000000000000
           Size.Height = 25.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 3
+          TabOrder = 4
         end
         object ComboBox2: TComboBox
           DropDownCount = 20
@@ -310,23 +251,23 @@ object Form1: TForm1
           Size.Width = 106.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 4
+          TabOrder = 5
         end
         object BtnConfirm: TButton
           Anchors = [akLeft, akBottom]
-          Position.X = 30.000000000000000000
-          Position.Y = 320.000000000000000000
+          Position.X = 29.000000000000000000
+          Position.Y = 352.000000000000000000
           Size.Width = 105.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 0
+          TabOrder = 1
           Text = 'Confirm'
           TextSettings.Trimming = None
           OnClick = BtnConfirmClick
         end
         object Edit2: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 2
+          TabOrder = 3
           Position.X = 30.000000000000000000
           Position.Y = 120.000000000000000000
           Size.Width = 105.000000000000000000
@@ -335,7 +276,7 @@ object Form1: TForm1
         end
         object Name: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 1
+          TabOrder = 2
           Position.X = 29.000000000000000000
           Position.Y = 57.000000000000000000
           Size.Width = 106.000000000000000000
@@ -350,7 +291,19 @@ object Form1: TForm1
           Size.Height = 16.000000000000000000
           Size.PlatformDefault = False
           Text = 'Name'
-          TabOrder = 9
+          TabOrder = 10
+        end
+        object BtnTakePhoto: TButton
+          Position.X = 30.000000000000000000
+          Position.Y = 303.000000000000000000
+          Size.Width = 59.000000000000000000
+          Size.Height = 41.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'cameratoolbutton'
+          TabOrder = 0
+          Text = 'BtnTakePhoto'
+          TextSettings.Trimming = None
+          OnClick = BtnTakePhotoClick
         end
       end
       object Splitter1: TSplitter
@@ -385,15 +338,6 @@ object Form1: TForm1
             Size.Height = 42.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
-            object CBoxNames: TComboBox
-              Position.X = 30.000000000000000000
-              Position.Y = 12.000000000000000000
-              Size.Width = 169.000000000000000000
-              Size.Height = 22.000000000000000000
-              Size.PlatformDefault = False
-              TabOrder = 0
-              OnChange = CBoxNamesChange
-            end
           end
         end
       end
@@ -411,11 +355,56 @@ object Form1: TForm1
       TabOrder = 0
       ExplicitSize.cx = 8.000000000000000000
       ExplicitSize.cy = 8.000000000000000000
-      object Label2: TLabel
-        Position.X = 232.000000000000000000
-        Position.Y = 160.000000000000000000
-        Text = 'Tab 2'
+      object ListView1: TListView
+        ItemAppearanceClassName = 'TListItemAppearance'
+        ItemEditAppearanceClassName = 'TListItemShowCheckAppearance'
+        HeaderAppearanceClassName = 'TListHeaderObjects'
+        FooterAppearanceClassName = 'TListHeaderObjects'
+        Align = Left
+        Size.Width = 232.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
         TabOrder = 0
+        OnChange = ListView1Change
+        SearchVisible = True
+      end
+      object ImageDisplay: TImage
+        MultiResBitmap = <
+          item
+          end>
+        Align = Client
+        Size.Width = 748.000000000000000000
+        Size.Height = 392.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+    object TabItem3: TTabItem
+      CustomIcon = <
+        item
+        end>
+      TextSettings.Trimming = None
+      IsSelected = False
+      Size.Width = 8.000000000000000000
+      Size.Height = 8.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'TabItem3'
+      object Memo1: TMemo
+        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+        DataDetectorTypes = []
+        Lines.Strings = (
+          'Issues with Permissiions:'
+          'Ensure that All Platforms permissions are set to false '
+          'apart from Write to External Storage')
+        Position.X = 18.000000000000000000
+        Position.Y = 24.000000000000000000
+        Size.Width = 470.000000000000000000
+        Size.Height = 360.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        Viewport.Width = 466.000000000000000000
+        Viewport.Height = 356.000000000000000000
       end
     end
   end
