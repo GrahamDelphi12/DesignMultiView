@@ -11,7 +11,7 @@ uses
   System.Permissions,FMX.DialogService, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
   System.ImageList, FMX.ImgList, FMX.Objects, FMX.Filter, Data.DB,
   FMX.ListView.Types, FMX.ListView.Appearances, FMX.ListView.Adapters.Base,
-  FMX.ListView;
+  FMX.ListView, FMX.Platform;
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -34,20 +34,10 @@ type
     Button3: TButton;
     ListBoxItem2: TListBoxItem;
     ComboBox1: TComboBox;
-    Button4: TButton;
     Panel1: TPanel;
-    Edit3: TEdit;
-    DateEdit2: TDateEdit;
-    DateEdit3: TDateEdit;
     Panel2: TPanel;
-    DateEdit1: TDateEdit;
-    ComboBox2: TComboBox;
-    BtnConfirm: TButton;
     Splitter1: TSplitter;
     Panel3: TPanel;
-    Edit2: TEdit;
-    Name: TEdit;
-    Label3: TLabel;
     BtnScaleUp: TButton;
     BtnScaleDown: TButton;
     BtnIterate: TButton;
@@ -57,15 +47,33 @@ type
     ShowShareSheetAction1: TShowShareSheetAction;
     ClearImageAction1: TAction;
     BtnDeleteAll: TButton;
-    Label1: TLabel;
     BtnAnonSync: TButton;
     Panel4: TPanel;
     ListView1: TListView;
     ImageDisplay: TImage;
     TabItem3: TTabItem;
     Memo1: TMemo;
-    BtnTakePhoto: TButton;
+    BtnEmptyEdits: TButton;
+    FlowLayout1: TFlowLayout;
+    Label3: TLabel;
+    Name: TEdit;
+    Label2: TLabel;
+    Edit2: TEdit;
+    Label4: TLabel;
+    DateEdit1: TDateEdit;
+    Label5: TLabel;
+    ComboBox2: TComboBox;
+    Panel5: TPanel;
+    BtnConfirm: TButton;
+    FlowLayout2: TFlowLayout;
+    Button4: TButton;
+    DateEdit2: TDateEdit;
+    Edit3: TEdit;
+    DateEdit3: TDateEdit;
+    Panel6: TPanel;
     BtnSynch: TButton;
+    BtnTakePhoto: TButton;
+    Label1: TLabel;
     procedure ListBox1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
@@ -85,6 +93,8 @@ type
     procedure BtnSynchClick(Sender: TObject);
     procedure BtnAnonSyncClick(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
+    procedure BtnEmptyEditsClick(Sender: TObject);
+    procedure Panel1Resize(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
   private
@@ -94,8 +104,8 @@ type
     procedure processArray<T>(const Arr: array of T;
                              Processor: TArrayProcessor<T>);
     procedure iteratecontrols(AParent: TFMXObject);
-    procedure ScaleComponents(AParent: TFMXObject; ScaleFactor: double);
-    procedure ResetComponents(AParent: TFMXObject; scalefactor: double);
+    procedure ScaleComponents(AParent: TFMXObject; ScaleFactor: real);
+    procedure ResetComponents(AParent: TFMXObject; scalefactor: real);
     procedure ListAllStyleElements(Control: TStyledControl);
     procedure ListStyleResources(Control : TStyledControl);
 
@@ -111,6 +121,7 @@ type
     procedure UpdateUI;
     procedure SelectedNameView(Name: string);
     procedure UpdateData;
+    procedure Empty_Controls(AParent: TFMXObject);
 
   public
   public
@@ -140,6 +151,45 @@ begin
   FreeAndNil(FRawBitmap);
   inherited Destroy;
 end;
+
+procedure TForm1.Empty_Controls(AParent: TFMXObject);
+begin
+
+     TThread.CreateAnonymousThread(procedure
+     var
+       I: integer;
+       Child: TFMXObject;
+     begin
+
+        For I := 0 to AParent.ChildrenCount - 1 do
+        begin
+
+           Child := AParent.children[i];
+
+           Empty_Controls(Child); //recursion
+
+           if Child.name <> '' then
+           begin
+
+              TThread.Synchronize(TThread.CurrentThread, procedure
+              begin
+
+                If Child is TEdit then
+                begin
+                  if TEdit(Child).Text <> '' then
+                  TEdit(Child).Text := ''
+                 end;
+
+              end)
+
+           end;//Child
+
+        end;//i
+
+     end).Start;
+end;
+
+
 
 procedure TForm1.DisplayRationale(Sender: TObject; const APermissions: TClassicStringDynArray; const APostRationaleProc: TProc);
 begin
@@ -190,7 +240,7 @@ begin
 end;
 
 
-procedure TForm1.ResetComponents(AParent: TFMXObject; scalefactor: double);
+procedure TForm1.ResetComponents(AParent: TFMXObject; scalefactor: real);
 var
  I, x: Integer;
  Child: TFMXObject;
@@ -208,13 +258,15 @@ begin
           If TControl(child) is TButton then
           begin
 
-            TButton(Child).Width := TButton(Child).Width /ScaleFactor;//ComponentWidth;
-            TButton(Child).Height := TButton(Child).Height /ScaleFactor;//ComponentHeight;
+            TButton(Child).Width := TButton(Child).Width /ScaleFactor;
+            TButton(Child).Height := TButton(Child).Height /ScaleFactor;
 
-            TButton(Child).StyledSettings := TButton(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                              // TStyledSetting.Other,
-                                                                              //   Tstyledsetting.Family                                                                 //    Tstyledsetting.Style];
-            TButton(Child).TextSettings.Font.Size := TButton(Child).TextSettings.Font.Size/ScaleFactor;//ComponentFontSize;
+//            showmessage('Width ' + Floattostr(TButton(Child).Width ) +
+//                       'Height ' + Floattostr(TButton(Child).Height ));
+
+            TButton(Child).StyledSettings := TButton(Child).StyledSettings - [TStyledSetting.Size];
+
+            TButton(Child).TextSettings.Font.Size := TButton(Child).TextSettings.Font.Size/ScaleFactor;
 
             //For Styled Button like camara
             if TButton(Child).StyleLookup <> '' then
@@ -227,32 +279,28 @@ begin
           If TControl(child) is TLabel then
           begin
 
-            TLabel(Child).Width := TLabel(Child).Width /ScaleFactor;//ComponentWidth;
-            TLabel(Child).Height := TLabel(Child).Height /ScaleFactor;//ComponentHeight;
+            TLabel(Child).Width := TLabel(Child).Width /ScaleFactor;
+            TLabel(Child).Height := TLabel(Child).Height /ScaleFactor;
 
-            TLabel(Child).StyledSettings := TLabel(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                              // TStyledSetting.Other,
-                                                                              //   Tstyledsetting.Family,
-                                                                             //    Tstyledsetting.Style];
-            TLabel(Child).TextSettings.Font.Size := TLabel(Child).TextSettings.Font.Size/ScaleFactor;//ComponentFontSize;
+            TLabel(Child).StyledSettings := TLabel(Child).StyledSettings - [TStyledSetting.Size];
+
+            TLabel(Child).TextSettings.Font.Size := TLabel(Child).TextSettings.Font.Size/ScaleFactor;
           end;
 
 
           If TControl(child) is TComboBox then
           begin
 
-            TComboBox(Child).Width := TComboBox(Child).Width/scalefactor;//ComponentWidth;
-            TComboBox(Child).Height := TComboBox(Child).Height/scalefactor;//ComponentHeight;
+            TComboBox(Child).Width := TComboBox(Child).Width/scalefactor;
+            TComboBox(Child).Height := TComboBox(Child).Height/scalefactor;
 
 
             for x := 0 to TComboBox(Child).Count-1 do begin
              Item := TComboBox(Child).ListItems[x];
              Item.StyledSettings := Item.StyledSettings - [TStyledSetting.Size];
-                                                        //    TStyledSetting.Other,
-                                                        //    Tstyledsetting.Family,
-                                                        //    Tstyledsetting.Style
-             Item.Font.Size := Item.Font.Size/scalefactor;//ComponentFontSize;
-             Item.Height := Item.height/scalefactor;//ComponentFontSize;
+
+             Item.Font.Size := Item.Font.Size/scalefactor;
+             Item.Height := Item.height/scalefactor;
 
             end;
 
@@ -261,34 +309,53 @@ begin
           If TControl(child) is TListBox then
           begin
 
-            TListBox(Child).Width := TListBox(Child).Width/scalefactor;//ComponentWidth;
-            TListBox(Child).Height := TListBox(Child).Height/scalefactor;//ComponentHeight;
+            TListBox(Child).Width := TListBox(Child).Width/scalefactor;
+            TListBox(Child).Height := TListBox(Child).Height/scalefactor;
 
 
             for x := 0 to TListBox(Child).Count-1 do begin
              Item := TListBox(Child).ListItems[x];
              Item.StyledSettings := Item.StyledSettings - [TStyledSetting.Size];
-                                                        //    TStyledSetting.Other,
-                                                        //    Tstyledsetting.Family,
-                                                        //    Tstyledsetting.Style
-             Item.Font.Size := Item.Font.Size/scalefactor;//ComponentFontSize;
-             Item.Height := Item.height/scalefactor;//ComponentFontSize;
+
+             Item.Font.Size := Item.Font.Size/scalefactor;
+             Item.Height := Item.height/scalefactor;
 
             end;
 
           end;
 
+//          If TControl(child) is TListView then
+//          begin
+//
+//            TListView(Child).Width := TListView(Child).Width/scalefactor;
+//            TListView(Child).Height := TListView(Child).Height/scalefactor;
+//
+//
+//            for x := 0 to TListView(Child).Items.Count-1 do begin
+//
+//             Item := TListView(Child).ItemIndex[x];
+//           //  TListView(Child).Items .StyledSettings := Item.StyledSettings - [TStyledSetting.Size];
+//
+//             Item.Font.Size := Item.Font.Size/scalefactor;
+//             Item.Height := Item.height/scalefactor;
+//
+//            end;
+
+          //end;
+
+
+
+
           If TControl(child) is TEdit then
           begin
 
-              TEdit(Child).Width := TEdit(Child).Width/scalefactor;//ComponentWidth;
-              TEdit(Child).Height := TEdit(Child).Height/scalefactor;//ComponentHeight;
+              TEdit(Child).Width := TEdit(Child).Width/scalefactor;
+              TEdit(Child).Height := TEdit(Child).Height/scalefactor;
 
-              TEdit(Child).StyledSettings := TEdit(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                            // TStyledSetting.Other,
-                                                                            //     Tstyledsetting.Family,
-                                                                            //     Tstyledsetting.Style];
-              TEdit(Child).TextSettings.Font.size := TEdit(Child).TextSettings.Font.size/scalefactor;//ComponentFontSize;
+
+              TEdit(Child).StyledSettings := TEdit(Child).StyledSettings - [TStyledSetting.Size];
+
+              TEdit(Child).TextSettings.Font.size := TEdit(Child).TextSettings.Font.size/scalefactor;
 
           end;
 
@@ -296,29 +363,20 @@ begin
           If TControl(child) is TDateEdit then
           begin
 
-            TDateEdit(Child).Width := TDateEdit(Child).Width / ScaleFactor;//ComponentWidth;
-            TDateEdit(Child).Height := TDateEdit(Child).Height / ScaleFactor;//ComponentHeight;
+            TDateEdit(Child).Width := TDateEdit(Child).Width / ScaleFactor;
+            TDateEdit(Child).Height := TDateEdit(Child).Height / ScaleFactor;
 
-            TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                                 //TStyledSetting.Other,
-                                                                                 //Tstyledsetting.Family,
-                                                                                 //Tstyledsetting.Style];
-            TDateEdit(Child).TextSettings.Font.Size := TDateEdit(Child).TextSettings.Font.Size / ScaleFactor;//ComponentFontSize;
+            TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];
+
+            TDateEdit(Child).TextSettings.Font.Size := TDateEdit(Child).TextSettings.Font.Size / ScaleFactor;
 
             StyleObj := TDateEdit(Child).FindStyleResource('arrow');// as TControl;
-
-             if assigned(StyleObj) then
-             begin
-             //    showmessage('arrow found ' + StyleObj.StyleName);  //dropbutton
-
-             end;
-
 
           end;
 
 
 
-          if (Child.ChildrenCount >0) then// and (TControl(child) is TDateEdit <> true) then
+          if (Child.ChildrenCount >0) then
           begin
             // showmessage(Child.StyleName + ' Recursion');
 
@@ -328,7 +386,6 @@ begin
 
 
 
-    // end;//Target component type
   end;//i
 
 
@@ -336,7 +393,7 @@ end;
 
 
 
-procedure TForm1.ScaleComponents(AParent: TFMXObject; ScaleFactor: double);
+procedure TForm1.ScaleComponents(AParent: TFMXObject; ScaleFactor: real); //double
 var
  I, x: Integer;
  Child: TFMXObject;
@@ -380,8 +437,7 @@ begin
             TDateEdit(Child).Height := TDateEdit(Child).height * ScaleFactor;
 
             TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                                // TStyledSetting.Other,
-                                                                                // Tstyledsetting.Family                                                                  // Tstyledsetting.Style];
+                                                                                                                  // Tstyledsetting.Style];
             //[TStyledSetting.Size];
           TDateEdit(Child).Font.Size := TDateEdit(Child).Font.size * ScaleFactor;
           end;
@@ -400,7 +456,15 @@ begin
             begin
               TButton(Child).Scale.x := TButton(Child).scale.x * ScaleFactor;
               TButton(Child).Scale.y := TButton(Child).scale.y * ScaleFactor;
+
             end;
+          end;
+
+          If TControl(child) is TListView then
+          begin
+              TListView(Child).Scale.x := TListView(Child).scale.x * ScaleFactor;
+              TListView(Child).Scale.y := TListView(Child).scale.y * ScaleFactor;
+
           end;
 
           If TControl(child) is TComboBox then
@@ -688,7 +752,7 @@ end;
 procedure TForm1.BtnScaleDownClick(Sender: TObject);
 begin
 
-  If ScaleState <> 0 then
+  If ScaleState <> 1 then
   begin
     ResetComponents(self, 1.25);
     ScaleState := ScaleState - 1;
@@ -705,7 +769,7 @@ procedure TForm1.BtnScaleUpClick(Sender: TObject);
 begin
 
 
-  If ScaleState <> 4 then
+  If ScaleState <> 3 then
   begin
    ScaleComponents(self, 1.25);
    ScaleState := ScaleState + 1;
@@ -779,6 +843,11 @@ begin
   end;
 
 
+end;
+
+procedure TForm1.BtnEmptyEditsClick(Sender: TObject);
+begin
+  Empty_Controls(Form1);
 end;
 
 procedure TForm1.ListAllStyleElements(Control: TStyledControl);
@@ -892,7 +961,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   listbox1.itemIndex := tabcontrol1.TabIndex;
 
-  ScaleState := 0;
+  ScaleState := 1;
 
   ImageContainer.Bitmap.Assign(FRawBitMap);
 
@@ -942,6 +1011,35 @@ end;
 procedure TForm1.NextTabAction1Update(Sender: TObject);
 begin
   listbox1.itemIndex := tabcontrol1.TabIndex;
+end;
+
+procedure TForm1.Panel1Resize(Sender: TObject);
+var
+  ScreenService: IFMXScreenService;
+begin
+
+  If TPlatformServices.Current.SupportsPlatformService(IFMXScreenService, IInterface(ScreenService))
+  then
+  begin
+
+    if screenService.GetScreenOrientation in [TscreenOrientation.Portrait,
+                                              TscreenOrientation.InvertedPortrait] then
+    begin
+    //showmessage('Portrait Orientation')
+     If Panel1.width <300 then Panel1.width := 300;
+     If Panel1.width >500 then Panel1.width := 500
+    end
+    else
+    begin
+     //showmessage('Landscape Orientation')
+     If Panel1.width <300 then Panel1.width := 300;
+     If Panel1.width >800 then Panel1.width := 800;
+    end;
+
+
+  end;
+
+
 end;
 
 procedure TForm1.PreviousTabAction1Update(Sender: TObject);

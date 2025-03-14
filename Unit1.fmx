@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   ActiveControl = TabItem1
   Caption = 'Form1'
-  ClientHeight = 480
+  ClientHeight = 456
   ClientWidth = 980
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -13,13 +13,15 @@ object Form1: TForm1
   DesignerMasterStyle = 0
   object ToolBar1: TToolBar
     Size.Width = 980.000000000000000000
-    Size.Height = 40.000000000000000000
+    Size.Height = 49.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object Button1: TButton
       Align = Left
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      Padding.Bottom = 10.000000000000000000
       Size.Width = 80.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'drawertoolbutton'
       TabOrder = 0
@@ -28,11 +30,14 @@ object Form1: TForm1
     end
     object Button2: TButton
       Action = PreviousTabAction1
-      Align = Left
+      Align = FitLeft
+      Anchors = []
       ImageIndex = -1
-      Position.X = 80.000000000000000000
+      Padding.Bottom = 10.000000000000000000
+      Margins.Bottom = 20.000000000000000000
+      Position.X = 180.000000000000000000
       Size.Width = 49.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 29.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowlefttoolbuttonbordered'
       TabOrder = 1
@@ -41,10 +46,13 @@ object Form1: TForm1
     object Button3: TButton
       Action = NextTabAction1
       Align = Right
+      Anchors = []
       ImageIndex = -1
+      Padding.Bottom = 10.000000000000000000
+      Margins.Bottom = 20.000000000000000000
       Position.X = 916.000000000000000000
       Size.Width = 64.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 29.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowrighttoolbutton'
       TabOrder = 2
@@ -52,6 +60,7 @@ object Form1: TForm1
     end
     object ComboBox1: TComboBox
       Align = Center
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Items.Strings = (
         'Design 1'
         'Design 2'
@@ -62,7 +71,7 @@ object Form1: TForm1
       Padding.Left = 30.000000000000000000
       Placement = TopCenter
       Size.Width = 100.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'comboboxstyle'
       TabOrder = 3
@@ -72,7 +81,7 @@ object Form1: TForm1
       Align = Right
       Position.X = 816.000000000000000000
       Size.Width = 100.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 4
       Text = ' Scale Up'
@@ -81,9 +90,9 @@ object Form1: TForm1
     end
     object BtnScaleDown: TButton
       Align = Left
-      Position.X = 129.000000000000000000
+      Position.X = 80.000000000000000000
       Size.Width = 100.000000000000000000
-      Size.Height = 40.000000000000000000
+      Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 5
       Text = 'Scale Down'
@@ -93,15 +102,15 @@ object Form1: TForm1
   end
   object ToolBar2: TToolBar
     Align = Bottom
-    Position.Y = 432.000000000000000000
+    Position.Y = 392.000000000000000000
     Size.Width = 980.000000000000000000
-    Size.Height = 48.000000000000000000
+    Size.Height = 64.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     object BtnIterate: TButton
       Align = Left
       Size.Width = 80.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 64.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 9
       Text = 'Iterate DB'
@@ -112,7 +121,7 @@ object Form1: TForm1
       Align = Left
       Position.X = 80.000000000000000000
       Size.Width = 80.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 64.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 10
       Text = 'Delete All'
@@ -123,29 +132,40 @@ object Form1: TForm1
       Align = Left
       Position.X = 160.000000000000000000
       Size.Width = 136.000000000000000000
-      Size.Height = 48.000000000000000000
+      Size.Height = 64.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 11
       Text = 'Cycle DB Threads'
       TextSettings.Trimming = None
       OnClick = BtnAnonSyncClick
     end
+    object BtnEmptyEdits: TButton
+      Align = Left
+      Position.X = 296.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 64.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 12
+      Text = 'Empty Edits'
+      TextSettings.Trimming = None
+      OnClick = BtnEmptyEditsClick
+    end
   end
   object TabControl1: TTabControl
     Align = Client
     Size.Width = 980.000000000000000000
-    Size.Height = 392.000000000000000000
+    Size.Height = 343.000000000000000000
     Size.PlatformDefault = False
     TabIndex = 0
     TabOrder = 0
     TabPosition = Dots
     Sizes = (
       980s
-      392s
+      343s
       980s
-      392s
+      343s
       980s
-      392s)
+      343s)
     object TabItem1: TTabItem
       CustomIcon = <
         item
@@ -163,147 +183,258 @@ object Form1: TForm1
         Align = Left
         Position.X = 321.000000000000000000
         Size.Width = 259.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
-        object Button4: TButton
-          Position.X = 31.000000000000000000
-          Position.Y = 8.000000000000000000
-          Size.Width = 100.000000000000000000
-          Size.Height = 22.000000000000000000
+        OnResize = Panel1Resize
+        object FlowLayout2: TFlowLayout
+          Align = Client
+          Size.Width = 259.000000000000000000
+          Size.Height = 271.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 0
-          Text = 'Button4'
-          TextSettings.Trimming = None
+          TabOrder = 5
+          Justify = Left
+          JustifyLastLine = Left
+          FlowDirection = LeftToRight
+          object Button4: TButton
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 20.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 20.000000000000000000
+            Size.Width = 100.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            Text = 'Button4'
+            TextSettings.Trimming = None
+          end
+          object DateEdit2: TDateEdit
+            Date = 45721.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 20.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Position.X = 120.000000000000000000
+            Position.Y = 20.000000000000000000
+            Size.Width = 125.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+          end
+          object Edit3: TEdit
+            Touch.InteractiveGestures = [LongTap, DoubleTap]
+            TabOrder = 1
+            Text = 'Graham'
+            Position.X = 5.000000000000000000
+            Position.Y = 72.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 20.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Size.Width = 100.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+          end
+          object DateEdit3: TDateEdit
+            Date = 45721.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 20.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 10.000000000000000000
+            Position.X = 120.000000000000000000
+            Position.Y = 72.000000000000000000
+            Size.Width = 125.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 3
+          end
         end
-        object Edit3: TEdit
-          Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 1
-          Text = 'Graham'
-          Position.X = 31.000000000000000000
-          Position.Y = 120.000000000000000000
-          Size.Width = 100.000000000000000000
-          Size.Height = 22.000000000000000000
+        object Panel6: TPanel
+          Align = Bottom
+          Position.Y = 271.000000000000000000
+          Size.Width = 259.000000000000000000
+          Size.Height = 72.000000000000000000
           Size.PlatformDefault = False
-        end
-        object DateEdit2: TDateEdit
-          Date = 45721.000000000000000000
-          Position.X = 31.000000000000000000
-          Position.Y = 57.000000000000000000
-          Size.Width = 100.000000000000000000
-          Size.Height = 22.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 2
-        end
-        object DateEdit3: TDateEdit
-          Date = 45721.000000000000000000
-          Position.X = 31.000000000000000000
-          Position.Y = 189.000000000000000000
-          Size.Width = 100.000000000000000000
-          Size.Height = 22.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 3
-        end
-        object Label1: TLabel
-          Position.X = 40.000000000000000000
-          Position.Y = 232.000000000000000000
-          Text = 'Label1'
-          TabOrder = 4
-        end
-        object BtnSynch: TButton
-          Position.X = 24.000000000000000000
-          Position.Y = 303.000000000000000000
-          Size.Width = 185.000000000000000000
-          Size.Height = 24.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 10
-          Text = 'Synch Force Queue Trivial'
-          TextSettings.Trimming = None
-          OnClick = BtnSynchClick
+          TabOrder = 6
+          object BtnSynch: TButton
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            Position.X = 8.000000000000000000
+            Position.Y = 8.000000000000000000
+            Size.Width = 121.000000000000000000
+            Size.Height = 33.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 4
+            Text = 'Force Queue Trivial'
+            TextSettings.WordWrap = True
+            TextSettings.Trimming = None
+            OnClick = BtnSynchClick
+          end
         end
       end
       object Panel2: TPanel
         Align = Left
         Size.Width = 281.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 1
-        object DateEdit1: TDateEdit
-          Date = 45727.000000000000000000
-          TodayDefault = True
-          Padding.Left = 20.000000000000000000
-          Position.X = 30.000000000000000000
-          Position.Y = 189.000000000000000000
-          Size.Width = 105.000000000000000000
-          Size.Height = 25.000000000000000000
+        object FlowLayout1: TFlowLayout
+          Align = Client
+          Size.Width = 281.000000000000000000
+          Size.Height = 271.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 4
+          Justify = Left
+          JustifyLastLine = Left
+          FlowDirection = LeftToRight
+          object Label3: TLabel
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 15.000000000000000000
+            Size.Width = 104.000000000000000000
+            Size.Height = 16.000000000000000000
+            Size.PlatformDefault = False
+            Text = 'Name'
+            TabOrder = 12
+          end
+          object Name: TEdit
+            Touch.InteractiveGestures = [LongTap, DoubleTap]
+            TabOrder = 4
+            Position.X = 124.000000000000000000
+            Position.Y = 15.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Size.Width = 106.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+          end
+          object Label2: TLabel
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 67.000000000000000000
+            Size.Width = 104.000000000000000000
+            Size.Height = 17.000000000000000000
+            Size.PlatformDefault = False
+            Text = 'Surname'
+            TabOrder = 13
+          end
+          object Edit2: TEdit
+            Touch.InteractiveGestures = [LongTap, DoubleTap]
+            TabOrder = 3
+            Position.X = 124.000000000000000000
+            Position.Y = 67.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Size.Width = 105.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+          end
+          object Label4: TLabel
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 119.000000000000000000
+            Size.Width = 104.000000000000000000
+            Size.Height = 17.000000000000000000
+            Size.PlatformDefault = False
+            Text = 'Special Date'
+            TabOrder = 14
+          end
+          object DateEdit1: TDateEdit
+            Date = 45730.000000000000000000
+            TodayDefault = True
+            Padding.Left = 20.000000000000000000
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 124.000000000000000000
+            Position.Y = 119.000000000000000000
+            Size.Width = 125.000000000000000000
+            Size.Height = 25.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+          end
+          object Label5: TLabel
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 174.000000000000000000
+            Size.Width = 104.000000000000000000
+            Size.Height = 17.000000000000000000
+            Size.PlatformDefault = False
+            Text = 'Manager'
+            TabOrder = 15
+          end
+          object ComboBox2: TComboBox
+            DropDownCount = 20
+            Items.Strings = (
+              'Peter'
+              'John')
+            ItemIndex = 0
+            DropDownKind = Custom
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 15.000000000000000000
+            Position.X = 124.000000000000000000
+            Position.Y = 174.000000000000000000
+            Size.Width = 106.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+          end
+          object BtnTakePhoto: TButton
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            Margins.Left = 5.000000000000000000
+            Margins.Right = 10.000000000000000000
+            Margins.Bottom = 20.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 211.000000000000000000
+            Size.Width = 84.000000000000000000
+            Size.Height = 32.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            Text = 'Take Photo'
+            TextSettings.Trimming = None
+            OnClick = BtnTakePhotoClick
+          end
         end
-        object ComboBox2: TComboBox
-          DropDownCount = 20
-          Items.Strings = (
-            'Peter'
-            'John')
-          ItemIndex = 0
-          DropDownKind = Custom
-          Position.X = 29.000000000000000000
-          Position.Y = 258.000000000000000000
-          Size.Width = 106.000000000000000000
-          Size.Height = 22.000000000000000000
+        object Panel5: TPanel
+          Align = Bottom
+          Position.Y = 271.000000000000000000
+          Size.Width = 281.000000000000000000
+          Size.Height = 72.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 5
-        end
-        object BtnConfirm: TButton
-          Anchors = [akLeft, akBottom]
-          Position.X = 29.000000000000000000
-          Position.Y = 352.000000000000000000
-          Size.Width = 105.000000000000000000
-          Size.Height = 22.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 1
-          Text = 'Confirm'
-          TextSettings.Trimming = None
-          OnClick = BtnConfirmClick
-        end
-        object Edit2: TEdit
-          Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 3
-          Position.X = 30.000000000000000000
-          Position.Y = 120.000000000000000000
-          Size.Width = 105.000000000000000000
-          Size.Height = 22.000000000000000000
-          Size.PlatformDefault = False
-        end
-        object Name: TEdit
-          Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 2
-          Position.X = 29.000000000000000000
-          Position.Y = 57.000000000000000000
-          Size.Width = 106.000000000000000000
-          Size.Height = 22.000000000000000000
-          Size.PlatformDefault = False
-          StyledSettings = [Family, Style, FontColor]
-        end
-        object Label3: TLabel
-          Position.X = 30.000000000000000000
-          Position.Y = 14.000000000000000000
-          Size.Width = 88.000000000000000000
-          Size.Height = 16.000000000000000000
-          Size.PlatformDefault = False
-          Text = 'Name'
-          TabOrder = 10
-        end
-        object BtnTakePhoto: TButton
-          Position.X = 30.000000000000000000
-          Position.Y = 303.000000000000000000
-          Size.Width = 59.000000000000000000
-          Size.Height = 41.000000000000000000
-          Size.PlatformDefault = False
-          StyleLookup = 'cameratoolbutton'
-          TabOrder = 0
-          Text = 'BtnTakePhoto'
-          TextSettings.Trimming = None
-          OnClick = BtnTakePhotoClick
+          object BtnConfirm: TButton
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 50.000000000000000000
+            Position.X = 4.000000000000000000
+            Position.Y = 11.000000000000000000
+            Size.Width = 105.000000000000000000
+            Size.Height = 30.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            Text = 'Confirm'
+            TextSettings.Trimming = None
+            OnClick = BtnConfirmClick
+          end
         end
       end
       object Splitter1: TSplitter
@@ -312,13 +443,13 @@ object Form1: TForm1
         MinSize = 20.000000000000000000
         Position.X = 281.000000000000000000
         Size.Width = 40.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
       end
       object Panel3: TPanel
         Align = Client
         Size.Width = 400.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 5
         object ImageContainer: TImage
@@ -330,7 +461,7 @@ object Form1: TForm1
             end>
           Align = Client
           Size.Width = 400.000000000000000000
-          Size.Height = 392.000000000000000000
+          Size.Height = 343.000000000000000000
           Size.PlatformDefault = False
           object Panel4: TPanel
             Align = Top
@@ -338,6 +469,15 @@ object Form1: TForm1
             Size.Height = 42.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
+            object Label1: TLabel
+              Align = Center
+              Margins.Left = 5.000000000000000000
+              Margins.Top = 20.000000000000000000
+              Margins.Right = 10.000000000000000000
+              Margins.Bottom = 10.000000000000000000
+              Text = 'Label1'
+              TabOrder = 4
+            end
           end
         end
       end
@@ -362,7 +502,7 @@ object Form1: TForm1
         FooterAppearanceClassName = 'TListHeaderObjects'
         Align = Left
         Size.Width = 232.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
         OnChange = ListView1Change
@@ -374,7 +514,7 @@ object Form1: TForm1
           end>
         Align = Client
         Size.Width = 748.000000000000000000
-        Size.Height = 392.000000000000000000
+        Size.Height = 343.000000000000000000
         Size.PlatformDefault = False
       end
     end
@@ -390,6 +530,8 @@ object Form1: TForm1
       StyleLookup = ''
       TabOrder = 0
       Text = 'TabItem3'
+      ExplicitSize.cx = 8.000000000000000000
+      ExplicitSize.cy = 8.000000000000000000
       object Memo1: TMemo
         Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
         DataDetectorTypes = []
