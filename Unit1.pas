@@ -122,6 +122,7 @@ type
     procedure SelectedNameView(Name: string);
     procedure UpdateData;
     procedure Empty_Controls(AParent: TFMXObject);
+    procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
 
   public
   public
@@ -133,6 +134,9 @@ type
 var
   Form1: TForm1;
   ScaleState: single;
+
+const
+  DefaultFontSize : Real = 14;
 
 implementation
 
@@ -261,8 +265,6 @@ begin
             TButton(Child).Width := TButton(Child).Width /ScaleFactor;
             TButton(Child).Height := TButton(Child).Height /ScaleFactor;
 
-//            showmessage('Width ' + Floattostr(TButton(Child).Width ) +
-//                       'Height ' + Floattostr(TButton(Child).Height ));
 
             TButton(Child).StyledSettings := TButton(Child).StyledSettings - [TStyledSetting.Size];
 
@@ -349,13 +351,13 @@ begin
           If TControl(child) is TEdit then
           begin
 
+
               TEdit(Child).Width := TEdit(Child).Width/scalefactor;
               TEdit(Child).Height := TEdit(Child).Height/scalefactor;
 
-
               TEdit(Child).StyledSettings := TEdit(Child).StyledSettings - [TStyledSetting.Size];
+              TEdit(Child).TextSettings.Font.size := Round(TEdit(Child).TextSettings.Font.size/scalefactor);
 
-              TEdit(Child).TextSettings.Font.size := TEdit(Child).TextSettings.Font.size/scalefactor;
 
           end;
 
@@ -375,19 +377,79 @@ begin
           end;
 
 
-
-          if (Child.ChildrenCount >0) then
-          begin
             // showmessage(Child.StyleName + ' Recursion');
-
              ResetComponents(Child, ScaleFactor);
+
+  end;//i
+
+
+end;
+
+procedure TForm1.ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
+var
+ I, x: Integer;
+ Child: TFMXObject;
+ Item : TListBoxItem;
+begin
+
+
+  for I := 0 to AParent.childrenCount - 1 do
+  begin
+
+     Child := AParent.Children[I];
+
+          If TControl(child) is TEdit then
+          begin
+
+              TEdit(Child).StyledSettings := TEdit(Child).StyledSettings - [TStyledSetting.Size];
+              TEdit(Child).TextSettings.Font.size := DefaultfontSize;
+
+          end;
+
+          If TControl(child) is TLabel then
+          begin
+
+              TLabel(Child).StyledSettings := TLabel(Child).StyledSettings - [TStyledSetting.Size];
+              TLabel(Child).TextSettings.Font.size := DefaultfontSize;
 
           end;
 
 
+          If TControl(child) is TDateEdit then
+          begin
+
+            TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];
+            TDateEdit(Child).Font.Size := DefaultfontSize;
+          end;
+
+          If TControl(child) is TComboBox then
+          begin
+
+            for x := 0 to TComboBox(Child).Count-1 do begin
+             Item := TComboBox(Child).ListItems[x];
+             Item.StyledSettings := Item.StyledSettings - [TStyledSetting.Size];
+             Item.Font.Size := DefaultfontSize;
+           //  Item.Height := Item.Height * ScaleFactor;
+            end;
+
+          end;
+
+          If TControl(child) is TListBox then
+          begin
+
+            for x := 0 to TListBox(Child).Count-1 do begin
+             Item := TListBox(Child).ListItems[x];
+             Item.StyledSettings := Item.StyledSettings - [TStyledSetting.Size];
+             Item.Font.Size := DefaultfontSize;
+            // Item.Height := Item.Height * ScaleFactor;
+            end;
+
+          end;
+
+          //Recursion
+          ComponentDefaultFont(Child, ScaleFactor);
 
   end;//i
-
 
 end;
 
@@ -414,7 +476,9 @@ begin
               TEdit(Child).Height := TEdit(Child).height * ScaleFactor;
 
               TEdit(Child).StyledSettings := TEdit(Child).StyledSettings - [TStyledSetting.Size];
-              TEdit(Child).TextSettings.Font.size := TEdit(Child).TextSettings.Font.size * ScaleFactor;
+              TEdit(Child).TextSettings.Font.size := Round(TEdit(Child).TextSettings.Font.size * ScaleFactor);
+
+              TEdit(Child).Repaint;
 
           end;
 
@@ -436,9 +500,7 @@ begin
             TDateEdit(Child).Width := TDateEdit(Child).Width * ScaleFactor;
             TDateEdit(Child).Height := TDateEdit(Child).height * ScaleFactor;
 
-            TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];//,
-                                                                                                                  // Tstyledsetting.Style];
-            //[TStyledSetting.Size];
+            TDateEdit(Child).StyledSettings := TDateEdit(Child).StyledSettings - [TStyledSetting.Size];
           TDateEdit(Child).Font.Size := TDateEdit(Child).Font.size * ScaleFactor;
           end;
 
@@ -497,12 +559,11 @@ begin
 
           end;
 
-            if (Child.ChildrenCount >0) then;//and (TControl(child) is TDateEdit <> true) then
-            begin
-             //  showmessage(Child.name + ' Recursion');
+
+             //showmessage(Child.name + ' Recursion');
                ScaleComponents(Child, ScaleFactor);
 
-            end;
+
 
 
   end;//i
@@ -735,7 +796,6 @@ begin
 
              ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
-       //application.ProcessMessages;
       MemoryStream.Free;
       BlobStream.Free;
      sleep(1000);
@@ -754,30 +814,53 @@ begin
 
   If ScaleState <> 1 then
   begin
-    ResetComponents(self, 1.25);
+    ResetComponents(Form1, 1.25);
     ScaleState := ScaleState - 1;
   end else
   begin
-    Showmessage('Minimum Reached');
-   exit;
-  end;
+   Showmessage('Minimum Reached');
+  exit;
+end;
 
 
 end;
 
 procedure TForm1.BtnScaleUpClick(Sender: TObject);
+var
+  ScaleFactor: real;
 begin
 
 
   If ScaleState <> 3 then
   begin
    ScaleComponents(self, 1.25);
+
    ScaleState := ScaleState + 1;
   end else
   begin
     Showmessage('Maximum Reached');
    exit;
   end;
+
+
+//     TThread.CreateAnonymousThread(procedure
+//        var
+//          ScaleFactor: real;
+//        begin
+//
+//           ScaleFactor := 1.25;
+
+//           Edit3.StyledSettings := Edit3.StyledSettings - [TStyledSetting.Size];
+//           Edit3.TextSettings.Font.size := Edit3.TextSettings.Font.size * ScaleFactor;
+//
+//          TThread.Synchronize(TThread.CurrentThread, procedure
+//          begin
+//
+//              ListBox2.Items.Add('Edit Increase End '  + 'Edit3' + ' ' +
+//                                 floattostr(Edit3.TextSettings.Font.size));
+//
+//          end)
+//     end).Start;
 
 end;
 
@@ -999,7 +1082,10 @@ procedure TForm1.FormShow(Sender: TObject);
 begin
     Form1.StyleBook := DM.StyleBook5;
 
-    UpdateData
+    UpdateData ;
+
+    ComponentDefaultFont(Form1, 12);
+
 
 end;
 
