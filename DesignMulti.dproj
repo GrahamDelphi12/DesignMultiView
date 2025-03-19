@@ -229,6 +229,7 @@
         <IncludeAndroid_NotificationAccentColor>false</IncludeAndroid_NotificationAccentColor>
         <Android_NotificationAccentColor>#000000</Android_NotificationAccentColor>
         <IncludeAndroid_VectorizedNotificationIcon>true</IncludeAndroid_VectorizedNotificationIcon>
+        <AUP_RECORD_AUDIO>true</AUP_RECORD_AUDIO>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>

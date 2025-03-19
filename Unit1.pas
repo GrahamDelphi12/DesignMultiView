@@ -10,8 +10,18 @@ uses
   FMX.MediaLibrary, FMX.MediaLibrary.Actions, FMX.StdActns, FireDac.Stan.Param,
   System.Permissions,FMX.DialogService, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
   System.ImageList, FMX.ImgList, FMX.Objects, FMX.Filter, Data.DB,
-  FMX.ListView.Types, FMX.ListView.Appearances, FMX.ListView.Adapters.Base,
-  FMX.ListView, FMX.Platform, FMX.Ani;
+  System.IOUtils,
+  FMX.ListView.Types,
+  FMX.ListView.Appearances,
+  FMX.ListView.Adapters.Base,
+  FMX.ListView,
+  FMX.Platform,
+  FMX.Ani,
+  FMX.Media,
+  Androidapi.Helpers,
+  Androidapi.JNI.Media,
+  Androidapi.JNI.JavaTypes,
+  Androidapi.JNI.Os;
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -54,9 +64,6 @@ type
     Panel5: TPanel;
     BtnConfirm: TButton;
     FlowLayout2: TFlowLayout;
-    DateEdit2: TDateEdit;
-    Edit3: TEdit;
-    DateEdit3: TDateEdit;
     Label1: TLabel;
     BtnIncreaseSize: TButton;
     BtnReduceSize: TButton;
@@ -75,6 +82,10 @@ type
     FloatAnimation1: TFloatAnimation;
     Label6: TLabel;
     Label7: TLabel;
+    BtnStartRec: TButton;
+    BtnStopRec: TButton;
+    BtnPlayRec: TButton;
+    MediaPlayer1: TMediaPlayer;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -96,8 +107,15 @@ type
     procedure BtnReduceSizeClick(Sender: TObject);
     procedure Panel2Resize(Sender: TObject);
     procedure BtnTerminateClick(Sender: TObject);
+    procedure BtnStartRecClick(Sender: TObject);
+    procedure BtnStopRecClick(Sender: TObject);
+    procedure BtnPlayRecClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
+
+     StorageWritePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
+     StorageReadPermission = 'android.permission.READ_EXTERNAL_STORAGE';
+     AudioPermission = 'android.permission.RECORD_AUDIO';
   private
     { Private declarations }
     FRawBitmap: TBitmap;
@@ -105,6 +123,10 @@ type
 
     TerminateThread: Boolean;
 
+    //
+    FMediaRecorder: JMediaRecorder;
+    FFileName: string;
+    //
     procedure processArray<T>(const Arr: array of T;
                              Processor: TArrayProcessor<T>);
     procedure iteratecontrols(AParent: TFMXObject);
@@ -121,6 +143,20 @@ type
     procedure TakePicturePermissionRequestResult(Sender: TObject;
               const APermissions: TClassicStringDynArray;
               const AGrantResults: TClassicPermissionStatusDynArray);
+
+    //
+    procedure AudioRationale(Sender: TObject;
+              const APermissions: TClassicStringDynArray;
+              const APostRationaleProc: TProc);
+
+    procedure AudioPermissionRequestResult(Sender: TObject;
+              const APermissions: TClassicStringDynArray;
+              const AGrantResults: TClassicPermissionStatusDynArray);
+
+    procedure StartRecording;
+    //
+
+
     procedure UpdateEffect;
     procedure UpdateUI;
     procedure SelectedNameView(Name: string);
@@ -159,6 +195,55 @@ begin
   FreeAndNil(FRawBitmap);
   inherited Destroy;
 end;
+
+procedure TForm1.AudioRationale(Sender: TObject;
+              const APermissions: TClassicStringDynArray;
+              const APostRationaleProc: TProc);
+begin
+    TDialogService.ShowMessage('The app needs to access the device''s storage to save the photos',
+    procedure(const AResult: TModalResult)
+    begin
+      APostRationaleProc;
+    end)
+end;
+
+procedure TForm1.AudioPermissionRequestResult(Sender: TObject;
+              const APermissions: TClassicStringDynArray;
+              const AGrantResults: TClassicPermissionStatusDynArray);
+begin
+
+    if (Length(AGrantResults) = 3) and
+     (AGrantResults[0] = TPermissionStatus.Granted) and
+     (AGrantResults[1] = TPermissionStatus.Granted) and
+     (AGrantResults[2] = TPermissionStatus.Granted)
+  then
+  begin
+    StartRecording;
+  end
+  else
+  begin
+    TDialogService.ShowMessage('Cannot Record Notes because the required permission has not been granted');
+  end;
+
+end;
+
+procedure TForm1.StartRecording;
+begin
+   // showmessage('Prepare');
+
+  FMediaRecorder := TJMediaRecorder.Create;
+  FMediaRecorder.setAudioSource(TJMediaRecorder_AudioSource.JavaClass.MIC);
+  FMediaRecorder.setOutputFormat(TJMediaRecorder_OutputFormat.JavaClass.THREE_GPP);
+  FFileName := TPath.Combine(TPath.GetDocumentsPath, 'recording.3gp');
+  FMediaRecorder.setOutputFile(StringToJString(FFileName));
+  FMediaRecorder.setAudioEncoder(TJMediaRecorder_AudioEncoder.JavaClass.AMR_NB);
+  FMediaRecorder.prepare;
+  FMediaRecorder.start;
+
+  //showmessage('Should Have Started');
+
+end;
+
 
 procedure TForm1.Empty_Controls(AParent: TFMXObject);
 begin
@@ -861,6 +946,19 @@ begin
 
 end;
 
+procedure TForm1.BtnPlayRecClick(Sender: TObject);
+begin
+
+  MediaPlayer1.FileName := TPath.Combine(TPath.GetDocumentsPath, 'recording.3gp');
+
+  if MediaPlayer1.Media <> nil then
+  begin
+      MediaPlayer1.Play;
+  end else
+    showmessage('No Media to Play');
+
+end;
+
 procedure TForm1.BtnReduceSizeClick(Sender: TObject);
 begin
   If ScaleState <> 1 then
@@ -871,6 +969,32 @@ begin
   begin
    Showmessage('Minimum Reached');
    exit;
+  end;
+end;
+
+procedure TForm1.BtnStartRecClick(Sender: TObject);
+begin
+  try
+    if TOSVersion.Check(11) then
+    begin
+      StartRecording;
+    end
+    else
+    begin
+
+       PermissionsService.RequestPermissions([StorageWritePermission,
+                                              StorageReadPermission,
+                                              AudioPermission],
+                                              AudioPermissionRequestResult,
+                                              AudioRationale);
+    end;
+
+  except
+    on E: Exception do
+    begin
+      ShowMessage('An error occurred: ' + E.Message);
+    end;
+
   end;
 end;
 
@@ -941,6 +1065,17 @@ end;
 procedure TForm1.BtnTerminateClick(Sender: TObject);
 begin
    TerminateThread:= True;
+end;
+
+procedure TForm1.BtnStopRecClick(Sender: TObject);
+begin
+  if Assigned(FMediaRecorder) then
+  begin
+    FMediaRecorder.stop;
+    FMediaRecorder.release;
+    FMediaRecorder := nil;
+  end;
+  //ShowMessage('Recording saved to: ' + FFileName);
 end;
 
 procedure TForm1.BtnIncreaseSizeClick(Sender: TObject);
