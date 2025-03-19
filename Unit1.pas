@@ -69,23 +69,27 @@ type
     BtnReduceSize: TButton;
     ComboBox1: TComboBox;
     ToolBar3: TToolBar;
-    BtnIterate: TButton;
     BtnDeleteAll: TButton;
     BtnAnonSync: TButton;
     BtnEmptyEdits: TButton;
     Button2: TButton;
     Button3: TButton;
     ImageList1: TImageList;
-    BtnTakePhoto: TButton;
-    BtnSynch: TButton;
     BtnTerminate: TButton;
-    FloatAnimation1: TFloatAnimation;
     Label6: TLabel;
     Label7: TLabel;
     BtnStartRec: TButton;
     BtnStopRec: TButton;
     BtnPlayRec: TButton;
     MediaPlayer1: TMediaPlayer;
+    Timer1: TTimer;
+    Image3: TImage;
+    BtnTakePhoto: TButton;
+    FloatAnimation1: TFloatAnimation;
+    Image4: TImage;
+    Image2: TImage;
+    Image1: TImage;
+    LblStatus: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -98,7 +102,6 @@ type
     procedure ClearImageAction1Execute(Sender: TObject);
     procedure TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
     procedure BtnDeleteAllClick(Sender: TObject);
-    procedure BtnSynchClick(Sender: TObject);
     procedure BtnAnonSyncClick(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
     procedure BtnEmptyEditsClick(Sender: TObject);
@@ -110,23 +113,21 @@ type
     procedure BtnStartRecClick(Sender: TObject);
     procedure BtnStopRecClick(Sender: TObject);
     procedure BtnPlayRecClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
-
-     StorageWritePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
-     StorageReadPermission = 'android.permission.READ_EXTERNAL_STORAGE';
-     AudioPermission = 'android.permission.RECORD_AUDIO';
+    //Audio
+    StorageWritePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
+    StorageReadPermission = 'android.permission.READ_EXTERNAL_STORAGE';
+    AudioPermission = 'android.permission.RECORD_AUDIO';
   private
     { Private declarations }
     FRawBitmap: TBitmap;
     FEffect: TFilter;
-
     TerminateThread: Boolean;
-
-    //
     FMediaRecorder: JMediaRecorder;
     FFileName: string;
-    //
+
     procedure processArray<T>(const Arr: array of T;
                              Processor: TArrayProcessor<T>);
     procedure iteratecontrols(AParent: TFMXObject);
@@ -144,7 +145,6 @@ type
               const APermissions: TClassicStringDynArray;
               const AGrantResults: TClassicPermissionStatusDynArray);
 
-    //
     procedure AudioRationale(Sender: TObject;
               const APermissions: TClassicStringDynArray;
               const APostRationaleProc: TProc);
@@ -154,8 +154,6 @@ type
               const AGrantResults: TClassicPermissionStatusDynArray);
 
     procedure StartRecording;
-    //
-
 
     procedure UpdateEffect;
     procedure UpdateUI;
@@ -200,7 +198,7 @@ procedure TForm1.AudioRationale(Sender: TObject;
               const APermissions: TClassicStringDynArray;
               const APostRationaleProc: TProc);
 begin
-    TDialogService.ShowMessage('The app needs to access the device''s storage to save the photos',
+    TDialogService.ShowMessage('The app needs to access the device''s storage to save the Voice notes',
     procedure(const AResult: TModalResult)
     begin
       APostRationaleProc;
@@ -229,7 +227,20 @@ end;
 
 procedure TForm1.StartRecording;
 begin
-   // showmessage('Prepare');
+
+     TThread.CreateAnonymousThread(
+       procedure
+       begin
+
+             TThread.Synchronize(TThread.CurrentThread, procedure
+              begin
+
+              LblStatus.Text := 'Recording in progress';
+
+              end);
+
+       end
+      ).start;
 
   FMediaRecorder := TJMediaRecorder.Create;
   FMediaRecorder.setAudioSource(TJMediaRecorder_AudioSource.JavaClass.MIC);
@@ -239,6 +250,8 @@ begin
   FMediaRecorder.setAudioEncoder(TJMediaRecorder_AudioEncoder.JavaClass.AMR_NB);
   FMediaRecorder.prepare;
   FMediaRecorder.start;
+
+  Timer1.Enabled := true;
 
   //showmessage('Should Have Started');
 
@@ -321,6 +334,28 @@ begin
   begin
     TDialogService.ShowMessage('Cannot take photos because the required permission has not been granted');
   end;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+
+    TThread.CreateAnonymousThread(procedure
+     begin
+
+              TThread.Synchronize(TThread.CurrentThread, procedure
+              begin
+
+                BtnStopRecClick(Sender);
+
+                showmessage('Voice note Limit reached');
+
+                Timer1.Enabled := false;
+              end)
+
+     end).Start;
+
+
+
 end;
 
 procedure TForm1.UpdateEffect;
@@ -953,9 +988,42 @@ begin
 
   if MediaPlayer1.Media <> nil then
   begin
+      LblStatus.Text := 'Recording Playing...';
       MediaPlayer1.Play;
+
+      //showmessage('stopped' + TMediaState(MediaPlayer1.State).Stopped);
+
+
+     If (MediaPlayer1.State = TMediaState.Stopped) then
+     begin
+
+       showmessage('stopped');
+
+          TThread.CreateAnonymousThread(
+           procedure
+           begin
+
+                 TThread.Synchronize(TThread.CurrentThread, procedure
+                  begin
+
+
+                           LblStatus.Text := 'Recording Finished';
+
+
+                  end);
+
+           end
+          ).start;
+
+     end;
+
   end else
     showmessage('No Media to Play');
+
+
+
+
+
 
 end;
 
@@ -977,7 +1045,9 @@ begin
   try
     if TOSVersion.Check(11) then
     begin
+
       StartRecording;
+
     end
     else
     begin
@@ -998,41 +1068,7 @@ begin
   end;
 end;
 
-procedure TForm1.BtnSynchClick(Sender: TObject);
-var
-  BlobStream: TStream;
-  FileStream: TFileStream;
-  MemoryStream: TmemoryStream;
-  RawBitMap: TBitMap;
-begin
 
-    label1.text := 'Apple';
-
-    TThread.ForceQueue(nil,
-      procedure
-      begin
-      label1.text := 'orange';
-      end,
-      6000
-    );
-
-    TThread.ForceQueue(nil,
-      procedure
-      begin
-      label1.text := 'Apple';
-      end,
-      7000
-     );
-
-    TThread.ForceQueue(nil,
-     procedure
-     begin
-      label1.text := 'done';
-    end,
-     8000
-   );
-
-end;
 
 procedure TForm1.BtnTakePhotoClick(Sender: TObject);
 begin
@@ -1069,13 +1105,16 @@ end;
 
 procedure TForm1.BtnStopRecClick(Sender: TObject);
 begin
+
   if Assigned(FMediaRecorder) then
   begin
     FMediaRecorder.stop;
     FMediaRecorder.release;
     FMediaRecorder := nil;
+    Timer1.Enabled := false;
+    LblStatus.Text := 'Recording Stopped';
   end;
-  //ShowMessage('Recording saved to: ' + FFileName);
+
 end;
 
 procedure TForm1.BtnIncreaseSizeClick(Sender: TObject);
@@ -1208,12 +1247,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
 
-
   ScaleState := 1;
-
   ImageContainer.Bitmap.Assign(FRawBitMap);
-
-
 
 end;
 
@@ -1245,12 +1280,11 @@ end;
 
 procedure TForm1.FormShow(Sender: TObject);
 begin
-    Form1.StyleBook := DM.StyleBook5;
+    Form1.StyleBook := DM.StyleBook2;
 
     UpdateData ;
 
     ComponentDefaultFont(Form1, 12);
-
 
 end;
 
