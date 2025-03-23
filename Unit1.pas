@@ -48,8 +48,6 @@ type
     ShowShareSheetAction1: TShowShareSheetAction;
     ClearImageAction1: TAction;
     Panel4: TPanel;
-    ListView1: TListView;
-    ImageDisplay: TImage;
     TabItem3: TTabItem;
     Memo1: TMemo;
     FlowLayout1: TFlowLayout;
@@ -62,9 +60,7 @@ type
     Label5: TLabel;
     ComboBox2: TComboBox;
     Panel5: TPanel;
-    BtnConfirm: TButton;
     FlowLayout2: TFlowLayout;
-    Label1: TLabel;
     BtnIncreaseSize: TButton;
     BtnReduceSize: TButton;
     ComboBox1: TComboBox;
@@ -75,7 +71,6 @@ type
     Button2: TButton;
     Button3: TButton;
     ImageList1: TImageList;
-    BtnTerminate: TButton;
     Label6: TLabel;
     Label7: TLabel;
     BtnStartRec: TButton;
@@ -90,6 +85,17 @@ type
     Image2: TImage;
     Image1: TImage;
     LblStatus: TLabel;
+    Panel7: TPanel;
+    ListView1: TListView;
+    Panel6: TPanel;
+    Panel8: TPanel;
+    ImageDisplay: TImage;
+    BtnPayVoiceDB: TButton;
+    BtnConfirm: TButton;
+    Panel9: TPanel;
+    BtnTerminate: TButton;
+    Panel10: TPanel;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -114,6 +120,8 @@ type
     procedure BtnStopRecClick(Sender: TObject);
     procedure BtnPlayRecClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure BtnPayVoiceDBClick(Sender: TObject);
+    procedure NextTabAction1Update(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -127,6 +135,7 @@ type
     TerminateThread: Boolean;
     FMediaRecorder: JMediaRecorder;
     FFileName: string;
+    RecordingRef: integer;
 
     procedure processArray<T>(const Arr: array of T;
                              Processor: TArrayProcessor<T>);
@@ -158,9 +167,12 @@ type
     procedure UpdateEffect;
     procedure UpdateUI;
     procedure SelectedNameView(Name: string);
-    procedure UpdateData;
+    function UpdateData: integer;
     procedure Empty_Controls(AParent: TFMXObject);
     procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
+
+    procedure WriteAudiotoDB(PK: Integer);
+    procedure PlayNote(PK_Record: integer);
 
   public
   public
@@ -179,6 +191,9 @@ const
 implementation
 
 {$R *.fmx}
+
+{$IFDEF ANDROID}
+{$ENDIF}
 
 uses UnDM;
 
@@ -242,6 +257,7 @@ begin
        end
       ).start;
 
+  {$IFDEF ANDROID}
   FMediaRecorder := TJMediaRecorder.Create;
   FMediaRecorder.setAudioSource(TJMediaRecorder_AudioSource.JavaClass.MIC);
   FMediaRecorder.setOutputFormat(TJMediaRecorder_OutputFormat.JavaClass.THREE_GPP);
@@ -250,6 +266,7 @@ begin
   FMediaRecorder.setAudioEncoder(TJMediaRecorder_AudioEncoder.JavaClass.AMR_NB);
   FMediaRecorder.prepare;
   FMediaRecorder.start;
+  {$ENDIF}
 
   Timer1.Enabled := true;
 
@@ -828,7 +845,8 @@ begin
 
             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
-            label1.text := (dm.FDQuery1.FieldByName('FIRST').asstring);
+            label1.text := (inttostr(dm.FDQuery1.FieldByName('P_KEY').asinteger)
+                            + ' ' + dm.FDQuery1.FieldByName('SITE').asstring);
 
             TThread.Sleep(2000);
 
@@ -855,6 +873,7 @@ end;
 procedure TForm1.BtnConfirmClick(Sender: TObject);
 var
   MemoryStream: TMemoryStream;
+  PKValue: integer;
 begin
 
   if Imagecontainer.Bitmap.isempty then
@@ -880,25 +899,19 @@ begin
         DM.FDConnection1.Connected := true;
 
         DM.FDQuery1.sql.clear;
-        DM.FDQuery1.sql.add('insert into "NAMES" (P_KEY,FIRST,LAST, PHOTO)');
-        DM.FDQuery1.sql.add('Values(:PK, :First, :Last, :image)');
 
+        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO)');
+        DM.FDQuery1.sql.add('Values(:Site, :Department, :image)');
 
-        DM.FDQuery1.Params.ParamByName('PK').AsInteger := 3;
-        DM.FDQuery1.Params.ParamByName('First').AsString := Name.Text;
-        //DM.FDQuery1.Params.ParamByName('Last').AsString := Edit2.Text;
-        DM.FDQuery1.Params.ParamByName('Last').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
+        DM.FDQuery1.Params.ParamByName('Site').AsString := Name.Text;
+        DM.FDQuery1.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
         DM.FDQuery1.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
-
 
         DM.FDQuery1.ExecSQL;
 
         DM.FDConnection1.Connected := false;
 
-        showmessage('Insert Done');
-
-        UpdateData;
-
+        PKValue := UpdateData;  //Returns Newly inserted PK Value
 
         Name.text := '';
         Edit2.text := '';
@@ -911,12 +924,56 @@ begin
       MemoryStream.Free;
      end;
 
-  end;
+    WriteAudiotoDB(PKValue);
+
+    showmessage('Insert Done');
+
+  end;//if
+
+end;
+
+
+procedure TForm1.WriteAudiotoDB(PK: integer);
+var
+  MemoryStream: TMemoryStream;
+  FileName: string;
+begin
+
+     try
+
+        MemoryStream := TMemoryStream.Create;
+
+        FileName := TPath.Combine(TPath.GetDocumentsPath, 'recording.3gp');
+
+        MemoryStream.LoadFromFile(FileName);
+
+        MemoryStream.Position := 0;
+
+        DM.FDConnection1.Connected := true;
+
+        DM.FDQuery1.SQL.Clear;
+        DM.FDQuery1.SQL.Add('UPDATE "NAMES" SET RECORDING = :Voice');
+        DM.FDQuery1.SQL.Add('WHERE P_KEY = :PK');
+        DM.FDQuery1.Params.ParamByName('PK').AsInteger := PK;
+        DM.FDQuery1.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
+
+        // Execute the query
+        DM.FDQuery1.ExecSQL;
+
+        DM.FDConnection1.Connected := false;
+
+        //showmessage('Voice Insert Done');
+
+     finally
+      MemoryStream.Free;
+     end;
 
 end;
 
 
 procedure TForm1.BtnDeleteAllClick(Sender: TObject);
+var
+  RawBitMap : TBitMap;
 begin
   dm.FDConnection1.Connected := true;
 
@@ -924,6 +981,14 @@ begin
   dm.FDQuery1.sql.add('DELETE From "NAMES"');
 
   dm.FDQuery1.ExecSQL;
+
+  UpdateData;
+
+  RawBitMap := TBitMap.Create;
+  RawBitMap.SetSize(0,0);
+  ImageDisplay.Bitmap.SetSize(0, 0);
+  ImageDisplay.Bitmap.Assign(RawBitMap);
+
 end;
 
 procedure TForm1.UpdateUI;
@@ -948,7 +1013,7 @@ begin
 
   dm.FDQuery1.sql.clear;
   dm.FDQuery1.sql.add('Select * FROM "NAMES"');
-      dm.FDQuery1.sql.add(' WHERE FIRST = ' + Trim(quotedstr('Larry')));
+      dm.FDQuery1.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
   dm.FDQuery1.Open;
 
   While not dm.FDQuery1.EOF do
@@ -981,6 +1046,63 @@ begin
 
 end;
 
+procedure TForm1.BtnPayVoiceDBClick(Sender: TObject);
+begin
+
+  PlayNote(RecordingRef);    //Need this vali=ue from the ListView to get the PK value
+
+end;
+
+procedure TForm1.PlayNote(PK_Record:integer);
+var
+  MemoryStream: TMemorystream;
+  TempFileName: string;
+  BlobStream: TStream;
+  PK: Integer;
+begin
+
+  //showmessage('Key ' + inttostr(PK_Record));
+  MemoryStream := TMemoryStream.Create;
+
+  try
+    // Retrieve the BLOB from the database
+    DM.FDQuery1.SQL.Clear;
+    DM.FDQuery1.SQL.Add('SELECT RECORDING, P_KEY FROM "NAMES" WHERE P_KEY = :PK');
+    DM.FDQuery1.Params.ParamByName('PK').AsInteger := PK_Record;
+    DM.FDQuery1.Open;
+
+    //showmessage('Record Count ' + inttostr(DM.FDQuery1.RecordCount));
+
+
+    if not DM.FDQuery1.FieldByName('RECORDING').IsNull then
+    begin
+
+
+      BlobStream := DM.FDQuery1.CreateBlobStream(DM.FDQuery1.FieldByName('RECORDING'), bmRead);
+
+
+      TBlobField(DM.FDQuery1.FieldByName('RECORDING')).SaveToStream(MemoryStream);
+      MemoryStream.Position := 0;
+
+
+      // Create a temporary file
+      TempFileName := TPath.GetTempFileName + '.3gp'; // Adjust the extension to match the media format
+      MemoryStream.SaveToFile(TempFileName);
+
+      // Play the file using TMediaPlayer
+      MediaPlayer1.FileName := TempFileName;
+      MediaPlayer1.Play;
+    end
+    else
+      ShowMessage('No recording found for the specified key.');
+  finally
+    MemoryStream.Free;
+  end;
+
+
+end;
+
+
 procedure TForm1.BtnPlayRecClick(Sender: TObject);
 begin
 
@@ -1005,11 +1127,7 @@ begin
 
                  TThread.Synchronize(TThread.CurrentThread, procedure
                   begin
-
-
                            LblStatus.Text := 'Recording Finished';
-
-
                   end);
 
            end
@@ -1106,6 +1224,7 @@ end;
 procedure TForm1.BtnStopRecClick(Sender: TObject);
 begin
 
+  {$IFDEF ANDROID}
   if Assigned(FMediaRecorder) then
   begin
     FMediaRecorder.stop;
@@ -1114,6 +1233,8 @@ begin
     Timer1.Enabled := false;
     LblStatus.Text := 'Recording Stopped';
   end;
+  {$ENDIF}
+
 
 end;
 
@@ -1179,7 +1300,15 @@ begin
 
   Name := ListItem.Text;
 
+  BtnPayVoiceDB.Enabled := true;
+
   SelectedNameView(Name);
+end;
+
+procedure TForm1.NextTabAction1Update(Sender: TObject);
+begin
+    // BtnPayVoiceDB.Enabled := false;
+     LblStatus.Text := '';
 end;
 
 procedure TForm1.SelectedNameView(Name: string);
@@ -1194,7 +1323,7 @@ begin
 
   DM.FDQuery1.sql.clear;
   DM.FDQuery1.sql.add('Select * FROM "NAMES"');
-  DM.FDQuery1.sql.add(' WHERE "FIRST" = ' +
+  DM.FDQuery1.sql.add(' WHERE "SITE" = ' +
                             Trim(QuotedStr(Name)));
   DM.FDQuery1.Open;
 
@@ -1216,8 +1345,12 @@ begin
   MemoryStream.Free;
   BlobStream.Free;
 
+  //Reference to Recording 23-3-24
+  RecordingRef := DM.FDQuery1.FieldByName('P_KEY').AsInteger;
 
  DM.FDConnection1.Connected := false;
+
+
 
 end;
 
@@ -1252,7 +1385,7 @@ begin
 
 end;
 
-procedure TForm1.UpdateData;
+Function TForm1.UpdateData: Integer;
 begin
 
   DM.FDConnection1.Connected := true;
@@ -1261,19 +1394,22 @@ begin
   DM.FDQuery1.sql.add('Select * FROM "NAMES"');
   DM.FDQuery1.Open;
 
-  ListView1.Data.Empty;
+  ListView1.items.Clear;  //Was data 22-3-24
 
   While not dm.FDQuery1.EOF do
   begin
 
     with TListViewItem(ListView1.Items.Add) do
     begin
-      Text := DM.FDQuery1.fieldbyname('FIRST').asstring;// [1000 + Random(1234567)]);
-      Detail := Format('%d kg of paper', [1000 + Random(1234)]);
+      Text := DM.FDQuery1.fieldbyname('SITE').asstring;// [1000 + Random(1234567)]);
+      Detail := InttoStr(DM.FDQuery1.fieldbyname('P_KEY').asInteger);
+      //Format('%d kg of paper', [1000 + Random(1234)]);
     end;
 
     DM.FDQuery1.Next;
   end;
+
+  result := DM.FDQuery1.fieldbyname('P_KEY').asInteger;
 
 end;
 
@@ -1347,7 +1483,9 @@ end;
 
 procedure TForm1.PreviousTabAction1Update(Sender: TObject);
 begin
-  //listbox1.itemIndex := tabcontrol1.TabIndex;
+
+  //BtnPayVoiceDB.Enabled := false;
+  LblStatus.Text := '';
 end;
 
 end.

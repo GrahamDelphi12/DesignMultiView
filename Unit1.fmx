@@ -82,7 +82,7 @@ object Form1: TForm1
     Size.Width = 980.000000000000000000
     Size.Height = 372.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     TabPosition = None
     Sizes = (
@@ -97,7 +97,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1267,7 +1267,7 @@ object Form1: TForm1
             TabOrder = 13
           end
           object DateEdit1: TDateEdit
-            Date = 45735.000000000000000000
+            Date = 45739.000000000000000000
             TodayDefault = True
             Padding.Left = 20.000000000000000000
             Margins.Left = 5.000000000000000000
@@ -1373,22 +1373,6 @@ object Form1: TForm1
           Size.Height = 60.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 5
-          object BtnConfirm: TButton
-            Align = Left
-            Margins.Left = 10.000000000000000000
-            Margins.Top = 10.000000000000000000
-            Margins.Right = 10.000000000000000000
-            Margins.Bottom = 10.000000000000000000
-            Position.X = 10.000000000000000000
-            Position.Y = 10.000000000000000000
-            Size.Width = 100.000000000000000000
-            Size.Height = 40.000000000000000000
-            Size.PlatformDefault = False
-            TabOrder = 0
-            Text = 'Confirm'
-            TextSettings.Trimming = None
-            OnClick = BtnConfirmClick
-          end
         end
       end
       object Splitter1: TSplitter
@@ -1428,35 +1412,48 @@ object Form1: TForm1
           Size.Height = 80.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
-          object Label1: TLabel
+          object Panel9: TPanel
             Align = Client
-            Margins.Left = 5.000000000000000000
-            Margins.Top = 20.000000000000000000
-            Margins.Right = 10.000000000000000000
-            Margins.Bottom = 10.000000000000000000
-            Size.Width = 212.000000000000000000
-            Size.Height = 50.000000000000000000
-            Size.PlatformDefault = False
-            TextSettings.HorzAlign = Center
-            Text = 'Current Image'
-            TabOrder = 4
-          end
-          object BtnTerminate: TButton
-            Align = Left
-            Margins.Left = 10.000000000000000000
-            Margins.Top = 10.000000000000000000
-            Margins.Right = 10.000000000000000000
-            Margins.Bottom = 10.000000000000000000
-            Position.X = 10.000000000000000000
-            Position.Y = 10.000000000000000000
-            Size.Width = 153.000000000000000000
-            Size.Height = 60.000000000000000000
+            Size.Width = 400.000000000000000000
+            Size.Height = 56.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 5
-            Text = 'Terminate Slides'
-            TextSettings.WordWrap = True
-            TextSettings.Trimming = None
-            OnClick = BtnTerminateClick
+            object BtnTerminate: TButton
+              Align = Left
+              Margins.Left = 10.000000000000000000
+              Margins.Top = 10.000000000000000000
+              Margins.Right = 10.000000000000000000
+              Margins.Bottom = 10.000000000000000000
+              Position.X = 10.000000000000000000
+              Position.Y = 10.000000000000000000
+              Size.Width = 135.000000000000000000
+              Size.Height = 36.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 5
+              Text = 'Terminate Slides'
+              TextSettings.WordWrap = True
+              TextSettings.Trimming = None
+              OnClick = BtnTerminateClick
+            end
+          end
+          object Panel10: TPanel
+            Align = Bottom
+            Position.Y = 56.000000000000000000
+            Size.Width = 400.000000000000000000
+            Size.Height = 24.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 6
+            object Label1: TLabel
+              Align = Left
+              Margins.Left = 10.000000000000000000
+              Position.X = 10.000000000000000000
+              Size.Width = 132.000000000000000000
+              Size.Height = 24.000000000000000000
+              Size.PlatformDefault = False
+              TextSettings.HorzAlign = Center
+              Text = 'Current Image'
+              TabOrder = 4
+            end
           end
         end
       end
@@ -1505,6 +1502,21 @@ object Form1: TForm1
           TextSettings.Trimming = None
           OnClick = BtnEmptyEditsClick
         end
+        object BtnConfirm: TButton
+          Align = Right
+          Images = ImageList1
+          ImageIndex = 1
+          Margins.Left = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Position.X = 870.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 45.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Confirm'
+          TextSettings.Trimming = None
+          OnClick = BtnConfirmClick
+        end
       end
     end
     object TabItem2: TTabItem
@@ -1512,7 +1524,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1520,31 +1532,69 @@ object Form1: TForm1
       TabOrder = 0
       ExplicitSize.cx = 8.000000000000000000
       ExplicitSize.cy = 8.000000000000000000
-      object ListView1: TListView
-        ItemAppearanceClassName = 'TListItemAppearance'
-        ItemEditAppearanceClassName = 'TListItemShowCheckAppearance'
-        HeaderAppearanceClassName = 'TListHeaderObjects'
-        FooterAppearanceClassName = 'TListHeaderObjects'
+      object Panel7: TPanel
         Align = Left
-        Size.Width = 232.000000000000000000
+        Size.Width = 201.000000000000000000
         Size.Height = 372.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
-        OnChange = ListView1Change
-        SearchVisible = True
+        object ListView1: TListView
+          ItemAppearanceClassName = 'TListItemAppearance'
+          ItemEditAppearanceClassName = 'TListItemShowCheckAppearance'
+          HeaderAppearanceClassName = 'TListHeaderObjects'
+          FooterAppearanceClassName = 'TListHeaderObjects'
+          Align = Client
+          Size.Width = 201.000000000000000000
+          Size.Height = 372.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          OnChange = ListView1Change
+          SearchVisible = True
+        end
       end
-      object ImageDisplay: TImage
-        MultiResBitmap = <
-          item
-          end>
+      object Panel6: TPanel
         Align = Client
-        Margins.Left = 5.000000000000000000
-        Margins.Top = 5.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Margins.Bottom = 5.000000000000000000
-        Size.Width = 738.000000000000000000
-        Size.Height = 362.000000000000000000
+        Size.Width = 779.000000000000000000
+        Size.Height = 372.000000000000000000
         Size.PlatformDefault = False
+        TabOrder = 1
+        object Panel8: TPanel
+          Align = Bottom
+          Position.Y = 327.000000000000000000
+          Size.Width = 779.000000000000000000
+          Size.Height = 45.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          object BtnPayVoiceDB: TButton
+            Align = Left
+            Enabled = False
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 5.000000000000000000
+            Size.Width = 124.000000000000000000
+            Size.Height = 35.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            Text = 'Play Voice Note'
+            TextSettings.Trimming = None
+            OnClick = BtnPayVoiceDBClick
+          end
+        end
+        object ImageDisplay: TImage
+          MultiResBitmap = <
+            item
+            end>
+          Align = Client
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Size.Width = 769.000000000000000000
+          Size.Height = 317.000000000000000000
+          Size.PlatformDefault = False
+        end
       end
     end
     object TabItem3: TTabItem
@@ -1578,6 +1628,17 @@ object Form1: TForm1
         Viewport.Height = 356.000000000000000000
       end
     end
+  end
+  object MediaPlayer1: TMediaPlayer
+    Left = 864
+    Top = 240
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 7000
+    OnTimer = Timer1Timer
+    Left = 864
+    Top = 312
   end
   object MultiView1: TMultiView
     DrawerOptions.TouchAreaSize = 15.000000000000000000
@@ -1674,6 +1735,7 @@ object Form1: TForm1
     object NextTabAction1: TNextTabAction
       Category = 'Tab'
       TabControl = TabControl1
+      OnUpdate = NextTabAction1Update
     end
     object TakePhotoFromLibraryAction1: TTakePhotoFromLibraryAction
       Category = 'Media Library'
@@ -26161,16 +26223,5 @@ object Form1: TForm1
     Destination = <>
     Left = 656
     Top = 128
-  end
-  object MediaPlayer1: TMediaPlayer
-    Left = 864
-    Top = 240
-  end
-  object Timer1: TTimer
-    Enabled = False
-    Interval = 7000
-    OnTimer = Timer1Timer
-    Left = 864
-    Top = 312
   end
 end
