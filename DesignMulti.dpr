@@ -4,7 +4,8 @@ uses
   System.StartUpCopy,
   FMX.Forms,
   Unit1 in 'Unit1.pas' {Form1},
-  UnDM in 'UnDM.pas' {DM: TDataModule};
+  UnDM in 'UnDM.pas' {DM: TDataModule},
+  UnLocation in 'UnLocation.pas';
 
 {$R *.res}
 

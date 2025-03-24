@@ -21,7 +21,9 @@ uses
   Androidapi.Helpers,
   Androidapi.JNI.Media,
   Androidapi.JNI.JavaTypes,
-  Androidapi.JNI.Os;
+  Androidapi.JNI.Os,
+  System.Sensors,
+  System.Sensors.Components, FMX.WebBrowser;
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -44,7 +46,6 @@ type
     Panel3: TPanel;
     TakePhotoFromLibraryAction1: TTakePhotoFromLibraryAction;
     TakePhotoFromCameraAction1: TTakePhotoFromCameraAction;
-    ImageContainer: TImage;
     ShowShareSheetAction1: TShowShareSheetAction;
     ClearImageAction1: TAction;
     Panel4: TPanel;
@@ -96,6 +97,34 @@ type
     BtnTerminate: TButton;
     Panel10: TPanel;
     Label1: TLabel;
+    TabCont_Image_Memo: TTabControl;
+    TabItem4: TTabItem;
+    TabItem5: TTabItem;
+    ImageContainer: TImage;
+    Memo2: TMemo;
+    TabItem6: TTabItem;
+    LocationSensor1: TLocationSensor;
+    WebBrowser1: TWebBrowser;
+    MultiView2: TMultiView;
+    ListBox1: TListBox;
+    ListBoxItem1: TListBoxItem;
+    Switch1: TSwitch;
+    ListBoxGroupHeader1: TListBoxGroupHeader;
+    ListBoxItemLatitude: TListBoxItem;
+    ListBoxItemLongitude: TListBoxItem;
+    ListBoxGroupHeader2: TListBoxGroupHeader;
+    ListBoxItemAdminArea: TListBoxItem;
+    ListBoxItemCountryCode: TListBoxItem;
+    ListBoxItemCountryName: TListBoxItem;
+    ListBoxItemFeatureName: TListBoxItem;
+    ListBoxItemLocality: TListBoxItem;
+    ListBoxItemPostalCode: TListBoxItem;
+    ListBoxItemSubAdminArea: TListBoxItem;
+    ListBoxItemSubLocality: TListBoxItem;
+    ListBoxItemSubThoroughfare: TListBoxItem;
+    ListBoxItemThoroughfare: TListBoxItem;
+    ToolBar4: TToolBar;
+    Button4: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -122,6 +151,10 @@ type
     procedure Timer1Timer(Sender: TObject);
     procedure BtnPayVoiceDBClick(Sender: TObject);
     procedure NextTabAction1Update(Sender: TObject);
+    procedure Switch1Switch(Sender: TObject);
+    procedure LocationSensor1LocationChanged(Sender: TObject; const OldLocation,
+      NewLocation: TLocationCoord2D);
+    procedure Button4Click(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -136,6 +169,9 @@ type
     FMediaRecorder: JMediaRecorder;
     FFileName: string;
     RecordingRef: integer;
+
+    FGeocoder: TGeocoder;
+    procedure OnGeocodeReverseEvent(const Address: TCivicAddress);
 
     procedure processArray<T>(const Arr: array of T;
                              Processor: TArrayProcessor<T>);
@@ -192,10 +228,11 @@ implementation
 
 {$R *.fmx}
 
+
 {$IFDEF ANDROID}
 {$ENDIF}
 
-uses UnDM;
+uses UnDM, UnLocation;
 
 constructor TForm1.Create(AOwner: TComponent);
 begin
@@ -208,6 +245,65 @@ begin
   FreeAndNil(FRawBitmap);
   inherited Destroy;
 end;
+
+procedure TForm1.OnGeocodeReverseEvent(const Address: TCivicAddress);
+begin
+
+  ListBoxItemAdminArea.ItemData.Detail       := Address.AdminArea;
+  ListBoxItemCountryCode.ItemData.Detail     := Address.CountryCode;
+  ListBoxItemCountryName.ItemData.Detail     := Address.CountryName;
+  ListBoxItemFeatureName.ItemData.Detail     := Address.FeatureName;
+  ListBoxItemLocality.ItemData.Detail        := Address.Locality;
+  ListBoxItemPostalCode.ItemData.Detail      := Address.PostalCode;
+  ListBoxItemSubAdminArea.ItemData.Detail    := Address.SubAdminArea;
+  ListBoxItemSubLocality.ItemData.Detail     := Address.SubLocality;
+  ListBoxItemSubThoroughfare.ItemData.Detail := Address.SubThoroughfare;
+  ListBoxItemThoroughfare.ItemData.Detail    := Address.Thoroughfare;
+
+end;
+
+procedure TForm1.Switch1Switch(Sender: TObject);
+begin
+ {$IFDEF ANDROID}
+  if Switch1.IsChecked then
+  begin
+    var PermissionAccessCoarseLocation := JStringToString(TJManifest_permission.JavaClass.ACCESS_COARSE_LOCATION);
+    var PermissionAccessFineLocation := JStringToString(TJManifest_permission.JavaClass.ACCESS_FINE_LOCATION);
+
+    TPermissionsService.DefaultService.RequestPermissions([PermissionAccessCoarseLocation, PermissionAccessFineLocation],
+       procedure(const APermissions: TClassicStringDynArray; const AGrantResults: TClassicPermissionStatusDynArray)
+       begin
+         if AGrantResults[0] = TPermissionStatus.Granted then
+           LocationSensor1.Active := Switch1.IsChecked
+         else
+           Switch1.IsChecked := False;
+       end,
+       procedure (const APermissions: TClassicStringDynArray; const APostRationaleProc: TProc)
+       var
+         RationaleMsg: string;
+       begin
+         for var i := Low(APermissions) to High(APermissions) do
+         begin
+           if APermissions[i] = PermissionAccessCoarseLocation then
+             RationaleMsg := RationaleMsg + 'The app needs to access the CoarseLocation for defining location' + sLineBreak + sLineBreak
+           else if APermissions[i] = PermissionAccessFineLocation then
+             RationaleMsg := RationaleMsg + 'The app needs to access the FineLocation for defining location';
+         end;
+
+         TDialogService.ShowMessage(RationaleMsg, procedure(const AResult: TModalResult)
+           begin
+             APostRationaleProc;
+           end);
+       end
+    )
+  end
+  else
+    LocationSensor1.Active := False;
+{$ELSE}
+  LocationSensor1.Active := Switch1.IsChecked;
+{$ENDIF}
+end;
+
 
 procedure TForm1.AudioRationale(Sender: TObject;
               const APermissions: TClassicStringDynArray;
@@ -273,6 +369,8 @@ begin
   //showmessage('Should Have Started');
 
 end;
+
+
 
 
 procedure TForm1.Empty_Controls(AParent: TFMXObject);
@@ -1221,6 +1319,11 @@ begin
    TerminateThread:= True;
 end;
 
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  MultiView1.HideMaster;
+end;
+
 procedure TForm1.BtnStopRecClick(Sender: TObject);
 begin
 
@@ -1305,11 +1408,54 @@ begin
   SelectedNameView(Name);
 end;
 
+procedure TForm1.LocationSensor1LocationChanged(Sender: TObject;
+  const OldLocation, NewLocation: TLocationCoord2D);
+var
+  URLString: String;
+  LSettings: TFormatSettings;
+  LDecSeparator : Char;
+begin
+  LDecSeparator := FormatSettings.DecimalSeparator;
+  LSettings := FormatSettings;
+  try
+    FormatSettings.DecimalSeparator := '.';
+    // Show current location
+    ListBoxItemLatitude.ItemData.Detail  := Format('%2.6f', [NewLocation.Latitude]);
+    ListBoxItemLongitude.ItemData.Detail := Format('%2.6f', [NewLocation.Longitude]);
+
+    // Show Map using Google Maps
+    URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [ NewLocation.Latitude, NewLocation.Longitude]);
+  finally
+    FormatSettings.DecimalSeparator := LDecSeparator;
+  end;
+  WebBrowser1.Navigate(URLString);
+
+  // Setup an instance of TGeocoder
+  try
+    if not Assigned(FGeocoder) then
+    begin
+      if Assigned(TGeocoder.Current) then
+        FGeocoder := TGeocoder.Current.Create;
+      if Assigned(FGeocoder) then
+        FGeocoder.OnGeocodeReverse := OnGeocodeReverseEvent;
+    end;
+  except
+    ListBoxGroupHeader1.Text := 'Geocoder service error.';
+  end;
+
+  // Translate location to address
+  if Assigned(FGeocoder) and not FGeocoder.Geocoding then
+    FGeocoder.GeocodeReverse(NewLocation);
+
+end;
+
 procedure TForm1.NextTabAction1Update(Sender: TObject);
 begin
     // BtnPayVoiceDB.Enabled := false;
      LblStatus.Text := '';
 end;
+
+
 
 procedure TForm1.SelectedNameView(Name: string);
 var

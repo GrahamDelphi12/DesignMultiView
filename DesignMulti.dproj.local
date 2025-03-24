@@ -2,14 +2,16 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2025/02/27 16:02:31.000.787,=C:\Delphi 12\Unit1.pas</Transaction>
-    <Transaction>2025/02/27 16:40:43.000.638,C:\Delphi 12\Unit1.fmx=C:\Delphi 12\DesignMultiView\Unit1.fmx</Transaction>
-    <Transaction>2025/02/27 16:40:43.000.638,C:\Delphi 12\Unit1.pas=C:\Delphi 12\DesignMultiView\Unit1.pas</Transaction>
-    <Transaction>2025/02/27 16:40:59.000.566,C:\Delphi 12\Project1.dproj=C:\Delphi 12\DesignMultiView\DesignMulti.dproj</Transaction>
+    <Transaction>2025/02/27 16:40:43.000.638,C:\Delphi 12\DesignMultiView\Unit1.pas=C:\Delphi 12\Unit1.pas</Transaction>
+    <Transaction>2025/02/27 16:40:43.000.638,C:\Delphi 12\DesignMultiView\Unit1.fmx=C:\Delphi 12\Unit1.fmx</Transaction>
+    <Transaction>2025/02/27 16:40:59.000.566,C:\Delphi 12\DesignMultiView\DesignMulti.dproj=C:\Delphi 12\Project1.dproj</Transaction>
     <Transaction>2025/02/28 12:29:55.000.569,=C:\Delphi 12\DesignMultiView\Unit2.pas</Transaction>
-    <Transaction>2025/02/28 12:30:13.000.183,C:\Delphi 12\DesignMultiView\UnDM.pas=C:\Delphi 12\DesignMultiView\Unit2.pas</Transaction>
-    <Transaction>2025/02/28 12:30:13.000.183,C:\Delphi 12\DesignMultiView\UnDM.dfm=C:\Delphi 12\DesignMultiView\Unit2.dfm</Transaction>
+    <Transaction>2025/02/28 12:30:13.000.183,C:\Delphi 12\DesignMultiView\Unit2.dfm=C:\Delphi 12\DesignMultiView\UnDM.dfm</Transaction>
+    <Transaction>2025/02/28 12:30:13.000.183,C:\Delphi 12\DesignMultiView\Unit2.pas=C:\Delphi 12\DesignMultiView\UnDM.pas</Transaction>
+    <Transaction>2025/03/24 11:06:57.176,=C:\Delphi 12\DesignMultiView\Unit2.pas</Transaction>
+    <Transaction>2025/03/24 11:09:06.432,C:\Delphi 12\DesignMultiView\UnLocation.pas=C:\Delphi 12\DesignMultiView\Unit2.pas</Transaction>
   </Transactions>
 	<ActiveMobileDevice>
-		<NoProfile Android="" Android64=""/>
+		<NoProfile Android="" Android64="HGAL549M"/>
 	</ActiveMobileDevice>
 </BorlandProject>
