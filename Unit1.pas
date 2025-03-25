@@ -23,7 +23,7 @@ uses
   Androidapi.JNI.JavaTypes,
   Androidapi.JNI.Os,
   System.Sensors,
-  System.Sensors.Components, FMX.WebBrowser;
+  System.Sensors.Components, FMX.WebBrowser, FMX.Maps;
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -109,7 +109,6 @@ type
     TabItem9: TTabItem;
     ImageDisplay: TImage;
     Layout1: TLayout;
-    WebBrowser2: TWebBrowser;
     ListBox1: TListBox;
     ListBoxItem1: TListBoxItem;
     Switch1: TSwitch;
@@ -127,6 +126,8 @@ type
     ListBoxItemSubLocality: TListBoxItem;
     ListBoxItemSubThoroughfare: TListBoxItem;
     ListBoxItemThoroughfare: TListBoxItem;
+    EdLat: TEdit;
+    EdLong: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -142,7 +143,6 @@ type
     procedure BtnAnonSyncClick(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
     procedure BtnEmptyEditsClick(Sender: TObject);
-    procedure Panel1Resize(Sender: TObject);
     procedure BtnIncreaseSizeClick(Sender: TObject);
     procedure BtnReduceSizeClick(Sender: TObject);
     procedure Panel2Resize(Sender: TObject);
@@ -428,13 +428,30 @@ end;
 procedure TForm1.TabItem9MouseEnter(Sender: TObject);
 var
   URLString: string;
+ // MapCenter: TMapCoordinate;
 begin
+
+  //if (Length(AGrantResults) = 1) and (AGrantResults[0] = TPermissionStatus.Granted) then
+  //begin
+ //   MapView1.ControlOptions := MapView1.ControlOptions + [TMapControlOption.MyLocation];
+   // MapView1.LayerOptions := MapView1.LayerOptions + [TMapLayerOption.UserLocation];
+  //end;
 
     FormatSettings.DecimalSeparator := '.';
 
     URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [51.316965 , -2.534651]);
+//
+//    EdLat.Text := '51.316965';
+//    EdLong.Text := '-2.534651';
+//
+//    MapCenter := TMapCoordinate.Create(StrToFloat(edLat.Text,
+//                                       TFormatSettings.Invariant),
+//                                       StrToFloat(edLong.Text,
+//                                       TFormatSettings.Invariant));
+//    MapView1.Location := MapCenter;
 
-  WebBrowser2.Navigate(URLString);
+
+  //WebBrowser2.Navigate(URLString);
 end;
 
 procedure TForm1.TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
@@ -1174,7 +1191,7 @@ var
   PK: Integer;
 begin
 
-  //showmessage('Key ' + inttostr(PK_Record));
+
   MemoryStream := TMemoryStream.Create;
 
   try
@@ -1183,9 +1200,6 @@ begin
     DM.FDQuery1.SQL.Add('SELECT RECORDING, P_KEY FROM "NAMES" WHERE P_KEY = :PK');
     DM.FDQuery1.Params.ParamByName('PK').AsInteger := PK_Record;
     DM.FDQuery1.Open;
-
-    //showmessage('Record Count ' + inttostr(DM.FDQuery1.RecordCount));
-
 
     if not DM.FDQuery1.FieldByName('RECORDING').IsNull then
     begin
@@ -1225,9 +1239,6 @@ begin
   begin
       LblStatus.Text := 'Recording Playing...';
       MediaPlayer1.Play;
-
-      //showmessage('stopped' + TMediaState(MediaPlayer1.State).Stopped);
-
 
      If (MediaPlayer1.State = TMediaState.Stopped) then
      begin
@@ -1439,7 +1450,7 @@ begin
     FormatSettings.DecimalSeparator := LDecSeparator;
   end;
  // WebBrowser1.Navigate(URLString);
-  WebBrowser2.Navigate(URLString);
+  //WebBrowser2.Navigate(URLString);
 
   // Setup an instance of TGeocoder
   try
@@ -1578,35 +1589,6 @@ begin
     UpdateData ;
 
     ComponentDefaultFont(Form1, 12);
-
-end;
-
-procedure TForm1.Panel1Resize(Sender: TObject);
-var
-  ScreenService: IFMXScreenService;
-begin
-
-  If TPlatformServices.Current.SupportsPlatformService(IFMXScreenService, IInterface(ScreenService))
-  then
-  begin
-
-//    if screenService.GetScreenOrientation in [TscreenOrientation.Portrait,
-//                                              TscreenOrientation.InvertedPortrait] then
-//    begin
-//    // showmessage('Portrait Orientation ' + floattostr(Panel2.width));
-//     If Panel2.width >300 then Panel2.width := 300;//300
-//    // If Panel2.width <200 then Panel2.width := 200
-//    end
-//    else
-//    begin
-//     //showmessage('Landscape Orientation')
-//     If Panel1.width <300 then Panel1.width := 300;
-//     If Panel1.width >800 then Panel1.width := 800;
-//    end;
-
-
-  end;
-
 
 end;
 
