@@ -23,7 +23,10 @@ uses
   Androidapi.JNI.JavaTypes,
   Androidapi.JNI.Os,
   System.Sensors,
-  System.Sensors.Components, FMX.WebBrowser, FMX.Maps;
+  System.Sensors.Components,
+  FMX.WebBrowser,
+  FMX.Maps;
+
 
 type
  TArrayProcessor<T> = procedure(const value: T) of object;
@@ -1003,6 +1006,7 @@ end;
 procedure TForm1.BtnConfirmClick(Sender: TObject);
 var
   MemoryStream: TMemoryStream;
+  BlobStream: TStream;
   PKValue: integer;
 begin
 
@@ -1021,6 +1025,9 @@ begin
 
      try
 
+        BlobStream := TStringStream.Create(Memo1.Text, TEncoding.UTF8);
+
+
         MemoryStream := TMemoryStream.Create;
 
         ImageContainer.Bitmap.SaveToStream(MemoryStream);
@@ -1030,12 +1037,24 @@ begin
 
         DM.FDQuery1.sql.clear;
 
-        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO)');
-        DM.FDQuery1.sql.add('Values(:Site, :Department, :image)');
+//        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO)');
+//        DM.FDQuery1.sql.add('Values(:Site, :Department, :image)');
+//
+//        DM.FDQuery1.Params.ParamByName('Site').AsString := Name.Text;
+//        DM.FDQuery1.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
+//        DM.FDQuery1.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
+
+        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
+        DM.FDQuery1.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
 
         DM.FDQuery1.Params.ParamByName('Site').AsString := Name.Text;
         DM.FDQuery1.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
         DM.FDQuery1.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
+
+        DM.FDQuery1.ParamByName('MemoNote').LoadFromStream(BlobStream, ftBlob);
+
+        DM.FDQuery1.Params.ParamByName('Latitude').AsFloat := strtofloat('51.22344');
+        DM.FDQuery1.Params.ParamByName('Longitude').AsFloat := strtofloat('-2.223');
 
         DM.FDQuery1.ExecSQL;
 
