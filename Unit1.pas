@@ -90,7 +90,6 @@ type
     ListView1: TListView;
     Panel6: TPanel;
     Panel8: TPanel;
-    ImageDisplay: TImage;
     BtnPayVoiceDB: TButton;
     BtnConfirm: TButton;
     Panel9: TPanel;
@@ -104,8 +103,13 @@ type
     Memo2: TMemo;
     TabItem6: TTabItem;
     LocationSensor1: TLocationSensor;
-    WebBrowser1: TWebBrowser;
-    MultiView2: TMultiView;
+    TabControl2: TTabControl;
+    TabItem7: TTabItem;
+    TabItem8: TTabItem;
+    TabItem9: TTabItem;
+    ImageDisplay: TImage;
+    Layout1: TLayout;
+    WebBrowser2: TWebBrowser;
     ListBox1: TListBox;
     ListBoxItem1: TListBoxItem;
     Switch1: TSwitch;
@@ -123,8 +127,6 @@ type
     ListBoxItemSubLocality: TListBoxItem;
     ListBoxItemSubThoroughfare: TListBoxItem;
     ListBoxItemThoroughfare: TListBoxItem;
-    ToolBar4: TToolBar;
-    Button4: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -154,7 +156,7 @@ type
     procedure Switch1Switch(Sender: TObject);
     procedure LocationSensor1LocationChanged(Sender: TObject; const OldLocation,
       NewLocation: TLocationCoord2D);
-    procedure Button4Click(Sender: TObject);
+    procedure TabItem9MouseEnter(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -249,7 +251,7 @@ end;
 procedure TForm1.OnGeocodeReverseEvent(const Address: TCivicAddress);
 begin
 
-  ListBoxItemAdminArea.ItemData.Detail       := Address.AdminArea;
+  ListBoxItemAdminArea.ItemData.Detail       := 'Closest Address';
   ListBoxItemCountryCode.ItemData.Detail     := Address.CountryCode;
   ListBoxItemCountryName.ItemData.Detail     := Address.CountryName;
   ListBoxItemFeatureName.ItemData.Detail     := Address.FeatureName;
@@ -259,6 +261,7 @@ begin
   ListBoxItemSubLocality.ItemData.Detail     := Address.SubLocality;
   ListBoxItemSubThoroughfare.ItemData.Detail := Address.SubThoroughfare;
   ListBoxItemThoroughfare.ItemData.Detail    := Address.Thoroughfare;
+
 
 end;
 
@@ -420,6 +423,18 @@ begin
     begin
       APostRationaleProc;
     end)
+end;
+
+procedure TForm1.TabItem9MouseEnter(Sender: TObject);
+var
+  URLString: string;
+begin
+
+    FormatSettings.DecimalSeparator := '.';
+
+    URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [51.316965 , -2.534651]);
+
+  WebBrowser2.Navigate(URLString);
 end;
 
 procedure TForm1.TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
@@ -1319,11 +1334,6 @@ begin
    TerminateThread:= True;
 end;
 
-procedure TForm1.Button4Click(Sender: TObject);
-begin
-  MultiView1.HideMaster;
-end;
-
 procedure TForm1.BtnStopRecClick(Sender: TObject);
 begin
 
@@ -1428,7 +1438,8 @@ begin
   finally
     FormatSettings.DecimalSeparator := LDecSeparator;
   end;
-  WebBrowser1.Navigate(URLString);
+ // WebBrowser1.Navigate(URLString);
+  WebBrowser2.Navigate(URLString);
 
   // Setup an instance of TGeocoder
   try
