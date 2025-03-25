@@ -1463,7 +1463,7 @@ end;
 procedure TForm1.NextTabAction1Update(Sender: TObject);
 begin
     // BtnPayVoiceDB.Enabled := false;
-     LblStatus.Text := '';
+   //  LblStatus.Text := '';
 end;
 
 
@@ -1642,7 +1642,7 @@ procedure TForm1.PreviousTabAction1Update(Sender: TObject);
 begin
 
   //BtnPayVoiceDB.Enabled := false;
-  LblStatus.Text := '';
+  //LblStatus.Text := '';
 end;
 
 end.
