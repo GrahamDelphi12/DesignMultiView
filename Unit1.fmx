@@ -82,7 +82,7 @@ object Form1: TForm1
     Size.Width = 980.000000000000000000
     Size.Height = 372.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     TabPosition = None
     Sizes = (
@@ -97,7 +97,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1267,7 +1267,7 @@ object Form1: TForm1
             TabOrder = 13
           end
           object DateEdit1: TDateEdit
-            Date = 45740.000000000000000000
+            Date = 45741.000000000000000000
             TodayDefault = True
             Padding.Left = 20.000000000000000000
             Margins.Left = 5.000000000000000000
@@ -1467,6 +1467,8 @@ object Form1: TForm1
             StyleLookup = ''
             TabOrder = 0
             Text = 'Image'
+            ExplicitSize.cx = 54.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
             object ImageContainer: TImage
               MultiResBitmap = <
                 item
@@ -1496,6 +1498,8 @@ object Form1: TForm1
             StyleLookup = ''
             TabOrder = 0
             Text = 'Notes'
+            ExplicitSize.cx = 52.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
             object Memo2: TMemo
               Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
               DataDetectorTypes = []
@@ -1520,6 +1524,8 @@ object Form1: TForm1
             StyleLookup = ''
             TabOrder = 0
             Text = 'Google Location'
+            ExplicitSize.cx = 107.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
             object ListBox1: TListBox
               Align = Client
               Size.Width = 400.000000000000000000
@@ -1756,7 +1762,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1836,12 +1842,14 @@ object Form1: TForm1
               end>
             TextSettings.Trimming = None
             IsSelected = False
-            Size.Width = 69.000000000000000000
+            Size.Width = 54.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
             StyleLookup = ''
             TabOrder = 0
-            Text = 'TabItem7'
+            Text = 'Image'
+            ExplicitSize.cx = 69.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
             object ImageDisplay: TImage
               MultiResBitmap = <
                 item
@@ -1862,12 +1870,14 @@ object Form1: TForm1
               end>
             TextSettings.Trimming = None
             IsSelected = False
-            Size.Width = 69.000000000000000000
+            Size.Width = 52.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
             StyleLookup = ''
             TabOrder = 0
-            Text = 'TabItem8'
+            Text = 'Notes'
+            ExplicitSize.cx = 69.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
           end
           object TabItem9: TTabItem
             CustomIcon = <
@@ -1875,13 +1885,15 @@ object Form1: TForm1
               end>
             TextSettings.Trimming = None
             IsSelected = True
-            Size.Width = 69.000000000000000000
+            Size.Width = 66.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
             StyleLookup = ''
             TabOrder = 0
-            Text = 'TabItem9'
+            Text = 'Location'
             OnMouseEnter = TabItem9MouseEnter
+            ExplicitSize.cx = 69.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
             object Layout1: TLayout
               Align = Client
               Size.Width = 779.000000000000000000
