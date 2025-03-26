@@ -82,7 +82,7 @@ object Form1: TForm1
     Size.Width = 980.000000000000000000
     Size.Height = 372.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     TabPosition = None
     Sizes = (
@@ -97,7 +97,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1266,7 +1266,7 @@ object Form1: TForm1
             TabOrder = 13
           end
           object DateEdit1: TDateEdit
-            Date = 45741.000000000000000000
+            Date = 45742.000000000000000000
             TodayDefault = True
             Padding.Left = 20.000000000000000000
             Margins.Left = 5.000000000000000000
@@ -1444,7 +1444,7 @@ object Form1: TForm1
           Size.Width = 400.000000000000000000
           Size.Height = 247.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 2
+          TabIndex = 1
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
@@ -1490,7 +1490,7 @@ object Form1: TForm1
               item
               end>
             TextSettings.Trimming = None
-            IsSelected = False
+            IsSelected = True
             Size.Width = 52.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -1499,7 +1499,7 @@ object Form1: TForm1
             Text = 'Notes'
             ExplicitSize.cx = 52.000000000000000000
             ExplicitSize.cy = 26.000000000000000000
-            object Memo2: TMemo
+            object MemoRecordNote: TMemo
               Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
               DataDetectorTypes = []
               Align = Client
@@ -1516,7 +1516,7 @@ object Form1: TForm1
               item
               end>
             TextSettings.Trimming = None
-            IsSelected = True
+            IsSelected = False
             Size.Width = 107.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -1761,7 +1761,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -1769,150 +1769,219 @@ object Form1: TForm1
       TabOrder = 0
       ExplicitSize.cx = 8.000000000000000000
       ExplicitSize.cy = 8.000000000000000000
-      object Panel7: TPanel
+      object PnlLelf: TPanel
         Align = Left
-        Size.Width = 201.000000000000000000
-        Size.Height = 372.000000000000000000
+        Size.Width = 137.000000000000000000
+        Size.Height = 337.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
+        TabOrder = 1
         object ListView1: TListView
           ItemAppearanceClassName = 'TListItemAppearance'
           ItemEditAppearanceClassName = 'TListItemShowCheckAppearance'
           HeaderAppearanceClassName = 'TListHeaderObjects'
           FooterAppearanceClassName = 'TListHeaderObjects'
           Align = Client
-          Size.Width = 201.000000000000000000
-          Size.Height = 372.000000000000000000
+          Size.Width = 137.000000000000000000
+          Size.Height = 337.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 0
+          TabOrder = 5
           OnChange = ListView1Change
-          SearchVisible = True
         end
       end
-      object Panel6: TPanel
+      object TabControl2: TTabControl
         Align = Client
-        Size.Width = 779.000000000000000000
-        Size.Height = 372.000000000000000000
+        Margins.Top = 25.000000000000000000
+        Size.Width = 843.000000000000000000
+        Size.Height = 312.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 1
-        object Panel8: TPanel
-          Align = Bottom
-          Position.Y = 327.000000000000000000
-          Size.Width = 779.000000000000000000
-          Size.Height = 45.000000000000000000
+        TabIndex = 1
+        TabOrder = 0
+        TabPosition = None
+        Sizes = (
+          843s
+          312s
+          843s
+          312s
+          843s
+          312s)
+        object TabItemImage: TTabItem
+          CustomIcon = <
+            item
+            end>
+          TextSettings.Trimming = None
+          IsSelected = False
+          Size.Width = 8.000000000000000000
+          Size.Height = 8.000000000000000000
           Size.PlatformDefault = False
+          StyleLookup = ''
           TabOrder = 0
-          object BtnPayVoiceDB: TButton
-            Align = Left
-            Enabled = False
-            Margins.Left = 5.000000000000000000
-            Margins.Top = 5.000000000000000000
-            Margins.Bottom = 5.000000000000000000
-            Position.X = 5.000000000000000000
-            Position.Y = 5.000000000000000000
-            Size.Width = 124.000000000000000000
-            Size.Height = 35.000000000000000000
-            Size.PlatformDefault = False
-            TabOrder = 0
-            Text = 'Play Voice Note'
-            TextSettings.Trimming = None
-            OnClick = BtnPayVoiceDBClick
-          end
-          object EdLat: TEdit
-            Touch.InteractiveGestures = [LongTap, DoubleTap]
-            TabOrder = 1
-            Position.X = 384.000000000000000000
-            Position.Y = 16.000000000000000000
-          end
-          object EdLong: TEdit
-            Touch.InteractiveGestures = [LongTap, DoubleTap]
-            TabOrder = 2
-            Position.X = 525.000000000000000000
-            Position.Y = 15.000000000000000000
-          end
-        end
-        object TabControl2: TTabControl
-          Align = Client
-          Margins.Top = 25.000000000000000000
-          Size.Width = 779.000000000000000000
-          Size.Height = 302.000000000000000000
-          Size.PlatformDefault = False
-          TabIndex = 2
-          TabOrder = 1
-          TabPosition = PlatformDefault
-          Sizes = (
-            779s
-            276s
-            779s
-            276s
-            779s
-            276s)
-          object TabItem7: TTabItem
-            CustomIcon = <
+          Text = 'Image'
+          ExplicitSize.cx = 69.000000000000000000
+          ExplicitSize.cy = 26.000000000000000000
+          object ImageDisplay: TImage
+            MultiResBitmap = <
               item
               end>
-            TextSettings.Trimming = None
-            IsSelected = False
-            Size.Width = 54.000000000000000000
-            Size.Height = 26.000000000000000000
+            Align = Client
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 5.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 833.000000000000000000
+            Size.Height = 302.000000000000000000
             Size.PlatformDefault = False
-            StyleLookup = ''
-            TabOrder = 0
-            Text = 'Image'
-            ExplicitSize.cx = 69.000000000000000000
-            ExplicitSize.cy = 26.000000000000000000
-            object ImageDisplay: TImage
-              MultiResBitmap = <
-                item
-                end>
-              Align = Client
+          end
+        end
+        object TabItemNote: TTabItem
+          CustomIcon = <
+            item
+            end>
+          TextSettings.Trimming = None
+          IsSelected = True
+          Size.Width = 8.000000000000000000
+          Size.Height = 8.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = ''
+          TabOrder = 0
+          Text = 'Notes'
+          ExplicitSize.cx = 69.000000000000000000
+          ExplicitSize.cy = 26.000000000000000000
+          object PlnTopMemo: TPanel
+            Align = Top
+            Size.Width = 843.000000000000000000
+            Size.Height = 41.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            object BtnEditNote: TButton
+              Align = Right
               Margins.Left = 5.000000000000000000
               Margins.Top = 5.000000000000000000
               Margins.Right = 5.000000000000000000
               Margins.Bottom = 5.000000000000000000
-              Size.Width = 769.000000000000000000
-              Size.Height = 266.000000000000000000
-              Size.PlatformDefault = False
-            end
-          end
-          object TabItem8: TTabItem
-            CustomIcon = <
-              item
-              end>
-            TextSettings.Trimming = None
-            IsSelected = False
-            Size.Width = 52.000000000000000000
-            Size.Height = 26.000000000000000000
-            Size.PlatformDefault = False
-            StyleLookup = ''
-            TabOrder = 0
-            Text = 'Notes'
-            ExplicitSize.cx = 69.000000000000000000
-            ExplicitSize.cy = 26.000000000000000000
-          end
-          object TabItem9: TTabItem
-            CustomIcon = <
-              item
-              end>
-            TextSettings.Trimming = None
-            IsSelected = True
-            Size.Width = 66.000000000000000000
-            Size.Height = 26.000000000000000000
-            Size.PlatformDefault = False
-            StyleLookup = ''
-            TabOrder = 0
-            Text = 'Location'
-            OnMouseEnter = TabItem9MouseEnter
-            ExplicitSize.cx = 69.000000000000000000
-            ExplicitSize.cy = 26.000000000000000000
-            object Layout1: TLayout
-              Align = Client
-              Size.Width = 779.000000000000000000
-              Size.Height = 276.000000000000000000
+              Position.X = 758.000000000000000000
+              Position.Y = 5.000000000000000000
+              Size.Width = 80.000000000000000000
+              Size.Height = 31.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
+              Text = 'Edit Note'
+              TextSettings.Trimming = None
+              OnClick = BtnEditNoteClick
             end
           end
+          object PnlHostMemo: TPanel
+            Align = Client
+            Size.Width = 843.000000000000000000
+            Size.Height = 271.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+            object MemoNote: TMemo
+              Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+              DataDetectorTypes = []
+              Align = Client
+              Size.Width = 843.000000000000000000
+              Size.Height = 271.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 1
+              Viewport.Width = 839.000000000000000000
+              Viewport.Height = 267.000000000000000000
+            end
+          end
+        end
+        object TabItem9: TTabItem
+          CustomIcon = <
+            item
+            end>
+          TextSettings.Trimming = None
+          IsSelected = False
+          Size.Width = 8.000000000000000000
+          Size.Height = 8.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = ''
+          TabOrder = 0
+          Text = 'Location'
+          OnMouseEnter = TabItem9MouseEnter
+          ExplicitSize.cx = 69.000000000000000000
+          ExplicitSize.cy = 26.000000000000000000
+          object Layout1: TLayout
+            Align = Client
+            Size.Width = 843.000000000000000000
+            Size.Height = 312.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+          end
+        end
+      end
+      object PnlBottom: TPanel
+        Align = Bottom
+        Position.Y = 337.000000000000000000
+        Size.Width = 980.000000000000000000
+        Size.Height = 35.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object BtnImageDisplay: TButton
+          Align = Left
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 112.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 102.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 5
+          Text = 'Image Display'
+          TextSettings.Trimming = None
+          OnClick = BtnImageDisplayClick
+        end
+        object BtnPayVoiceDB: TButton
+          Align = Left
+          Enabled = False
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 102.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 4
+          Text = 'Play Voice Note'
+          TextSettings.Trimming = None
+          OnClick = BtnPayVoiceDBClick
+        end
+        object BtnNoteDisplay: TButton
+          Align = Left
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 219.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 102.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 3
+          Text = 'Note Display'
+          TextSettings.Trimming = None
+          OnClick = BtnNoteDisplayClick
+        end
+        object EdLat: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 2
+          Position.X = 512.000000000000000000
+          Position.Y = 8.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object EdLong: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 1
+          Position.X = 638.000000000000000000
+          Position.Y = 8.000000000000000000
+          Size.Width = 123.000000000000000000
+          Size.Height = 19.000000000000000000
+          Size.PlatformDefault = False
         end
       end
     end
@@ -1949,14 +2018,14 @@ object Form1: TForm1
     end
   end
   object MediaPlayer1: TMediaPlayer
-    Left = 864
+    Left = 848
     Top = 240
   end
   object Timer1: TTimer
     Enabled = False
     Interval = 7000
     OnTimer = Timer1Timer
-    Left = 864
+    Left = 840
     Top = 312
   end
   object MultiView1: TMultiView
@@ -2044,7 +2113,7 @@ object Form1: TForm1
     end
   end
   object ActionList1: TActionList
-    Left = 864
+    Left = 840
     Top = 168
     object PreviousTabAction1: TPreviousTabAction
       Category = 'Tab'
@@ -26547,7 +26616,7 @@ object Form1: TForm1
     ActivityType = Other
     UsageAuthorization = WhenInUse
     OnLocationChanged = LocationSensor1LocationChanged
-    Left = 900
-    Top = 49
+    Left = 836
+    Top = 97
   end
 end

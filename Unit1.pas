@@ -89,11 +89,6 @@ type
     Image2: TImage;
     Image1: TImage;
     LblStatus: TLabel;
-    Panel7: TPanel;
-    ListView1: TListView;
-    Panel6: TPanel;
-    Panel8: TPanel;
-    BtnPayVoiceDB: TButton;
     BtnConfirm: TButton;
     Panel9: TPanel;
     BtnTerminate: TButton;
@@ -103,15 +98,9 @@ type
     TabItem4: TTabItem;
     TabItem5: TTabItem;
     ImageContainer: TImage;
-    Memo2: TMemo;
+    MemoRecordNote: TMemo;
     TabItem6: TTabItem;
     LocationSensor1: TLocationSensor;
-    TabControl2: TTabControl;
-    TabItem7: TTabItem;
-    TabItem8: TTabItem;
-    TabItem9: TTabItem;
-    ImageDisplay: TImage;
-    Layout1: TLayout;
     ListBox1: TListBox;
     ListBoxItem1: TListBoxItem;
     Switch1: TSwitch;
@@ -129,8 +118,24 @@ type
     ListBoxItemSubLocality: TListBoxItem;
     ListBoxItemSubThoroughfare: TListBoxItem;
     ListBoxItemThoroughfare: TListBoxItem;
+    TabControl2: TTabControl;
+    TabItemImage: TTabItem;
+    ImageDisplay: TImage;
+    TabItemNote: TTabItem;
+    TabItem9: TTabItem;
+    Layout1: TLayout;
+    PnlLelf: TPanel;
+    ListView1: TListView;
+    PnlBottom: TPanel;
+    BtnImageDisplay: TButton;
+    BtnPayVoiceDB: TButton;
+    BtnNoteDisplay: TButton;
     EdLat: TEdit;
     EdLong: TEdit;
+    PlnTopMemo: TPanel;
+    BtnEditNote: TButton;
+    PnlHostMemo: TPanel;
+    MemoNote: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -160,6 +165,9 @@ type
     procedure LocationSensor1LocationChanged(Sender: TObject; const OldLocation,
       NewLocation: TLocationCoord2D);
     procedure TabItem9MouseEnter(Sender: TObject);
+    procedure BtnImageDisplayClick(Sender: TObject);
+    procedure BtnNoteDisplayClick(Sender: TObject);
+    procedure BtnEditNoteClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -215,6 +223,7 @@ type
     procedure WriteAudiotoDB(PK: Integer);
     procedure PlayNote(PK_Record: integer);
 
+    procedure SelectedNameMemo(Name: string);
   public
   public
     { Public declarations }
@@ -1025,7 +1034,7 @@ begin
 
      try
 
-        BlobStream := TStringStream.Create(Memo1.Text, TEncoding.UTF8);
+        BlobStream := TStringStream.Create(MemoRecordNote.Text, TEncoding.UTF8);
 
 
         MemoryStream := TMemoryStream.Create;
@@ -1036,13 +1045,6 @@ begin
         DM.FDConnection1.Connected := true;
 
         DM.FDQuery1.sql.clear;
-
-//        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO)');
-//        DM.FDQuery1.sql.add('Values(:Site, :Department, :image)');
-//
-//        DM.FDQuery1.Params.ParamByName('Site').AsString := Name.Text;
-//        DM.FDQuery1.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
-//        DM.FDQuery1.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
 
         DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
         DM.FDQuery1.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
@@ -1138,6 +1140,8 @@ begin
   ImageDisplay.Bitmap.SetSize(0, 0);
   ImageDisplay.Bitmap.Assign(RawBitMap);
 
+  TDialogService.ShowMessage('All Records Deleted');
+
 end;
 
 procedure TForm1.UpdateUI;
@@ -1193,6 +1197,11 @@ begin
 
   dm.FDConnection1.Connected := false;
 
+end;
+
+procedure TForm1.BtnNoteDisplayClick(Sender: TObject);
+begin
+  Tabcontrol2.TabIndex := 1;
 end;
 
 procedure TForm1.BtnPayVoiceDBClick(Sender: TObject);
@@ -1262,7 +1271,7 @@ begin
      If (MediaPlayer1.State = TMediaState.Stopped) then
      begin
 
-       showmessage('stopped');
+       //showmessage('stopped');
 
           TThread.CreateAnonymousThread(
            procedure
@@ -1381,6 +1390,11 @@ begin
 
 end;
 
+procedure TForm1.BtnImageDisplayClick(Sender: TObject);
+begin
+  Tabcontrol2.TabIndex := 0;
+end;
+
 procedure TForm1.BtnIncreaseSizeClick(Sender: TObject);
 begin
 
@@ -1394,6 +1408,40 @@ begin
     Showmessage('Maximum Reached');
    exit;
   end;
+end;
+
+procedure TForm1.BtnEditNoteClick(Sender: TObject);
+var
+  name: string;
+  ListItem: TListViewItem;
+  BlobStream: TStream;
+begin
+
+  ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
+  Name := ListItem.Text;
+
+     try
+
+       BlobStream := TStringStream.Create(MemoNote.Text, TEncoding.UTF8);
+
+
+        DM.FDConnection1.Connected := true;
+
+        DM.FDQuery1.SQL.Clear;
+        DM.FDQuery1.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
+        DM.FDQuery1.SQL.Add('WHERE SITE = :Site');
+
+        DM.FDQuery1.Params.ParamByName('Site').AsString := Name;
+        DM.FDQuery1.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
+
+        DM.FDQuery1.ExecSQL;
+
+        DM.FDConnection1.Connected := false;
+
+     finally
+      BlobStream.Free;
+     end;
+
 end;
 
 procedure TForm1.BtnEmptyEditsClick(Sender: TObject);
@@ -1446,6 +1494,9 @@ begin
   BtnPayVoiceDB.Enabled := true;
 
   SelectedNameView(Name);
+
+  SelectedNameMemo(Name);
+
 end;
 
 procedure TForm1.LocationSensor1LocationChanged(Sender: TObject;
@@ -1496,6 +1547,42 @@ begin
    //  LblStatus.Text := '';
 end;
 
+procedure TForm1.SelectedNameMemo(Name: string);
+var
+  BlobStream: TStream;
+  Stringlist: TStringList;
+begin
+
+  DM.FDConnection1.Connected := true;
+
+  DM.FDQuery1.sql.clear;
+  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
+  DM.FDQuery1.sql.add(' WHERE "SITE" = ' +
+                            Trim(QuotedStr(Name)));
+  DM.FDQuery1.Open;
+
+  Try
+    BlobStream := DM.FDQuery1.CreateBlobStream(DM.FDQuery1.FieldByName('MEMO_NOTE'), bmRead);
+
+    StringList:= TStringList.create;
+
+    StringList.LoadFromStream(BlobStream);
+
+    MemoNote.lines.Clear;
+
+    MemoNote.Lines.Assign(StringList);
+
+  Finally
+    StringList.free;
+    BlobStream.Free;
+  End;
+
+  //Reference to Recording 23-3-24
+  RecordingRef := DM.FDQuery1.FieldByName('P_KEY').AsInteger;
+
+  DM.FDConnection1.Connected := false;
+
+end;
 
 
 procedure TForm1.SelectedNameView(Name: string);
@@ -1559,7 +1646,7 @@ begin
     3: Form1.StyleBook := DM.StyleBook4;
     4: Form1.StyleBook := DM.StyleBook5;
   else
-     Form1.StyleBook := DM.StyleBook1;
+     Form1.StyleBook := DM.StyleBook2;
   end;
 
 end;
