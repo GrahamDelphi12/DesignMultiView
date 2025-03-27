@@ -141,6 +141,24 @@ type
     BtnCurrImage: TButton;
     BtnCurrCood: TButton;
     BtnCurrNote: TButton;
+    Button4: TButton;
+    Edit1: TEdit;
+    TIStartpage: TTabItem;
+    PlnStartHost: TPanel;
+    PlnStartTitle: TPanel;
+    Label8: TLabel;
+    FlowLayout3: TFlowLayout;
+    GroupBox1: TGroupBox;
+    ComboBox3: TComboBox;
+    Label9: TLabel;
+    GroupBox2: TGroupBox;
+    Label10: TLabel;
+    Edit3: TEdit;
+    LblAddress: TLabel;
+    LblEmail: TLabel;
+    LblProjectRef: TLabel;
+    LblContact: TLabel;
+    Memo2: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -176,6 +194,7 @@ type
     procedure BtnCurrImageClick(Sender: TObject);
     procedure BtnCurrNoteClick(Sender: TObject);
     procedure BtnCurrCoodClick(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -1156,6 +1175,12 @@ begin
 
   dm.FDQuery1.ExecSQL;
 
+  dm.FDQuery1.sql.clear;
+  dm.FDQuery1.sql.add('DELETE From "SITE_LOCATION"');
+
+  dm.FDQuery1.ExecSQL;
+
+
   UpdateData;
 
   RawBitMap := TBitMap.Create;
@@ -1394,6 +1419,33 @@ end;
 procedure TForm1.BtnTerminateClick(Sender: TObject);
 begin
    TerminateThread:= True;
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+
+       DM.FDConnection1.Connected := true;
+
+        DM.FDQuery1.sql.clear;
+
+        DM.FDQuery1.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
+        DM.FDQuery1.sql.add('Values(:Site)');
+
+        DM.FDQuery1.Params.ParamByName('Site').AsString := Edit1.text;
+
+        DM.FDQuery1.ExecSQL;
+
+
+        DM.FDQuery1.sql.clear;
+        DM.FDQuery1.sql.add('Select * FROM "SITE_LOCATION"');
+        DM.FDQuery1.sql.add(' WHERE "SITE_NAME" = ' +
+                            QuotedStr(Edit1.text));
+        DM.FDQuery1.Open;
+
+        Showmessage('PK ' + inttostr(DM.FDQuery1.fieldbyName('PK_KEY').asinteger));
+
+
+
 end;
 
 procedure TForm1.BtnStopRecClick(Sender: TObject);
