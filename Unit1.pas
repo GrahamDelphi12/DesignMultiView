@@ -136,6 +136,11 @@ type
     BtnEditNote: TButton;
     PnlHostMemo: TPanel;
     MemoNote: TMemo;
+    PnlImage_Memo: TPanel;
+    FLImage_Memo: TFlowLayout;
+    BtnCurrImage: TButton;
+    BtnCurrCood: TButton;
+    BtnCurrNote: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -168,6 +173,9 @@ type
     procedure BtnImageDisplayClick(Sender: TObject);
     procedure BtnNoteDisplayClick(Sender: TObject);
     procedure BtnEditNoteClick(Sender: TObject);
+    procedure BtnCurrImageClick(Sender: TObject);
+    procedure BtnCurrNoteClick(Sender: TObject);
+    procedure BtnCurrCoodClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -1084,6 +1092,21 @@ begin
 end;
 
 
+procedure TForm1.BtnCurrCoodClick(Sender: TObject);
+begin
+  TabCont_Image_Memo.TabIndex := 2;
+end;
+
+procedure TForm1.BtnCurrImageClick(Sender: TObject);
+begin
+  TabCont_Image_Memo.TabIndex := 0;
+end;
+
+procedure TForm1.BtnCurrNoteClick(Sender: TObject);
+begin
+  TabCont_Image_Memo.TabIndex := 1;
+end;
+
 procedure TForm1.WriteAudiotoDB(PK: integer);
 var
   MemoryStream: TMemoryStream;
@@ -1491,6 +1514,8 @@ begin
 
   Name := ListItem.Text;
 
+  //RecordingRef := Name;  need to formalise name or PK as the reference
+
   BtnPayVoiceDB.Enabled := true;
 
   SelectedNameView(Name);
@@ -1711,14 +1736,23 @@ begin
                                               TscreenOrientation.InvertedPortrait] then
     begin
     // showmessage('Portrait Orientation ' + floattostr(Panel2.width));
-     If Panel2.width >300 then Panel2.width := 300;//300
-     If Panel2.width <200 then Panel2.width := 200
+     If Panel2.width >300 then Panel2.width := 300;
+     If Panel2.width <200 then Panel2.width := 200;
+
+     If PnlImage_Memo.height >170 then PnlImage_Memo.height := 170;
+     If PnlImage_Memo.height <170  then PnlImage_Memo.height := 170;
+
     end
     else
     begin
      //showmessage('Landscape Orientation')
      If Panel2.width >500 then Panel2.width := 500;
      If Panel2.width <200 then Panel2.width := 200;
+
+     If PnlImage_Memo.height >45 then PnlImage_Memo.height := 45;
+     If PnlImage_Memo.height <45 then PnlImage_Memo.height := 45;
+
+
     end;
 
 
