@@ -149,16 +149,31 @@ type
     Label8: TLabel;
     FlowLayout3: TFlowLayout;
     GroupBox1: TGroupBox;
-    ComboBox3: TComboBox;
+    CBOrganisations: TComboBox;
     Label9: TLabel;
     GroupBox2: TGroupBox;
     Label10: TLabel;
-    Edit3: TEdit;
+    EdID: TEdit;
     LblAddress: TLabel;
     LblEmail: TLabel;
     LblProjectRef: TLabel;
     LblContact: TLabel;
-    Memo2: TMemo;
+    MemProjectDescription: TMemo;
+    EdAddress: TEdit;
+    Label11: TLabel;
+    EdEmail: TEdit;
+    Label12: TLabel;
+    EdProjectRef: TEdit;
+    Label13: TLabel;
+    EdContact: TEdit;
+    Label14: TLabel;
+    MemNote: TMemo;
+    Label15: TLabel;
+    Label16: TLabel;
+    PnlHostCreateRecord: TPanel;
+    BtnCreateOrgRec: TButton;
+    BtnShow: TButton;
+    Button5: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -195,6 +210,9 @@ type
     procedure BtnCurrNoteClick(Sender: TObject);
     procedure BtnCurrCoodClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure BtnCreateOrgRecClick(Sender: TObject);
+    procedure BtnShowClick(Sender: TObject);
+    procedure CBOrganisationsChange(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -251,6 +269,9 @@ type
     procedure PlayNote(PK_Record: integer);
 
     procedure SelectedNameMemo(Name: string);
+
+    Procedure UpdateOrganisationData;
+
   public
   public
     { Public declarations }
@@ -1000,27 +1021,27 @@ begin
 
         dm.FDConnection1.Connected := true;
 
-        dm.FDQuery1.sql.clear;
-        dm.FDQuery1.sql.add('Select * FROM "NAMES"');
-        dm.FDQuery1.Open;
+        dm.FDQDetails.sql.clear;
+        dm.FDQDetails.sql.add('Select * FROM "NAMES"');
+        dm.FDQDetails.Open;
 
-          While not dm.FDQuery1.EOF And (TerminateThread <> true) do
+          While not dm.FDQDetails.EOF And (TerminateThread <> true) do
           begin
 
-            BlobStream := dm.FDQuery1.CreateBlobStream(dm.FDQuery1.FieldByName('PHOTO'), bmRead);
+            BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('PHOTO'), bmRead);
             MemoryStream := TMemoryStream.Create;
             MemoryStream.CopyFrom(BlobStream, 0);
             MemoryStream.Position := 0;
 
             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
-            label1.text := (inttostr(dm.FDQuery1.FieldByName('P_KEY').asinteger)
-                            + ' ' + dm.FDQuery1.FieldByName('SITE').asstring);
+            label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
+                            + ' ' + dm.FDQDetails.FieldByName('SITE').asstring);
 
             TThread.Sleep(2000);
 
 
-            dm.FDQuery1.Next;
+            dm.FDQDetails.Next;
 
             MemoryStream.Free;
             BlobStream.Free;
@@ -1071,21 +1092,21 @@ begin
 
         DM.FDConnection1.Connected := true;
 
-        DM.FDQuery1.sql.clear;
+        DM.FDQDetails.sql.clear;
 
-        DM.FDQuery1.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
-        DM.FDQuery1.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
+        DM.FDQDetails.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
+        DM.FDQDetails.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
 
-        DM.FDQuery1.Params.ParamByName('Site').AsString := Name.Text;
-        DM.FDQuery1.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
-        DM.FDQuery1.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
+        DM.FDQDetails.Params.ParamByName('Site').AsString := Name.Text;
+        DM.FDQDetails.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
+        DM.FDQDetails.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
 
-        DM.FDQuery1.ParamByName('MemoNote').LoadFromStream(BlobStream, ftBlob);
+        DM.FDQDetails.ParamByName('MemoNote').LoadFromStream(BlobStream, ftBlob);
 
-        DM.FDQuery1.Params.ParamByName('Latitude').AsFloat := strtofloat('51.22344');
-        DM.FDQuery1.Params.ParamByName('Longitude').AsFloat := strtofloat('-2.223');
+        DM.FDQDetails.Params.ParamByName('Latitude').AsFloat := strtofloat('51.22344');
+        DM.FDQDetails.Params.ParamByName('Longitude').AsFloat := strtofloat('-2.223');
 
-        DM.FDQuery1.ExecSQL;
+        DM.FDQDetails.ExecSQL;
 
         DM.FDConnection1.Connected := false;
 
@@ -1110,6 +1131,73 @@ begin
 
 end;
 
+
+procedure TForm1.BtnCreateOrgRecClick(Sender: TObject);
+var
+  BlobStream: TStream;
+  PKValue: integer;
+  LastCodeID: string;
+  NewCodeID: double;
+
+begin
+
+    //Ensure Edits are filled with data
+    //IterateControls(TIStartpage);
+
+     try
+
+        BlobStream := TStringStream.Create(MemNote.Text, TEncoding.UTF8);
+
+        DM.FDConnection1.Connected := true;
+
+
+        DM.FDQOrganisation.SQL.Text := 'SELECT MAX(SITE_CODE) AS LastCodeID FROM ORGANAISATION';
+        DM.FDQOrganisation.Open;
+
+        LastCodeID := DM.FDQOrganisation.FieldByName('LastCodeID').AsString;
+
+        if LastCodeID = '' then LastCodeID := '50000';
+
+        NewCodeID := strtofloat(LastCodeID) + 1;
+
+        showmessage('New Vlue Created ' + floattostr(NewCodeID));
+
+        DM.FDQOrganisation.sql.clear;
+
+        DM.FDQOrganisation.sql.add('insert into ORGANAISATION (SITE_CODE, SITE_NAME, ADDRESS,' +
+                                   'EMAIL, PHONE, CONTACT,PROJECT_REF, NOTE)');
+        DM.FDQOrganisation.sql.add('Values(:SiteCode, :SiteName, :SiteAddress, :SiteEmail,' +
+                                   ':SitePhone, :SiteContact, :SiteProject, :SiteNote)');
+
+        DM.FDQOrganisation.Params.ParamByName('SiteCode').AsString := FloattoStr(NewCodeID);
+        DM.FDQOrganisation.Params.ParamByName('SiteName').AsString := EdId.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteAddress').AsString := EdAddress.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteEmail').AsString := EdEmail.Text;
+        //DM.FDQOrganisation.Params.ParamByName('SitePhone').AsString := EdPhone.Text;
+
+        DM.FDQOrganisation.Params.ParamByName('SiteContact').AsString := EdContact.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteProject').AsString := EdProjectref.Text;
+
+        DM.FDQOrganisation.ParamByName('SiteNote').LoadFromStream(BlobStream, ftBlob);
+
+
+        DM.FDQOrganisation.ExecSQL;
+
+        DM.FDConnection1.Connected := false;
+
+
+        //Name.text := '';
+        //Edit2.text := '';
+
+        showmessage('Insert Done');
+
+     finally
+       BlobStream.Free;
+     end;
+
+      UpdateOrganisationData;
+
+end;
 
 procedure TForm1.BtnCurrCoodClick(Sender: TObject);
 begin
@@ -1144,14 +1232,14 @@ begin
 
         DM.FDConnection1.Connected := true;
 
-        DM.FDQuery1.SQL.Clear;
-        DM.FDQuery1.SQL.Add('UPDATE "NAMES" SET RECORDING = :Voice');
-        DM.FDQuery1.SQL.Add('WHERE P_KEY = :PK');
-        DM.FDQuery1.Params.ParamByName('PK').AsInteger := PK;
-        DM.FDQuery1.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
+        DM.FDQDetails.SQL.Clear;
+        DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET RECORDING = :Voice');
+        DM.FDQDetails.SQL.Add('WHERE P_KEY = :PK');
+        DM.FDQDetails.Params.ParamByName('PK').AsInteger := PK;
+        DM.FDQDetails.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
 
         // Execute the query
-        DM.FDQuery1.ExecSQL;
+        DM.FDQDetails.ExecSQL;
 
         DM.FDConnection1.Connected := false;
 
@@ -1170,15 +1258,15 @@ var
 begin
   dm.FDConnection1.Connected := true;
 
-  dm.FDQuery1.sql.clear;
-  dm.FDQuery1.sql.add('DELETE From "NAMES"');
+  dm.FDQDetails.sql.clear;
+  dm.FDQDetails.sql.add('DELETE From "NAMES"');
 
-  dm.FDQuery1.ExecSQL;
+  dm.FDQDetails.ExecSQL;
 
-  dm.FDQuery1.sql.clear;
-  dm.FDQuery1.sql.add('DELETE From "SITE_LOCATION"');
+  dm.FDQDetails.sql.clear;
+  dm.FDQDetails.sql.add('DELETE From "SITE_LOCATION"');
 
-  dm.FDQuery1.ExecSQL;
+  dm.FDQDetails.ExecSQL;
 
 
   UpdateData;
@@ -1212,12 +1300,12 @@ begin
 
   dm.FDConnection1.Connected := true;
 
-  dm.FDQuery1.sql.clear;
-  dm.FDQuery1.sql.add('Select * FROM "NAMES"');
-      dm.FDQuery1.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
-  dm.FDQuery1.Open;
+  dm.FDQDetails.sql.clear;
+  dm.FDQDetails.sql.add('Select * FROM "NAMES"');
+      dm.FDQDetails.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
+  dm.FDQDetails.Open;
 
-  While not dm.FDQuery1.EOF do
+  While not dm.FDQDetails.EOF do
   begin
 
 
@@ -1226,7 +1314,7 @@ begin
              ImageContainer.Bitmap.SetSize(0, 0);
              ImageContainer.Bitmap.Assign(RawBitMap);
 
-             BlobStream := dm.FDQuery1.CreateBlobStream(dm.FDQuery1.FieldByName('PHOTO'), bmRead);
+             BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('PHOTO'), bmRead);
              MemoryStream := TMemoryStream.Create;
              MemoryStream.CopyFrom(BlobStream, 0);
 
@@ -1238,7 +1326,7 @@ begin
       BlobStream.Free;
      sleep(1000);
 
-   dm.FDQuery1.Next;
+   dm.FDQDetails.Next;
 
   end;
 
@@ -1272,19 +1360,19 @@ begin
 
   try
     // Retrieve the BLOB from the database
-    DM.FDQuery1.SQL.Clear;
-    DM.FDQuery1.SQL.Add('SELECT RECORDING, P_KEY FROM "NAMES" WHERE P_KEY = :PK');
-    DM.FDQuery1.Params.ParamByName('PK').AsInteger := PK_Record;
-    DM.FDQuery1.Open;
+    DM.FDQDetails.SQL.Clear;
+    DM.FDQDetails.SQL.Add('SELECT RECORDING, P_KEY FROM "NAMES" WHERE P_KEY = :PK');
+    DM.FDQDetails.Params.ParamByName('PK').AsInteger := PK_Record;
+    DM.FDQDetails.Open;
 
-    if not DM.FDQuery1.FieldByName('RECORDING').IsNull then
+    if not DM.FDQDetails.FieldByName('RECORDING').IsNull then
     begin
 
 
-      BlobStream := DM.FDQuery1.CreateBlobStream(DM.FDQuery1.FieldByName('RECORDING'), bmRead);
+      BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('RECORDING'), bmRead);
 
 
-      TBlobField(DM.FDQuery1.FieldByName('RECORDING')).SaveToStream(MemoryStream);
+      TBlobField(DM.FDQDetails.FieldByName('RECORDING')).SaveToStream(MemoryStream);
       MemoryStream.Position := 0;
 
 
@@ -1426,27 +1514,97 @@ begin
 
        DM.FDConnection1.Connected := true;
 
-        DM.FDQuery1.sql.clear;
+        DM.FDQDetails.sql.clear;
 
-        DM.FDQuery1.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
-        DM.FDQuery1.sql.add('Values(:Site)');
+        DM.FDQDetails.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
+        DM.FDQDetails.sql.add('Values(:Site)');
 
-        DM.FDQuery1.Params.ParamByName('Site').AsString := Edit1.text;
+        DM.FDQDetails.Params.ParamByName('Site').AsString := Edit1.text;
 
-        DM.FDQuery1.ExecSQL;
+        DM.FDQDetails.ExecSQL;
 
 
-        DM.FDQuery1.sql.clear;
-        DM.FDQuery1.sql.add('Select * FROM "SITE_LOCATION"');
-        DM.FDQuery1.sql.add(' WHERE "SITE_NAME" = ' +
+        DM.FDQDetails.sql.clear;
+        DM.FDQDetails.sql.add('Select * FROM "SITE_LOCATION"');
+        DM.FDQDetails.sql.add(' WHERE "SITE_NAME" = ' +
                             QuotedStr(Edit1.text));
-        DM.FDQuery1.Open;
+        DM.FDQDetails.Open;
 
-        Showmessage('PK ' + inttostr(DM.FDQuery1.fieldbyName('PK_KEY').asinteger));
+        Showmessage('PK ' + inttostr(DM.FDQDetails.fieldbyName('PK_KEY').asinteger));
 
 
 
 end;
+
+procedure TForm1.BtnShowClick(Sender: TObject);
+var
+  BlobStream: TStream;
+  StringList: TStringList;
+begin
+  DM.FDConnection1.Connected := true;
+
+  DM.FDQOrganisation.sql.clear;
+  DM.FDQOrganisation.sql.add('Select * FROM ORGANAISATION');
+    //  dm.FDQOrganisation.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
+  DM.FDQOrganisation.Open;
+
+  lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+  lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
+  lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
+
+  try
+      BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
+
+      StringList:= TStringList.create;
+
+      StringList.LoadFromStream(BlobStream);
+
+      MemProjectDescription.lines.Clear;
+      MemProjectDescription.Lines.Assign(StringList);
+  finally
+     StringList.Free;
+  end;
+end;
+
+Procedure TForm1.UpdateOrganisationData;
+begin
+
+    try
+      // Ensure the connection is active
+      DM.FDConnection1.Connected := true;
+
+      // Prepare the query
+      DM.FDQOrganisation.SQL.Clear;
+      DM.FDQOrganisation.SQL.Add('SELECT SITE_CODE FROM ORGANAISATION');
+
+      // Open the dataset
+      DM.FDQOrganisation.Open;
+
+      // Check if CBOrganisations is initialized
+      if Assigned(CBOrganisations) then
+      begin
+        CBOrganisations.Items.Clear; // Clear ComboBox items
+
+        // Loop through the dataset
+        while not DM.FDQOrganisation.EOF do
+        begin
+          // Add SITE_CODE to the ComboBox items
+          CBOrganisations.Items.Add(DM.FDQOrganisation.FieldByName('SITE_CODE').AsString);
+
+          // Move to the next record
+          DM.FDQOrganisation.Next;
+        end;
+      end
+      else
+        ShowMessage('Error: CBOrganisations is not assigned.');
+    except
+      on E: Exception do
+        ShowMessage('An error occurred: ' + E.Message);
+    end;
+
+end;
+
+
 
 procedure TForm1.BtnStopRecClick(Sender: TObject);
 begin
@@ -1502,14 +1660,14 @@ begin
 
         DM.FDConnection1.Connected := true;
 
-        DM.FDQuery1.SQL.Clear;
-        DM.FDQuery1.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
-        DM.FDQuery1.SQL.Add('WHERE SITE = :Site');
+        DM.FDQDetails.SQL.Clear;
+        DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
+        DM.FDQDetails.SQL.Add('WHERE SITE = :Site');
 
-        DM.FDQuery1.Params.ParamByName('Site').AsString := Name;
-        DM.FDQuery1.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
+        DM.FDQDetails.Params.ParamByName('Site').AsString := Name;
+        DM.FDQDetails.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
 
-        DM.FDQuery1.ExecSQL;
+        DM.FDQDetails.ExecSQL;
 
         DM.FDConnection1.Connected := false;
 
@@ -1632,14 +1790,14 @@ begin
 
   DM.FDConnection1.Connected := true;
 
-  DM.FDQuery1.sql.clear;
-  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
-  DM.FDQuery1.sql.add(' WHERE "SITE" = ' +
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+  DM.FDQDetails.sql.add(' WHERE "SITE" = ' +
                             Trim(QuotedStr(Name)));
-  DM.FDQuery1.Open;
+  DM.FDQDetails.Open;
 
   Try
-    BlobStream := DM.FDQuery1.CreateBlobStream(DM.FDQuery1.FieldByName('MEMO_NOTE'), bmRead);
+    BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_NOTE'), bmRead);
 
     StringList:= TStringList.create;
 
@@ -1655,7 +1813,7 @@ begin
   End;
 
   //Reference to Recording 23-3-24
-  RecordingRef := DM.FDQuery1.FieldByName('P_KEY').AsInteger;
+  RecordingRef := DM.FDQDetails.FieldByName('P_KEY').AsInteger;
 
   DM.FDConnection1.Connected := false;
 
@@ -1672,15 +1830,15 @@ begin
 
   DM.FDConnection1.Connected := true;
 
-  DM.FDQuery1.sql.clear;
-  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
-  DM.FDQuery1.sql.add(' WHERE "SITE" = ' +
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+  DM.FDQDetails.sql.add(' WHERE "SITE" = ' +
                             Trim(QuotedStr(Name)));
-  DM.FDQuery1.Open;
+  DM.FDQDetails.Open;
 
   //showmessage('validate');
 
-  BlobStream := DM.FDQuery1.CreateBlobStream(DM.FDQuery1.FieldByName('PHOTO'), bmRead);
+  BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('PHOTO'), bmRead);
 
   RawBitMap := TBitMap.Create;
   RawBitMap.SetSize(0,0);
@@ -1697,11 +1855,53 @@ begin
   BlobStream.Free;
 
   //Reference to Recording 23-3-24
-  RecordingRef := DM.FDQuery1.FieldByName('P_KEY').AsInteger;
+  RecordingRef := DM.FDQDetails.FieldByName('P_KEY').AsInteger;
 
  DM.FDConnection1.Connected := false;
 
 
+
+end;
+
+procedure TForm1.CBOrganisationsChange(Sender: TObject);
+var
+  BlobStream: TStream;
+  StringList: TStringList;
+  ItemChosen: string;
+begin
+
+  If CBOrganisations.ItemIndex <> -1 then
+  begin
+      ItemChosen :=  CBOrganisations.Selected.Text;
+
+      DM.FDConnection1.Connected := true;
+
+      DM.FDQOrganisation.sql.clear;
+      DM.FDQOrganisation.sql.add('Select * FROM ORGANAISATION');
+      DM.FDQOrganisation.sql.add(' WHERE SITE_CODE = ' + quotedstr(ItemChosen));
+      DM.FDQOrganisation.Open;
+
+      lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+      lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
+      lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
+
+      try
+          BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
+
+          StringList:= TStringList.create;
+          StringList.LoadFromStream(BlobStream);
+
+          MemProjectDescription.lines.Clear;
+          MemProjectDescription.Lines.Assign(StringList);
+
+          DM.FDConnection1.Connected := false;
+
+      finally
+         StringList.Free;
+         BlobStream.Free;
+      end;
+
+  end;//if
 
 end;
 
@@ -1741,26 +1941,26 @@ begin
 
   DM.FDConnection1.Connected := true;
 
-  DM.FDQuery1.sql.clear;
-  DM.FDQuery1.sql.add('Select * FROM "NAMES"');
-  DM.FDQuery1.Open;
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+  DM.FDQDetails.Open;
 
   ListView1.items.Clear;  //Was data 22-3-24
 
-  While not dm.FDQuery1.EOF do
+  While not dm.FDQDetails.EOF do
   begin
 
     with TListViewItem(ListView1.Items.Add) do
     begin
-      Text := DM.FDQuery1.fieldbyname('SITE').asstring;// [1000 + Random(1234567)]);
-      Detail := InttoStr(DM.FDQuery1.fieldbyname('P_KEY').asInteger);
+      Text := DM.FDQDetails.fieldbyname('SITE').asstring;// [1000 + Random(1234567)]);
+      Detail := InttoStr(DM.FDQDetails.fieldbyname('P_KEY').asInteger);
       //Format('%d kg of paper', [1000 + Random(1234)]);
     end;
 
-    DM.FDQuery1.Next;
+    DM.FDQDetails.Next;
   end;
 
-  result := DM.FDQuery1.fieldbyname('P_KEY').asInteger;
+  result := DM.FDQDetails.fieldbyname('P_KEY').asInteger;
 
 end;
 
@@ -1769,7 +1969,9 @@ procedure TForm1.FormShow(Sender: TObject);
 begin
     Form1.StyleBook := DM.StyleBook2;
 
-    UpdateData ;
+    UpdateData;
+
+    UpdateOrganisationData;
 
     ComponentDefaultFont(Form1, 12);
 

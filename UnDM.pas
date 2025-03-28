@@ -19,9 +19,10 @@ type
     StyleBook4: TStyleBook;
     StyleBook5: TStyleBook;
     FDConnection1: TFDConnection;
-    FDQuery1: TFDQuery;
+    FDQDetails: TFDQuery;
     FDPhysIBDriverLink1: TFDPhysIBDriverLink;
     FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    FDQOrganisation: TFDQuery;
     procedure FDConnection1BeforeConnect(Sender: TObject);
   private
     { Private declarations }
