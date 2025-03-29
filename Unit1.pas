@@ -147,33 +147,53 @@ type
     PlnStartHost: TPanel;
     PlnStartTitle: TPanel;
     Label8: TLabel;
-    FlowLayout3: TFlowLayout;
-    GroupBox1: TGroupBox;
-    CBOrganisations: TComboBox;
-    Label9: TLabel;
-    GroupBox2: TGroupBox;
-    Label10: TLabel;
-    EdID: TEdit;
-    LblAddress: TLabel;
-    LblEmail: TLabel;
-    LblProjectRef: TLabel;
-    LblContact: TLabel;
-    MemProjectDescription: TMemo;
-    EdAddress: TEdit;
-    Label11: TLabel;
-    EdEmail: TEdit;
-    Label12: TLabel;
-    EdProjectRef: TEdit;
-    Label13: TLabel;
-    EdContact: TEdit;
-    Label14: TLabel;
-    MemNote: TMemo;
-    Label15: TLabel;
-    Label16: TLabel;
     PnlHostCreateRecord: TPanel;
-    BtnCreateOrgRec: TButton;
     BtnShow: TButton;
     Button5: TButton;
+    PnlHostSiteSelect: TPanel;
+    PnlHostSitePhoto: TPanel;
+    TabConHostSelectSite: TTabControl;
+    TIAddSite: TTabItem;
+    TIChooseSite: TTabItem;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    Splitter2: TSplitter;
+    FlowLayout3: TFlowLayout;
+    FlowLayout4: TFlowLayout;
+    BtnCreateOrgRec: TButton;
+    LOCreateSite: TLayout;
+    EdID: TEdit;
+    Label10: TLabel;
+    LOProRef: TLayout;
+    Label13: TLabel;
+    EdProjectRef: TEdit;
+    LOContact: TLayout;
+    Label14: TLabel;
+    EdContact: TEdit;
+    LOEmail: TLayout;
+    Label12: TLabel;
+    EdEmail: TEdit;
+    LOAddress: TLayout;
+    Label11: TLabel;
+    EdAddress: TEdit;
+    LOProject: TLayout;
+    Label16: TLabel;
+    MemNote: TMemo;
+    Image5: TImage;
+    LOSiteShow: TLayout;
+    Label9: TLabel;
+    CBOrganisations: TComboBox;
+    LOAddressShow: TLayout;
+    LblAddress: TLabel;
+    LOEmailShow: TLayout;
+    LblEmail: TLabel;
+    LOProjectShow: TLayout;
+    LblProjectRef: TLabel;
+    LOContaxtShow: TLayout;
+    LblContact: TLabel;
+    LOProjectNotesShow: TLayout;
+    Label15: TLabel;
+    MemProjectDescription: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -1537,33 +1557,11 @@ begin
 end;
 
 procedure TForm1.BtnShowClick(Sender: TObject);
-var
-  BlobStream: TStream;
-  StringList: TStringList;
 begin
-  DM.FDConnection1.Connected := true;
-
-  DM.FDQOrganisation.sql.clear;
-  DM.FDQOrganisation.sql.add('Select * FROM ORGANAISATION');
-    //  dm.FDQOrganisation.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
-  DM.FDQOrganisation.Open;
-
-  lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
-  lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
-  lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
-
-  try
-      BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
-
-      StringList:= TStringList.create;
-
-      StringList.LoadFromStream(BlobStream);
-
-      MemProjectDescription.lines.Clear;
-      MemProjectDescription.Lines.Assign(StringList);
-  finally
-     StringList.Free;
-  end;
+  if TabConHostSelectSite.TabIndex = 0 then
+     TabConHostSelectSite.TabIndex := 1
+  else
+     TabConHostSelectSite.TabIndex := 0
 end;
 
 Procedure TForm1.UpdateOrganisationData;
