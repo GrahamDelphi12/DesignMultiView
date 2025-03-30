@@ -113261,4 +113261,9 @@ object DM: TDM
     Left = 72
     Top = 392
   end
+  object FDQLocations: TFDQuery
+    Connection = FDConnection1
+    Left = 56
+    Top = 488
+  end
 end

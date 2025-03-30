@@ -23,6 +23,7 @@ type
     FDPhysIBDriverLink1: TFDPhysIBDriverLink;
     FDGUIxWaitCursor1: TFDGUIxWaitCursor;
     FDQOrganisation: TFDQuery;
+    FDQLocations: TFDQuery;
     procedure FDConnection1BeforeConnect(Sender: TObject);
   private
     { Private declarations }

@@ -56,13 +56,13 @@ type
     Memo1: TMemo;
     FlowLayout1: TFlowLayout;
     Label3: TLabel;
-    Name: TEdit;
+    EdName: TEdit;
     Label2: TLabel;
-    Edit2: TEdit;
+    EdLocation: TEdit;
     Label4: TLabel;
     DateEdit1: TDateEdit;
-    Label5: TLabel;
-    ComboBox2: TComboBox;
+    Dep: TLabel;
+    CBLocations: TComboBox;
     Panel5: TPanel;
     FlowLayout2: TFlowLayout;
     BtnIncreaseSize: TButton;
@@ -194,6 +194,12 @@ type
     LOProjectNotesShow: TLayout;
     Label15: TLabel;
     MemProjectDescription: TMemo;
+    Label17: TLabel;
+    Label18: TLabel;
+    Label19: TLabel;
+    Label20: TLabel;
+    BtnAddLocation: TButton;
+    EdSiteName: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -233,6 +239,7 @@ type
     procedure BtnCreateOrgRecClick(Sender: TObject);
     procedure BtnShowClick(Sender: TObject);
     procedure CBOrganisationsChange(Sender: TObject);
+    procedure BtnAddLocationClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -291,6 +298,7 @@ type
     procedure SelectedNameMemo(Name: string);
 
     Procedure UpdateOrganisationData;
+    Procedure UpdateLocationData;
 
   public
   public
@@ -1026,6 +1034,30 @@ begin
 end;
 
 
+procedure TForm1.BtnAddLocationClick(Sender: TObject);
+begin
+
+        DM.FDConnection1.Connected := true;
+
+        DM.FDQLocations.sql.clear;
+
+        DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_NAME)');
+        DM.FDQLocations.sql.add('Values(:Site, :Department, :Area)');
+
+        DM.FDQLocations.Params.ParamByName('Site').AsString := EdName.Text;
+        DM.FDQLocations.Params.ParamByName('Department').AsString := EdSiteName.Text;
+        //ComboBox1.Items[ComboBox1.ItemIndex];
+        DM.FDQLocations.ParamByName('Area').AsString := EdLocation.Text;
+
+        DM.FDQLocations.ExecSQL;
+
+        DM.FDConnection1.Connected := false;
+
+        //Refill Combobox
+        UpdateLocationData;
+
+end;
+
 procedure TForm1.BtnAnonSyncClick(Sender: TObject);
 begin
 
@@ -1056,7 +1088,7 @@ begin
             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
             label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
-                            + ' ' + dm.FDQDetails.FieldByName('SITE').asstring);
+                            + ' ' + dm.FDQDetails.FieldByName('SITECODE').asstring);
 
             TThread.Sleep(2000);
 
@@ -1095,9 +1127,9 @@ begin
 
   IterateControls(TabItem1);
 
-  If (Name.Text <> '') AND
-     (Edit2.Text <> '') AND
-     (ComboBox2.ItemIndex <> -1) then
+  If (EdName.Text <> '') AND
+     (EdLocation.Text <> '') AND
+     (CBLocations.ItemIndex <> -1) then
   begin
 
      try
@@ -1114,10 +1146,10 @@ begin
 
         DM.FDQDetails.sql.clear;
 
-        DM.FDQDetails.sql.add('insert into "NAMES" (SITE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
+        DM.FDQDetails.sql.add('insert into "NAMES" (SITECODE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
         DM.FDQDetails.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
 
-        DM.FDQDetails.Params.ParamByName('Site').AsString := Name.Text;
+        DM.FDQDetails.Params.ParamByName('Site').AsString := EdName.Text;
         DM.FDQDetails.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
         DM.FDQDetails.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
 
@@ -1132,8 +1164,8 @@ begin
 
         PKValue := UpdateData;  //Returns Newly inserted PK Value
 
-        Name.text := '';
-        Edit2.text := '';
+        EdName.text := '';
+        EdLocation.text := '';
 
          FRawBitmap.SetSize(0, 0);
          ImageContainer.Bitmap.SetSize(0, 0);
@@ -1322,7 +1354,7 @@ begin
 
   dm.FDQDetails.sql.clear;
   dm.FDQDetails.sql.add('Select * FROM "NAMES"');
-      dm.FDQDetails.sql.add(' WHERE SITE = ' + Trim(quotedstr('Larry')));
+      dm.FDQDetails.sql.add(' WHERE SITECODE = ' + Trim(quotedstr('Larry')));
   dm.FDQDetails.Open;
 
   While not dm.FDQDetails.EOF do
@@ -1602,6 +1634,44 @@ begin
 
 end;
 
+Procedure TForm1.UpdateLocationData;
+begin
+
+    try
+      // Ensure the connection is active
+      DM.FDConnection1.Connected := true;
+
+      // Prepare the query
+      DM.FDQLocations.SQL.Clear;
+      DM.FDQLocations.SQL.Add('SELECT SITE_CODE FROM SITE_LOCATION');
+
+      // Open the dataset
+      DM.FDQLocations.Open;
+
+      // Check if CBOrganisations is initialized
+      if Assigned(CBLocations) then
+      begin
+        CBLocations.Items.Clear; // Clear ComboBox items
+
+        // Loop through the dataset
+        while not DM.FDQLocations.EOF do
+        begin
+          // Add SITE_CODE to the ComboBox items
+          CBLocations.Items.Add(DM.FDQLocations.FieldByName('SITE_CODE').AsString);
+
+          // Move to the next record
+          DM.FDQLocations.Next;
+        end;
+      end
+      else
+        ShowMessage('Error: CBOrganisations is not assigned.');
+    except
+      on E: Exception do
+        ShowMessage('An error occurred: ' + E.Message);
+    end;
+
+end;
+
 
 
 procedure TForm1.BtnStopRecClick(Sender: TObject);
@@ -1660,7 +1730,7 @@ begin
 
         DM.FDQDetails.SQL.Clear;
         DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
-        DM.FDQDetails.SQL.Add('WHERE SITE = :Site');
+        DM.FDQDetails.SQL.Add('WHERE SITECODE = :Site');
 
         DM.FDQDetails.Params.ParamByName('Site').AsString := Name;
         DM.FDQDetails.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
@@ -1790,7 +1860,7 @@ begin
 
   DM.FDQDetails.sql.clear;
   DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add(' WHERE "SITE" = ' +
+  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
                             Trim(QuotedStr(Name)));
   DM.FDQDetails.Open;
 
@@ -1830,7 +1900,7 @@ begin
 
   DM.FDQDetails.sql.clear;
   DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add(' WHERE "SITE" = ' +
+  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
                             Trim(QuotedStr(Name)));
   DM.FDQDetails.Open;
 
@@ -1882,6 +1952,14 @@ begin
       lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
       lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
       lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
+
+      //
+      EdName.Text := DM.FDQOrganisation.fieldbyName('SITE').asstring;
+      Edlocation.Text := DM.FDQOrganisation.fieldbyName('DEPARTMENT').asstring;
+      EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+
+      //
+
 
       try
           BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
@@ -1950,7 +2028,7 @@ begin
 
     with TListViewItem(ListView1.Items.Add) do
     begin
-      Text := DM.FDQDetails.fieldbyname('SITE').asstring;// [1000 + Random(1234567)]);
+      Text := DM.FDQDetails.fieldbyname('SITECODE').asstring;// [1000 + Random(1234567)]);
       Detail := InttoStr(DM.FDQDetails.fieldbyname('P_KEY').asInteger);
       //Format('%d kg of paper', [1000 + Random(1234)]);
     end;
