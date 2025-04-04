@@ -8,8 +8,9 @@ uses
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.IB, FireDAC.Phys.IBDef, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.FMXUI.Wait, FireDAC.Comp.UI,
-  FireDAC.Phys.IBBase, FireDAC.Comp.DataSet, FireDAC.Comp.Client, IBX.IBQuery,
-  Data.DB, IBX.IBCustomDataSet, IBX.IBTable, IBX.IBDatabase, IOUtils;
+  FireDAC.Phys.IBBase, FireDAC.Comp.DataSet, FireDAC.Comp.Client, IOUtils,
+  Data.DB;
+  //IBX.IBQuery,IBX.IBCustomDataSet, IBX.IBTable, IBX.IBDatabase;
 
 type
   TDM = class(TDataModule)
