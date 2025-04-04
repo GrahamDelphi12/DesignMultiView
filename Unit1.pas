@@ -1978,8 +1978,8 @@ begin
 
   SiteRef := Copy(Name,1,5);
   DeptRef := Copy(Name,6, Length(Name)-5);
-  showmessage('Site Ref ' + SiteRef);
-  showmessage('DeptRef ' + DeptRef);
+  //showmessage('Site Ref ' + SiteRef);
+  //showmessage('DeptRef ' + DeptRef);
 
   DM.FDConnection1.Connected := true;
 
@@ -2029,14 +2029,29 @@ var
   FileStream: TFileStream;
   MemoryStream: TmemoryStream;
   RawBitMap: TBitMap;
+  SiteRef, DeptRef: string;
 begin
+
+  SiteRef := Copy(Name,1,5);
+  DeptRef := Copy(Name,6, Length(Name)-5);
+  //showmessage('Site Ref ' + SiteRef);
+  //showmessage('DeptRef ' + DeptRef);
+
 
   DM.FDConnection1.Connected := true;
 
+//  DM.FDQDetails.sql.clear;
+//  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+//  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
+//                            Trim(QuotedStr(Name)));
+//  DM.FDQDetails.Open;
+
   DM.FDQDetails.sql.clear;
   DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
-                            Trim(QuotedStr(Name)));
+  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
+                            Trim(QuotedStr(SiteRef)));
+  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
+                            Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
   //showmessage('validate');
@@ -2060,9 +2075,7 @@ begin
   //Reference to Recording 23-3-24
   RecordingRef := DM.FDQDetails.FieldByName('P_KEY').AsInteger;
 
- DM.FDConnection1.Connected := false;
-
-
+  DM.FDConnection1.Connected := false;
 
 end;
 
