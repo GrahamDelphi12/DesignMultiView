@@ -18,10 +18,12 @@ uses
   FMX.Platform,
   FMX.Ani,
   FMX.Media,
-  Androidapi.Helpers,
-  Androidapi.JNI.Media,
-  Androidapi.JNI.JavaTypes,
-  Androidapi.JNI.Os,
+  {$IFDEF ANDROID}
+      Androidapi.Helpers,
+      Androidapi.JNI.Media,
+      Androidapi.JNI.JavaTypes,
+      Androidapi.JNI.Os,
+  {$ENDIF}
   System.Sensors,
   System.Sensors.Components,
   FMX.WebBrowser,
@@ -55,13 +57,7 @@ type
     Panel4: TPanel;
     TabItem3: TTabItem;
     Memo1: TMemo;
-    FlowLayout1: TFlowLayout;
-    Label3: TLabel;
-    EdName: TEdit;
-    Label2: TLabel;
-    EdLocation: TEdit;
-    Label4: TLabel;
-    DateEdit1: TDateEdit;
+    FLOShowSelectedRecordOrg: TFlowLayout;
     Panel5: TPanel;
     FlowLayout2: TFlowLayout;
     BtnIncreaseSize: TButton;
@@ -141,7 +137,6 @@ type
     BtnCurrCood: TButton;
     BtnCurrNote: TButton;
     Button4: TButton;
-    Edit1: TEdit;
     TIStartpage: TTabItem;
     PlnStartHost: TPanel;
     PlnStartTitle: TPanel;
@@ -197,10 +192,27 @@ type
     Label18: TLabel;
     Label19: TLabel;
     Label20: TLabel;
-    BtnAddLocation: TButton;
-    EdSiteName: TEdit;
     Button6: TButton;
     MemoDepartments: TMemo;
+    Button7: TButton;
+    Panel7: TPanel;
+    BtnAddLocation: TButton;
+    EdNewLocation: TEdit;
+    LOSiteName: TLayout;
+    Label5: TLabel;
+    LblSite_Name: TLabel;
+    Layout2: TLayout;
+    LblSiteCode: TLabel;
+    EdSite_Name: TEdit;
+    LODate: TLayout;
+    Label4: TLabel;
+    DateEdit1: TDateEdit;
+    LOOrgAdress: TLayout;
+    Lbl_Address: TLabel;
+    EdSiteAddress: TEdit;
+    Label2: TLabel;
+    BtnAddNewSite: TButton;
+    BtnSelectSite: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -243,6 +255,10 @@ type
     procedure BtnAddLocationClick(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure TabConHostSelectSiteChange(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
+    procedure TabControl1Change(Sender: TObject);
+    procedure BtnAddNewSiteClick(Sender: TObject);
+    procedure BtnSelectSiteClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -254,7 +270,10 @@ type
     FRawBitmap: TBitmap;
     FEffect: TFilter;
     TerminateThread: Boolean;
-    FMediaRecorder: JMediaRecorder;
+    {$IFDEF ANDROID}
+      FMediaRecorder: JMediaRecorder;
+    {$ENDIF}
+
     FFileName: string;
     RecordingRef: integer;
 
@@ -291,7 +310,7 @@ type
     procedure UpdateEffect;
     procedure UpdateUI;
     procedure SelectedNameView(Name: string);
-    Function UpdateData(CallingProcedure: string): Integer;
+    Function UpdateListviewData(CallingProcedure: string): Integer;
     procedure Empty_Controls(AParent: TFMXObject);
     procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
 
@@ -519,11 +538,18 @@ end;
 procedure TForm1.TabConHostSelectSiteChange(Sender: TObject);
 begin
 
-  //31-3-24
-  //showmessage('TabConHostSelectSiteChange called');
-  UpdateData('TabConHostSelectSiteChange');
   UpdateOrganisationData;
   UpdateLocationData;
+end;
+
+procedure TForm1.TabControl1Change(Sender: TObject);
+begin
+
+  If TabItem2.IsSelected Then
+  begin
+   UpdateListviewData('TabControl1Change');//2-4-25
+  end;
+
 end;
 
 procedure TForm1.TabItem9MouseEnter(Sender: TObject);
@@ -1054,13 +1080,13 @@ begin
 
         DM.FDQLocations.sql.clear;
 
-        DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_NAME)');
-        DM.FDQLocations.sql.add('Values(:Site, :Department, :Area)');
+        DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_CODE, AREA_DEPT_NAME)');
+        DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
 
-        DM.FDQLocations.Params.ParamByName('Site').AsString := EdName.Text;
-        DM.FDQLocations.Params.ParamByName('Department').AsString := EdSiteName.Text;
-        //ComboBox1.Items[ComboBox1.ItemIndex];
-        DM.FDQLocations.ParamByName('Area').AsString := EdLocation.Text;
+        DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
+        DM.FDQLocations.Params.ParamByName('SiteName').AsString := EdSite_Name.Text;
+        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := '';
+        DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
 
         DM.FDQLocations.ExecSQL;
 
@@ -1069,6 +1095,11 @@ begin
         //Refill Combobox
         UpdateLocationData;
 
+end;
+
+procedure TForm1.BtnAddNewSiteClick(Sender: TObject);
+begin
+  TabConHostSelectSite.TabIndex := 1;
 end;
 
 procedure TForm1.BtnAnonSyncClick(Sender: TObject);
@@ -1132,17 +1163,19 @@ var
   PKValue: integer;
 begin
 
-  if Imagecontainer.Bitmap.isempty then
-  begin
-    showmessage('Image Required - take picture');
-    exit;
-  end;
+  {$IFDEF ANDROID}
+    if Imagecontainer.Bitmap.isempty then
+    begin
+      showmessage('Image Required - take picture');
+      exit;
+    end;
+  {$ENDIF}
 
   IterateControls(TabItem1);
 
-  If (EdName.Text <> '') AND
-     (EdLocation.Text <> '') then
-  begin
+//  If (EdName.Text <> '') AND
+//     (EdLocation.Text <> '') then
+//  begin
 
      try
 
@@ -1161,8 +1194,9 @@ begin
         DM.FDQDetails.sql.add('insert into "NAMES" (SITECODE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
         DM.FDQDetails.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
 
-        DM.FDQDetails.Params.ParamByName('Site').AsString := EdName.Text;
-        DM.FDQDetails.Params.ParamByName('Department').AsString := ComboBox1.Items[ComboBox1.ItemIndex];
+        DM.FDQDetails.Params.ParamByName('Site').AsString := LblSiteCode.text;
+        DM.FDQDetails.Params.ParamByName('Department').AsString := EdNewLocation.text;
+        //ComboBox1.Items[ComboBox1.ItemIndex];
         DM.FDQDetails.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
 
         DM.FDQDetails.ParamByName('MemoNote').LoadFromStream(BlobStream, ftBlob);
@@ -1174,10 +1208,10 @@ begin
 
         DM.FDConnection1.Connected := false;
 
-        PKValue := UpdateData('BtnConfirmClick');  //Returns Newly inserted PK Value
+        PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
 
-        EdName.text := '';
-        EdLocation.text := '';
+
+        EdNewLocation.text := '';
 
          FRawBitmap.SetSize(0, 0);
          ImageContainer.Bitmap.SetSize(0, 0);
@@ -1187,11 +1221,15 @@ begin
       MemoryStream.Free;
      end;
 
-    WriteAudiotoDB(PKValue);
+
+      {$IFDEF ANDROID}
+        WriteAudiotoDB(PKValue);
+      {$ENDIF}
+
 
     showmessage('Insert Done');
 
-  end;//if
+  //end;//if
 
 end;
 
@@ -1260,7 +1298,8 @@ begin
      end;
 
       UpdateOrganisationData;
-      //UpdateLocationData;
+
+      UpdateLocationData;
 
 end;
 
@@ -1321,20 +1360,22 @@ procedure TForm1.BtnDeleteAllClick(Sender: TObject);
 var
   RawBitMap : TBitMap;
 begin
-  dm.FDConnection1.Connected := true;
 
-  dm.FDQDetails.sql.clear;
-  dm.FDQDetails.sql.add('DELETE From "NAMES"');
+  DM.FDConnection1.Connected := true;
 
-  dm.FDQDetails.ExecSQL;
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('DELETE From "ORGANAISATION"');
+  DM.FDQDetails.ExecSQL;
 
-  dm.FDQDetails.sql.clear;
-  dm.FDQDetails.sql.add('DELETE From "SITE_LOCATION"');
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('DELETE From "SITE_LOCATION"');
+  DM.FDQDetails.ExecSQL;
 
-  dm.FDQDetails.ExecSQL;
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('DELETE From "NAMES"');
+  DM.FDQDetails.ExecSQL;
 
-
-  UpdateData('BtnDeleteAllClick');
+  UpdateListviewData('BtnDeleteAllClick');
 
   RawBitMap := TBitMap.Create;
   RawBitMap.SetSize(0,0);
@@ -1577,27 +1618,27 @@ end;
 procedure TForm1.Button4Click(Sender: TObject);
 begin
 
-       DM.FDConnection1.Connected := true;
-
-        DM.FDQDetails.sql.clear;
-
-        DM.FDQDetails.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
-        DM.FDQDetails.sql.add('Values(:Site)');
-
-        DM.FDQDetails.Params.ParamByName('Site').AsString := Edit1.text;
-
-        DM.FDQDetails.ExecSQL;
-
-
-        DM.FDQDetails.sql.clear;
-        DM.FDQDetails.sql.add('Select * FROM "SITE_LOCATION"');
-        DM.FDQDetails.sql.add(' WHERE "SITE_NAME" = ' +
-                            QuotedStr(Edit1.text));
-        DM.FDQDetails.Open;
-
-        Showmessage('PK ' + inttostr(DM.FDQDetails.fieldbyName('PK_KEY').asinteger));
-
-
+//       DM.FDConnection1.Connected := true;
+//
+//        DM.FDQDetails.sql.clear;
+//
+//        DM.FDQDetails.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
+//        DM.FDQDetails.sql.add('Values(:Site)');
+//
+//        DM.FDQDetails.Params.ParamByName('Site').AsString := Edit1.text;
+//
+//        DM.FDQDetails.ExecSQL;
+//
+//
+//        DM.FDQDetails.sql.clear;
+//        DM.FDQDetails.sql.add('Select * FROM "SITE_LOCATION"');
+//        DM.FDQDetails.sql.add(' WHERE "SITE_NAME" = ' +
+//                            QuotedStr(Edit1.text));
+//        DM.FDQDetails.Open;
+//
+//        Showmessage('PK ' + inttostr(DM.FDQDetails.fieldbyName('PK_KEY').asinteger));
+//
+//
 
 end;
 
@@ -1621,6 +1662,35 @@ begin
 
 end;
 
+procedure TForm1.Button7Click(Sender: TObject);
+begin
+
+
+
+      DM.FDQLocations.SQL.Clear;
+      DM.FDQLocations.SQL.Add('SELECT * FROM SITE_LOCATION');
+      DM.FDQLocations.Open;
+
+        while not DM.FDQLocations.EOF do
+        begin
+
+          Showmessage(DM.FDQLocations.FieldByName('SITE_CODE').AsString
+              + ' ' + Inttostr(DM.FDQLocations.FieldByName('PK_KEY').AsInteger));
+
+          DM.FDQLocations.Next;
+        end;
+
+
+
+
+
+end;
+
+procedure TForm1.BtnSelectSiteClick(Sender: TObject);
+begin
+  TabConHostSelectSite.TabIndex := 0;
+end;
+
 procedure TForm1.BtnShowClick(Sender: TObject);
 begin
   if TabConHostSelectSite.TabIndex = 0 then
@@ -1641,12 +1711,12 @@ begin
       DM.FDQOrganisation.SQL.Add('SELECT SITE_CODE FROM ORGANAISATION');
       DM.FDQOrganisation.Open;
 
-      // Check if CBOrganisations is initialized
+
       if Assigned(CBOrganisations) then
       begin
         CBOrganisations.Items.Clear;
 
-      ShowMessage('Organisation DB ' + inttostr(DM.FDQOrganisation.RecordCount));
+      //ShowMessage('Organisation DB ' + inttostr(DM.FDQOrganisation.RecordCount));
 
         while not DM.FDQOrganisation.EOF do
         begin
@@ -1657,9 +1727,9 @@ begin
         end;
 
 
-      end
-      else
-        ShowMessage('Error: CBOrganisations is not assigned.');
+      end;
+      //else
+      //  ShowMessage('Error: CBOrganisations is not assigned.');
     except
       on E: Exception do
         ShowMessage('An error occurred: ' + E.Message);
@@ -1677,10 +1747,10 @@ begin
       DM.FDConnection1.Connected := true;
 
       DM.FDQLocations.SQL.Clear;
-      DM.FDQLocations.SQL.Add('SELECT SITE_CODE, SITE_NAME FROM SITE_LOCATION ');
+      DM.FDQLocations.SQL.Add('SELECT SITE_CODE, SITE_NAME, AREA_DEPT_NAME FROM SITE_LOCATION ');
       DM.FDQLocations.SQL.Add('WHERE SITE_CODE = :SiteCode');
 
-      DM.FDQLocations.Params.ParamByName('SiteCode').AsString := EdName.text;
+      DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.text;
 
       DM.FDQLocations.Open;
 
@@ -1689,8 +1759,10 @@ begin
         while not DM.FDQLocations.EOF do
         begin
 
-          MemoDepartments.Lines.Add(DM.FDQLocations.FieldByName('SITE_CODE').AsString + ' ' +
-                                    DM.FDQLocations.FieldByName('SITE_NAME').AsString ) ;
+
+          MemoDepartments.Lines.Add(DM.FDQLocations.FieldByName('SITE_NAME').AsString + ' ' +
+                                    DM.FDQLocations.FieldByName('AREA_DEPT_NAME').AsString);
+
 
           DM.FDQLocations.Next;
         end;
@@ -1746,10 +1818,18 @@ var
   name: string;
   ListItem: TListViewItem;
   BlobStream: TStream;
+  SiteRef, DeptRef : string;
 begin
 
   ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
   Name := ListItem.Text;
+
+  SiteRef := Copy(Name,1,5);
+  DeptRef := ListItem.Detail;
+
+ // showmessage('Site Ref ' + SiteRef);
+ // showmessage('DeptRef ' + DeptRef);
+
 
      try
 
@@ -1760,9 +1840,11 @@ begin
 
         DM.FDQDetails.SQL.Clear;
         DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
-        DM.FDQDetails.SQL.Add('WHERE SITECODE = :Site');
+        DM.FDQDetails.SQL.Add(' WHERE SITECODE = :Site');
+        DM.FDQDetails.SQL.Add(' AND DEPARTMENT = :Dept');
 
-        DM.FDQDetails.Params.ParamByName('Site').AsString := Name;
+        DM.FDQDetails.Params.ParamByName('Site').AsString := SiteRef;
+        DM.FDQDetails.Params.ParamByName('Dept').AsString := DeptRef;
         DM.FDQDetails.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
 
         DM.FDQDetails.ExecSQL;
@@ -1820,13 +1902,16 @@ begin
 
   ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
 
-  Name := ListItem.Text;
+  Name := Copy(ListItem.Text, 1, 5);
+  Name := Name + ListItem.Detail;
 
-  //RecordingRef := Name;  need to formalise name or PK as the reference
+  showmessage(Name);
 
-  BtnPayVoiceDB.Enabled := true;
 
-  SelectedNameView(Name);
+  {$IFDEF ANDROID}
+    BtnPayVoiceDB.Enabled := true;
+    SelectedNameView(Name);
+  {$ENDIF}
 
   SelectedNameMemo(Name);
 
@@ -1884,14 +1969,34 @@ procedure TForm1.SelectedNameMemo(Name: string);
 var
   BlobStream: TStream;
   Stringlist: TStringList;
+  SiteRef : string;
+  DeptRef : string;
 begin
+
+
+  //showmessage('Ref to Memo used in Names DB = ' + Name);
+
+  SiteRef := Copy(Name,1,5);
+  DeptRef := Copy(Name,6, Length(Name)-5);
+  showmessage('Site Ref ' + SiteRef);
+  showmessage('DeptRef ' + DeptRef);
 
   DM.FDConnection1.Connected := true;
 
+//  DM.FDQDetails.sql.clear;
+//  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+//  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
+//                            Trim(QuotedStr(Name)));
+//  DM.FDQDetails.Open;
+
+
+  //Need Ite and Departent to ensure correct record
   DM.FDQDetails.sql.clear;
   DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add(' WHERE "SITECODE" = ' +
-                            Trim(QuotedStr(Name)));
+  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
+                            Trim(QuotedStr(SiteRef)));
+  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
+                            Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
   Try
@@ -1965,23 +2070,21 @@ procedure TForm1.CBOrganisationsChange(Sender: TObject);
 var
   BlobStream: TStream;
   StringList: TStringList;
-  ItemChosen: string;
-  LocationValueValid : Boolean;
 begin
 
-  //showmessage('Before combo select routine Organisation');
 
-  LocationValueValid := false;
-  ItemChosen := '';
 
     TTask.Run(procedure
-            begin
+        begin
 
-                try
+           try
 
-                  TThread.Synchronize(nil, procedure
+               TThread.Synchronize(nil, procedure
+                     var
+                       ItemChosen : string;
+                       LocationValueValid : Boolean;
                      begin
-
+                       ItemChosen := '';
                        LocationValueValid := false;
 
                        if Assigned(CBOrganisations) and (CBOrganisations.ItemIndex >= 0) and
@@ -1989,9 +2092,10 @@ begin
                        begin
                          if CBOrganisations.Items[CBOrganisations.ItemIndex] <> '' then
                          begin
-                          //ShowMessage('Item is not null or empty: '
-                          //                + CBOrganisations.Items[CBOrganisations.ItemIndex]);
+
                           ItemChosen := CBOrganisations.Items[CBOrganisations.ItemIndex];
+
+                          
                           LocationValueValid:= true;
 
                           DM.FDConnection1.Connected := true;
@@ -2001,21 +2105,19 @@ begin
                           DM.FDQOrganisation.sql.add(' WHERE SITE_CODE = ' + quotedstr(ItemChosen));
                           DM.FDQOrganisation.Open;
 
-                          lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
-                          lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
-                          lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
 
 
-                          EdName.Text := DM.FDQOrganisation.fieldbyName('SITE_CODE').asstring;
-                          Edlocation.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
-                          EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+                          //Organisation selector
+                          lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;//ok
+                          lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring; //ok
+                          lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;//ok
+                          LblSite_Name.text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;//ok
+                          LBLContact.text :=  DM.FDQOrganisation.fieldbyName('CONTACT').asstring;//New
 
-
-                          //showmessage('Records ' + Inttostr(DM.FDQOrganisation.RecordCount) +
-                          //            ' ItemChosen = ' + ItemChosen);
 
                               try
-                                  BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
+                                  BlobStream := DM.FDQOrganisation.CreateBlobStream(
+                                                       DM.FDQOrganisation.FieldByName('NOTE'), bmRead);//ok
 
                                   StringList:= TStringList.create;
                                   StringList.LoadFromStream(BlobStream);
@@ -2023,15 +2125,23 @@ begin
                                   MemProjectDescription.lines.Clear;
                                   MemProjectDescription.Lines.Assign(StringList);
 
-                                  DM.FDConnection1.Connected := false;
-
                               finally
                                  StringList.Free;
                                  BlobStream.Free;
                               end;
 
-                             UpdateLocationData;//Not sure this is the best place
+                             //Second Tab
+                             LblSiteCode.text := DM.FDQOrganisation.fieldbyName('SITE_CODE').asstring;
+                             EdSite_Name.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
+                             EdSiteAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
 
+                             //EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+
+
+                             UpdateLocationData;//Not sure this is the best place
+                                                //Fill Memo with all Departments created
+
+                             DM.FDConnection1.Connected := false;
                          end
                          else
                          begin
@@ -2046,52 +2156,14 @@ begin
                        end;
 
                      end);
-                  except
-              on E: Exception do
-              TThread.Queue(nil, procedure
-              begin
-                 ShowMessage('Error: ' + E.Message);
-              end);
-                end;//try
-            end);//task
+           except
+              on E: Exception do TThread.Queue(nil, procedure
+                                               begin
+                                                  ShowMessage('Error: ' + E.Message);
+                                               end);
+           end;//try
 
-
-//      DM.FDConnection1.Connected := true;
-//
-//      DM.FDQOrganisation.sql.clear;
-//      DM.FDQOrganisation.sql.add('Select * FROM ORGANAISATION');
-//      DM.FDQOrganisation.sql.add(' WHERE SITE_CODE = ' + quotedstr(ItemChosen));
-//      DM.FDQOrganisation.Open;
-//
-//      lblAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
-//      lblEmail.Text := DM.FDQOrganisation.fieldbyName('EMAIL').asstring;
-//      lblProjectRef.Text := DM.FDQOrganisation.fieldbyName('PROJECT_REF').asstring;
-//
-//      //
-//      EdName.Text := DM.FDQOrganisation.fieldbyName('SITE_CODE').asstring;
-//      Edlocation.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
-//      EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
-//
-//      //
-//      showmessage('Records ' + Inttostr(DM.FDQOrganisation.RecordCount) +
-//                  ' ItemChosen = ' + ItemChosen);
-//
-//      try
-//          BlobStream := DM.FDQOrganisation.CreateBlobStream(DM.FDQOrganisation.FieldByName('NOTE'), bmRead);
-//
-//          StringList:= TStringList.create;
-//          StringList.LoadFromStream(BlobStream);
-//
-//          MemProjectDescription.lines.Clear;
-//          MemProjectDescription.Lines.Assign(StringList);
-//
-//          DM.FDConnection1.Connected := false;
-//
-//      finally
-//         StringList.Free;
-//         BlobStream.Free;
-//      end;
-
+        end);//task
 
 
 end;
@@ -2127,32 +2199,66 @@ begin
 
 end;
 
-Function TForm1.UpdateData(CallingProcedure: string): Integer;
+Function TForm1.UpdateListviewData(CallingProcedure: string): Integer;
+var
+ ListItem: TListViewItem;
 begin
   //showmessage('UpdateData ' + CallingProcedure);
 
   DM.FDConnection1.Connected := true;
 
-  DM.FDQDetails.sql.clear;
-  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.Open;
+  DM.FDQLocations.sql.clear;
+  DM.FDQLocations.sql.add('Select * FROM SITE_LOCATION');
+  DM.FDQLocations.Open;
 
   ListView1.items.Clear;  //Was data 22-3-24
 
-  While not dm.FDQDetails.EOF do
+  While not dm.FDQLocations.EOF do
   begin
 
     with TListViewItem(ListView1.Items.Add) do
     begin
-      Text := DM.FDQDetails.fieldbyname('SITECODE').asstring;// [1000 + Random(1234567)]);
-      Detail := InttoStr(DM.FDQDetails.fieldbyname('P_KEY').asInteger);
-      //Format('%d kg of paper', [1000 + Random(1234)]);
+      Text := DM.FDQLocations.fieldbyname('SITE_CODE').asstring + ' ' +
+              DM.FDQLocations.fieldbyname('SITE_NAME').asString;
+      Detail := DM.FDQLocations.fieldbyname('AREA_DEPT_NAME').asString;
+
+//      ListItem := ListView1.Items.Add;
+//
+//      ListItem.Data['Text1'] := 'SubItem A';
+//      ListItem.Data['Text2'] := 'SubItem B';
+//      ListItem.Data['Text3'] := 'SubItem C';
+
+
     end;
 
-    DM.FDQDetails.Next;
+    DM.FDQLocations.Next;
   end;
 
+  //
+
+
+  // Assign data for custom rows or sub-items
+//  ListItem.Data['Text1'] := 'SubItem A';
+//  ListItem.Data['Text2'] := 'SubItem B';
+//  ListItem.Data['Text3'] := 'SubItem C';
+//
+//  showmessage(ListItem.Data['Text3'].AsString);
+
+
+  //
+
+
+
+
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+  DM.FDQDetails.sql.add('ORDER BY P_KEY DESC');
+  DM.FDQDetails.sql.add('ROWS 1');
+  DM.FDQDetails.Open;
+
   result := DM.FDQDetails.fieldbyname('P_KEY').asInteger;
+
+
 
 end;
 
@@ -2160,10 +2266,6 @@ end;
 procedure TForm1.FormShow(Sender: TObject);
 begin
     Form1.StyleBook := DM.StyleBook2;
-
-    //UpdateData;
-    //UpdateOrganisationData; //31-3-24
-    //UpdateLocationData;
 
     UpdateOrganisationData;
 
