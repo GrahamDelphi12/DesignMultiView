@@ -82,7 +82,7 @@ object Form1: TForm1
     Size.Width = 1188.000000000000000000
     Size.Height = 556.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     TabPosition = None
     OnChange = TabControl1Change
@@ -100,7 +100,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -192,7 +192,7 @@ object Form1: TForm1
             Size.Width = 481.000000000000000000
             Size.Height = 464.000000000000000000
             Size.PlatformDefault = False
-            TabIndex = 0
+            TabIndex = 1
             TabOrder = 0
             TabPosition = PlatformDefault
             OnChange = TabConHostSelectSiteChange
@@ -206,7 +206,7 @@ object Form1: TForm1
                 item
                 end>
               TextSettings.Trimming = None
-              IsSelected = True
+              IsSelected = False
               Size.Width = 83.000000000000000000
               Size.Height = 26.000000000000000000
               Size.PlatformDefault = False
@@ -491,8 +491,8 @@ object Form1: TForm1
               end
               object BtnAddNewSite: TButton
                 Position.X = 30.000000000000000000
-                Position.Y = 7.000000000000000000
-                Size.Width = 86.000000000000000000
+                Position.Y = 12.000000000000000000
+                Size.Width = 117.000000000000000000
                 Size.Height = 22.000000000000000000
                 Size.PlatformDefault = False
                 TabOrder = 2
@@ -506,7 +506,7 @@ object Form1: TForm1
                 item
                 end>
               TextSettings.Trimming = None
-              IsSelected = False
+              IsSelected = True
               Size.Width = 65.000000000000000000
               Size.Height = 26.000000000000000000
               Size.PlatformDefault = False
@@ -779,7 +779,7 @@ object Form1: TForm1
                     Size.Height = 25.000000000000000000
                     Size.PlatformDefault = False
                     TabOrder = 0
-                    Text = 'Create New Record'
+                    Text = 'OK'
                     TextSettings.Trimming = None
                     OnClick = BtnCreateOrgRecClick
                   end
@@ -788,6 +788,9 @@ object Form1: TForm1
               object BtnSelectSite: TButton
                 Position.X = 30.000000000000000000
                 Position.Y = 8.000000000000000000
+                Size.Width = 107.000000000000000000
+                Size.Height = 22.000000000000000000
+                Size.PlatformDefault = False
                 TabOrder = 1
                 Text = 'Select Site'
                 TextSettings.Trimming = None
@@ -51943,7 +51946,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -53092,7 +53095,7 @@ object Form1: TForm1
         object FLOShowSelectedRecordOrg: TFlowLayout
           Align = Top
           Size.Width = 281.000000000000000000
-          Size.Height = 201.000000000000000000
+          Size.Height = 193.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 4
           Justify = Left
@@ -53116,26 +53119,22 @@ object Form1: TForm1
               Margins.Right = 10.000000000000000000
               Margins.Bottom = 15.000000000000000000
               Position.X = 14.000000000000000000
-              Position.Y = 14.000000000000000000
+              Position.Y = 13.000000000000000000
               Size.Width = 75.000000000000000000
               Size.Height = 17.000000000000000000
               Size.PlatformDefault = False
               TextSettings.Font.StyleExt = {00070000000000000004000000}
               Text = 'LblSiteCode'
-              TabOrder = 13
+              TabOrder = 12
             end
-            object EdSite_Name: TEdit
-              Touch.InteractiveGestures = [LongTap, DoubleTap]
-              TabOrder = 2
-              Position.X = 104.000000000000000000
-              Position.Y = 9.000000000000000000
-              Margins.Left = 10.000000000000000000
-              Margins.Top = 15.000000000000000000
-              Margins.Right = 10.000000000000000000
-              Margins.Bottom = 10.000000000000000000
-              Size.Width = 125.000000000000000000
+            object LbSite_Name: TLabel
+              Position.X = 95.000000000000000000
+              Position.Y = 8.000000000000000000
+              Size.Width = 132.000000000000000000
               Size.Height = 22.000000000000000000
               Size.PlatformDefault = False
+              Text = 'LbSite_Name'
+              TabOrder = 13
             end
           end
           object LODate: TLayout
@@ -53159,24 +53158,13 @@ object Form1: TForm1
               Size.Width = 75.000000000000000000
               Size.Height = 17.000000000000000000
               Size.PlatformDefault = False
-              Text = 'Record Date'
-              TabOrder = 9
-            end
-            object DateEdit1: TDateEdit
-              Date = 45751.000000000000000000
-              TodayDefault = True
-              Enabled = False
-              Padding.Left = 20.000000000000000000
-              Margins.Left = 10.000000000000000000
-              Margins.Top = 15.000000000000000000
-              Margins.Right = 10.000000000000000000
-              Margins.Bottom = 10.000000000000000000
-              Position.X = 104.000000000000000000
-              Position.Y = 7.000000000000000000
-              Size.Width = 125.000000000000000000
-              Size.Height = 25.000000000000000000
-              Size.PlatformDefault = False
-              TabOrder = 0
+              Text = 'Date'
+              TabOrder = 8
+              object LbSite_Date: TLabel
+                Position.X = 81.000000000000000000
+                Text = 'LbSite_Date'
+                TabOrder = 4
+              end
             end
           end
           object LOOrgAdress: TLayout
@@ -53201,20 +53189,17 @@ object Form1: TForm1
               Size.Height = 17.000000000000000000
               Size.PlatformDefault = False
               Text = 'Address'
-              TabOrder = 8
+              TabOrder = 7
             end
-            object EdSiteAddress: TEdit
-              Touch.InteractiveGestures = [LongTap, DoubleTap]
-              TabOrder = 0
-              Position.X = 14.000000000000000000
-              Position.Y = 34.000000000000000000
-              Margins.Left = 10.000000000000000000
-              Margins.Top = 15.000000000000000000
-              Margins.Right = 10.000000000000000000
-              Margins.Bottom = 10.000000000000000000
-              Size.Width = 215.000000000000000000
+            object LbSiteAddress: TLabel
+              Position.X = 95.000000000000000000
+              Position.Y = 9.000000000000000000
+              Size.Width = 140.000000000000000000
               Size.Height = 47.000000000000000000
               Size.PlatformDefault = False
+              TextSettings.VertAlign = Leading
+              Text = 'LbSiteAddress'
+              TabOrder = 8
             end
           end
         end
@@ -53241,20 +53226,20 @@ object Form1: TForm1
         object Panel7: TPanel
           Align = Client
           Size.Width = 281.000000000000000000
-          Size.Height = 199.000000000000000000
+          Size.Height = 207.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 6
           object BtnAddLocation: TButton
             Margins.Left = 10.000000000000000000
             Margins.Top = 15.000000000000000000
             Margins.Right = 10.000000000000000000
-            Position.X = 39.000000000000000000
-            Position.Y = 83.000000000000000000
+            Position.X = 25.000000000000000000
+            Position.Y = 60.000000000000000000
             Size.Width = 100.000000000000000000
             Size.Height = 22.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 12
-            Text = 'Add New Location'
+            Text = 'OK'
             TextSettings.Trimming = None
             OnClick = BtnAddLocationClick
           end

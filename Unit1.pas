@@ -28,7 +28,8 @@ uses
   System.Sensors.Components,
   FMX.WebBrowser,
   FMX.Maps,
-  System.Threading;
+  System.Threading,
+  DateUtils;
 
 
 type
@@ -203,16 +204,16 @@ type
     LblSite_Name: TLabel;
     Layout2: TLayout;
     LblSiteCode: TLabel;
-    EdSite_Name: TEdit;
     LODate: TLayout;
     Label4: TLabel;
-    DateEdit1: TDateEdit;
     LOOrgAdress: TLayout;
     Lbl_Address: TLabel;
-    EdSiteAddress: TEdit;
     Label2: TLabel;
     BtnAddNewSite: TButton;
     BtnSelectSite: TButton;
+    LbSite_Name: TLabel;
+    LbSite_Date: TLabel;
+    LbSiteAddress: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -1084,7 +1085,7 @@ begin
         DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
 
         DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
-        DM.FDQLocations.Params.ParamByName('SiteName').AsString := EdSite_Name.Text;
+        DM.FDQLocations.Params.ParamByName('SiteName').AsString := LbSite_Name.Text;
         DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := '';
         DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
 
@@ -2145,8 +2146,9 @@ begin
 
                              //Second Tab
                              LblSiteCode.text := DM.FDQOrganisation.fieldbyName('SITE_CODE').asstring;
-                             EdSite_Name.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
-                             EdSiteAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+                             LbSite_Name.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
+                             LbSite_Date.Text := DatetoStr(Today);
+                             LbSiteAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
 
                              //EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
 
