@@ -29,7 +29,8 @@ uses
   FMX.WebBrowser,
   FMX.Maps,
   System.Threading,
-  DateUtils;
+  DateUtils,
+  System.generics.collections;
 
 
 type
@@ -58,9 +59,7 @@ type
     Panel4: TPanel;
     TabItem3: TTabItem;
     Memo1: TMemo;
-    FLOShowSelectedRecordOrg: TFlowLayout;
     Panel5: TPanel;
-    FlowLayout2: TFlowLayout;
     BtnIncreaseSize: TButton;
     BtnReduceSize: TButton;
     ComboBox1: TComboBox;
@@ -73,17 +72,8 @@ type
     ImageList1: TImageList;
     Label6: TLabel;
     Label7: TLabel;
-    BtnStartRec: TButton;
-    BtnStopRec: TButton;
-    BtnPlayRec: TButton;
     MediaPlayer1: TMediaPlayer;
     Timer1: TTimer;
-    Image3: TImage;
-    BtnTakePhoto: TButton;
-    FloatAnimation1: TFloatAnimation;
-    Image4: TImage;
-    Image2: TImage;
-    Image1: TImage;
     LblStatus: TLabel;
     BtnConfirm: TButton;
     Panel9: TPanel;
@@ -197,23 +187,32 @@ type
     MemoDepartments: TMemo;
     Button7: TButton;
     Panel7: TPanel;
-    BtnAddLocation: TButton;
-    EdNewLocation: TEdit;
     LOSiteName: TLayout;
     Label5: TLabel;
     LblSite_Name: TLabel;
-    Layout2: TLayout;
-    LblSiteCode: TLabel;
-    LODate: TLayout;
-    Label4: TLabel;
-    LOOrgAdress: TLayout;
-    Lbl_Address: TLabel;
-    Label2: TLabel;
     BtnAddNewSite: TButton;
     BtnSelectSite: TButton;
     LbSite_Name: TLabel;
-    LbSite_Date: TLabel;
-    LbSiteAddress: TLabel;
+    LblSiteCode: TLabel;
+    PnlPopup: TPanel;
+    BtnShowAddDept: TButton;
+    EdNewLocation: TEdit;
+    PlnVoice: TPanel;
+    BtnStartRec: TButton;
+    Image3: TImage;
+    BtnStopRec: TButton;
+    Image4: TImage;
+    BtnPlayRec: TButton;
+    Image1: TImage;
+    BtnTakePhoto: TButton;
+    FloatAnimation1: TFloatAnimation;
+    Image2: TImage;
+    VertScrollBox1: TVertScrollBox;
+    FlowLayout2: TFlowLayout;
+    BtnDeleteSelected: TButton;
+    Layout2: TLayout;
+    BtnOK: TButton;
+    BtnCancel: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -253,13 +252,19 @@ type
     procedure BtnCreateOrgRecClick(Sender: TObject);
     procedure BtnShowClick(Sender: TObject);
     procedure CBOrganisationsChange(Sender: TObject);
-    procedure BtnAddLocationClick(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure TabConHostSelectSiteChange(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
     procedure BtnAddNewSiteClick(Sender: TObject);
     procedure BtnSelectSiteClick(Sender: TObject);
+    procedure BtnShowAddDeptClick(Sender: TObject);
+    procedure BtnOKClick(Sender: TObject);
+    procedure BtnCancelClick(Sender: TObject);
+    procedure EdNewLocationClick(Sender: TObject);
+    procedure VertScrollBox1Gesture(Sender: TObject;
+      const EventInfo: TGestureEventInfo; var Handled: Boolean);
+    procedure BtnDeleteSelectedClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -322,7 +327,9 @@ type
 
     Procedure UpdateOrganisationData;
     Procedure UpdateLocationData;
-
+    //
+    procedure ImageDblClick(Sender: TObject);
+    //
   public
   public
     { Public declarations }
@@ -487,6 +494,11 @@ end;
 
 
 
+procedure TForm1.EdNewLocationClick(Sender: TObject);
+begin
+  EdNewLocation.Text := '';
+end;
+
 procedure TForm1.Empty_Controls(AParent: TFMXObject);
 begin
 
@@ -582,9 +594,19 @@ begin
   //WebBrowser2.Navigate(URLString);
 end;
 
+procedure TForm1.ImageDblClick(Sender: TObject);
+begin
+
+  ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
+end;
+
+
 procedure TForm1.TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
 var
   ScaleFactor: Single;
+
+  Img: TImage;
+  Checkbox : TCheckBox;
 begin
   if Image.Width > 1024 then
   begin
@@ -594,6 +616,33 @@ begin
   FRawBitmap.Assign(Image);
   ImageContainer.Bitmap.Assign(Image);
   UpdateEffect;
+
+           FlowLayout2.BeginUpdate;
+
+
+            Img := TImage.Create(FlowLayout2);//LOImagesTaken
+            Img.Parent := FlowLayout2; //LOImagesTaken// Assign parent to FlowLayout
+            Img.Align := TAlignLayout.None; // Allow free placement
+            Img.WrapMode := TImageWrapMode.Stretch; // Stretch the image to fit
+            Img.Width := 120; // Set width (adjust as needed)
+            Img.Height := 100; // Set height (adjust as needed)
+            Img.HitTest := True;
+            Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+            Img.tag := random(10000);
+
+            Img.OnDblClick :=  ImageDblClick;
+
+             Checkbox := TCheckBox.Create(FlowLayout2);
+             Checkbox.Parent := FlowLayout2;
+             Checkbox.Align := TAlignLayout.Top;
+             Checkbox.Text := 'Select'; // Set checkbox label
+             Checkbox.Tag := Img.Tag;
+
+
+
+            Img.Bitmap.Assign(ImageContainer.Bitmap);
+
+            FlowLayout2.EndUpdate;
 
 end;
 
@@ -1074,30 +1123,6 @@ begin
 end;
 
 
-procedure TForm1.BtnAddLocationClick(Sender: TObject);
-begin
-
-        DM.FDConnection1.Connected := true;
-
-        DM.FDQLocations.sql.clear;
-
-        DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_CODE, AREA_DEPT_NAME)');
-        DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
-
-        DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
-        DM.FDQLocations.Params.ParamByName('SiteName').AsString := LbSite_Name.Text;
-        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := '';
-        DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
-
-        DM.FDQLocations.ExecSQL;
-
-        DM.FDConnection1.Connected := false;
-
-        //Refill Combobox
-        UpdateLocationData;
-
-end;
-
 procedure TForm1.BtnAddNewSiteClick(Sender: TObject);
 begin
   TabConHostSelectSite.TabIndex := 1;
@@ -1154,6 +1179,14 @@ begin
     end
 
    ).Start;
+
+end;
+
+procedure TForm1.BtnCancelClick(Sender: TObject);
+begin
+
+  EdNewLocation.Text := '';
+  PnlPopup.visible := false;
 
 end;
 
@@ -1387,11 +1420,70 @@ begin
 
 end;
 
+procedure TForm1.BtnDeleteSelectedClick(Sender: TObject);
+var
+  DeletionList: TList<TCheckBox>;
+  i, x, y: Integer;
+  AssociatedImage: TImage;
+  Checkbox: TCheckbox;
+begin
+  DeletionList := TList<TCheckBox>.Create; // Temporary list
+  try
+    // Collect selected checkboxes and images
+    for i := 0 to FlowLayout2.ControlsCount - 1 do
+    begin
+      if (FlowLayout2.Controls[i] is TCheckBox) and
+         (TCheckBox(FlowLayout2.Controls[i]).IsChecked) then
+      begin
+        DeletionList.Add(TCheckbox(FlowLayout2.Controls[i])); // Add checkbox to delete
+      end;
+    end;
+
+    // Delete controls in the list
+    for x := DeletionList.Count - 1 downto 0 do
+    begin
+
+        Checkbox := DeletionList[x]; // Free each control
+
+        AssociatedImage := nil; // Initialize reference
+
+          for y := FlowLayout2.ControlsCount - 1 downto 0 do
+          begin
+            if (FlowLayout2.Controls[y] is TImage) and
+               (TImage(FlowLayout2.Controls[y]).Tag = Checkbox.Tag) then
+            begin
+              AssociatedImage := TImage(FlowLayout2.Controls[y]);
+              Break;
+            end;
+          end;
+
+        if AssociatedImage <> nil then
+        begin
+          AssociatedImage.Free;
+          Checkbox.Free;
+        end;
+
+    end;
+
+  finally
+    DeletionList.Free; // Free the temporary list
+  end;
+
+end;
+
 procedure TForm1.UpdateUI;
 begin
 
 end;
 
+
+procedure TForm1.VertScrollBox1Gesture(Sender: TObject;
+  const EventInfo: TGestureEventInfo; var Handled: Boolean);
+begin
+
+  Handled := true;
+
+end;
 
 procedure TForm1.BtnIterateClick(Sender: TObject);
 var
@@ -1445,6 +1537,42 @@ end;
 procedure TForm1.BtnNoteDisplayClick(Sender: TObject);
 begin
   Tabcontrol2.TabIndex := 1;
+end;
+
+procedure TForm1.BtnOKClick(Sender: TObject);
+begin
+
+  If (EdNewLocation.text = '') or (EdNewLocation.text = 'Enter Dept...') then
+  begin
+    showmessage('Need to enter a dept, or cancel');
+  end else
+  begin
+   // ShowMessage('You entered: ' + EdGetDept.Text);
+
+        DM.FDConnection1.Connected := true;
+
+        DM.FDQLocations.sql.clear;
+
+        DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_CODE, AREA_DEPT_NAME)');
+        DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
+
+        DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
+        DM.FDQLocations.Params.ParamByName('SiteName').AsString := LbSite_Name.Text;
+        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := '';
+        DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
+
+        DM.FDQLocations.ExecSQL;
+
+        DM.FDConnection1.Connected := false;
+
+        //Refill Combobox
+        UpdateLocationData;
+
+        EdNewLocation.Text := '';
+
+        PnlPopup.visible := false;
+  end;
+
 end;
 
 procedure TForm1.BtnPayVoiceDBClick(Sender: TObject);
@@ -1617,29 +1745,29 @@ begin
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
+var
+  i, x: Integer;
+  Checkbox: TCheckBox;
+  AssociatedImage: TImage;
 begin
 
-//       DM.FDConnection1.Connected := true;
-//
-//        DM.FDQDetails.sql.clear;
-//
-//        DM.FDQDetails.sql.add('insert into "SITE_LOCATION" (SITE_NAME)');
-//        DM.FDQDetails.sql.add('Values(:Site)');
-//
-//        DM.FDQDetails.Params.ParamByName('Site').AsString := Edit1.text;
-//
-//        DM.FDQDetails.ExecSQL;
-//
-//
-//        DM.FDQDetails.sql.clear;
-//        DM.FDQDetails.sql.add('Select * FROM "SITE_LOCATION"');
-//        DM.FDQDetails.sql.add(' WHERE "SITE_NAME" = ' +
-//                            QuotedStr(Edit1.text));
-//        DM.FDQDetails.Open;
-//
-//        Showmessage('PK ' + inttostr(DM.FDQDetails.fieldbyName('PK_KEY').asinteger));
-//
-//
+  for i := 0 to FlowLayOut2.ControlsCount - 1 do
+  begin
+    // Check if the control is a TCheckBox
+    if FlowLayOut2.Controls[i] is TCheckBox then
+    begin
+      Checkbox := TCheckBox(FlowLayOut2.Controls[i]);
+
+      // Check if the checkbox is selected
+      if Checkbox.IsChecked then
+      begin
+
+        Showmessage(CheckBox.Name);
+
+      end;
+    end;//checkbox
+
+  end;
 
 end;
 
@@ -1690,6 +1818,12 @@ end;
 procedure TForm1.BtnSelectSiteClick(Sender: TObject);
 begin
   TabConHostSelectSite.TabIndex := 0;
+end;
+
+procedure TForm1.BtnShowAddDeptClick(Sender: TObject);
+begin
+    EdNewLocation.text:= 'Enter Dept...';
+    PnlPopup.visible := true;
 end;
 
 procedure TForm1.BtnShowClick(Sender: TObject);
@@ -2147,8 +2281,8 @@ begin
                              //Second Tab
                              LblSiteCode.text := DM.FDQOrganisation.fieldbyName('SITE_CODE').asstring;
                              LbSite_Name.Text := DM.FDQOrganisation.fieldbyName('SITE_NAME').asstring;
-                             LbSite_Date.Text := DatetoStr(Today);
-                             LbSiteAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
+                             //LbSite_Date.Text := DatetoStr(Today);
+                             //LbSiteAddress.Text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
 
                              //EdSiteName.text := DM.FDQOrganisation.fieldbyName('ADDRESS').asstring;
 
@@ -2285,6 +2419,12 @@ begin
     UpdateOrganisationData;
 
     ComponentDefaultFont(Form1, 12);  //12
+
+
+  FlowLayout2 := TFlowLayout.Create(VertScrollBox1); // Create FlowLayout dynamically
+  FlowLayout2.Parent := VertScrollBox1;              // Assign parent to the scroll box
+  //FlowLayout.Align := TAlignLayout.Top;            // Align FlowLayout within the scroll box
+
 
 end;
 
