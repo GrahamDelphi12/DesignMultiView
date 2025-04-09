@@ -52234,23 +52234,21 @@ object Form1: TForm1
         end
         object VertScrollBox1: TVertScrollBox
           OnGesture = VertScrollBox1Gesture
-          Align = Client
           Margins.Left = 5.000000000000000000
           Margins.Top = 5.000000000000000000
           Margins.Right = 5.000000000000000000
           Margins.Bottom = 5.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 95.000000000000000000
           Size.Width = 165.000000000000000000
-          Size.Height = 411.000000000000000000
+          Size.Height = 449.000000000000000000
           Size.PlatformDefault = False
-          StyleLookup = 'scrollboxstyle'
           TabOrder = 5
-          ShowSizeGrip = True
-          Viewport.Width = 165.000000000000000000
-          Viewport.Height = 411.000000000000000000
+          Viewport.Width = 149.000000000000000000
+          Viewport.Height = 449.000000000000000000
           object FlowLayout2: TFlowLayout
-            Align = Client
             Size.Width = 165.000000000000000000
-            Size.Height = 411.000000000000000000
+            Size.Height = 450.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 5
             Justify = Left
@@ -53350,6 +53348,17 @@ object Form1: TForm1
               Size.Width = 818.000000000000000000
               Size.Height = 386.000000000000000000
               Size.PlatformDefault = False
+              object MemoShowNote: TMemo
+                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+                DataDetectorTypes = []
+                Align = MostLeft
+                Size.Width = 81.000000000000000000
+                Size.Height = 386.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 0
+                Viewport.Width = 77.000000000000000000
+                Viewport.Height = 382.000000000000000000
+              end
             end
           end
           object TabItem5: TTabItem

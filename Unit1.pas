@@ -213,6 +213,7 @@ type
     Layout2: TLayout;
     BtnOK: TButton;
     BtnCancel: TButton;
+    MemoShowNote: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -329,6 +330,7 @@ type
     Procedure UpdateLocationData;
     //
     procedure ImageDblClick(Sender: TObject);
+    procedure CalculateFlowLayoutHeight;
     //
   public
   public
@@ -594,19 +596,41 @@ begin
   //WebBrowser2.Navigate(URLString);
 end;
 
+
 procedure TForm1.ImageDblClick(Sender: TObject);
+var
+  y: Integer;
+  MemoInstance: TMemo;
 begin
 
-  ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
-end;
+  MemoShowNote.Lines.Clear;
 
+  if Sender is TImage then
+    ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
+
+  for y := FlowLayout2.ControlsCount - 1 downto 0 do
+  begin
+    // Check if the control is a TMemo
+    if (FlowLayout2.Controls[y] is TMemo) then
+    begin
+      MemoInstance := TMemo(FlowLayout2.Controls[y]);
+
+      // Match the Tag property of the TImage and TMemo instances
+      if (TImage(Sender).Tag = MemoInstance.Tag) then
+      begin
+        MemoShowNote.lines.Assign(MemoInstance.Lines); // Correctly assign the instance content
+        Break; // Exit the loop after finding the match
+      end;
+    end;
+  end;
+end;
 
 procedure TForm1.TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
 var
   ScaleFactor: Single;
-
   Img: TImage;
   Checkbox : TCheckBox;
+  Memo : TMemo;
 begin
   if Image.Width > 1024 then
   begin
@@ -637,15 +661,48 @@ begin
              Checkbox.Align := TAlignLayout.Top;
              Checkbox.Text := 'Select'; // Set checkbox label
              Checkbox.Tag := Img.Tag;
-
-
-
+              //
+               Memo := TMemo.Create(FlowLayout2);//LOImagesTaken
+               Memo.Parent := FlowLayout2; //LOImagesTaken// Assign parent to FlowLayout
+               Memo.Align := TAlignLayout.None; // Allow free placement
+               Memo.Width := 120; // Set width (adjust as needed)
+               Memo.Height := 20; // Set height (adjust as needed)
+               Memo.HitTest := True;
+               Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+               Memo.Tag := Img.Tag;
+              //
             Img.Bitmap.Assign(ImageContainer.Bitmap);
 
             FlowLayout2.EndUpdate;
 
+            CalculateFlowLayoutHeight;
+
+            VertScrollbox1.RealignContent;
+
+
 end;
 
+procedure TForm1.CalculateFlowLayoutHeight;
+var
+  MaxY, I: Integer;
+  Child: TControl;
+begin
+  MaxY := 0;
+
+  // Iterate through FlowLayout children and find the maximum Y + Height
+  for I := 0 to FlowLayout2.ControlsCount - 1 do
+  begin
+    Child := TControl(FlowLayout2.Controls[I]);
+    if (Child.Position.Y + Child.Height) > MaxY then
+      MaxY := Round(Child.Position.Y + Child.Height);
+  end;
+
+  // Update the FlowLayout height to fit its content
+  FlowLayout2.Height := MaxY;
+
+  // Force the VertScrollBox to update its scrollbar
+  //VertScrollBox1.Realign;
+end;
 
 procedure TForm1.TakePicturePermissionRequestResult(Sender: TObject; const APermissions: TClassicStringDynArray; const AGrantResults: TClassicPermissionStatusDynArray);
 begin
@@ -1482,6 +1539,11 @@ procedure TForm1.VertScrollBox1Gesture(Sender: TObject;
 begin
 
   Handled := true;
+
+  VertScrollBox1.AniCalculations.ViewportPosition := PointF(
+  VertScrollBox1.AniCalculations.ViewportPosition.X,
+  VertScrollBox1.AniCalculations.ViewportPosition.Y //- 50 // Adjust scroll step as needed
+  );
 
 end;
 
@@ -2447,6 +2509,8 @@ begin
      If PnlImage_Memo.height >170 then PnlImage_Memo.height := 170;
      If PnlImage_Memo.height <170  then PnlImage_Memo.height := 170;
 
+     FlowLayout2.Height := 900;
+     Vertscrollbox1.Height := 899;
     end
     else
     begin
@@ -2457,7 +2521,8 @@ begin
      If PnlImage_Memo.height >45 then PnlImage_Memo.height := 45;
      If PnlImage_Memo.height <45 then PnlImage_Memo.height := 45;
 
-
+     FlowLayout2.Height := 450;
+     Vertscrollbox1.Height := 449;
     end;
 
 
