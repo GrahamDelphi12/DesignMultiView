@@ -243,6 +243,7 @@ type
     Button6: TButton;
     BtnReadLog: TButton;
     LblDeptCode: TLabel;
+    FLOThumbNails: TFlowLayout;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -347,7 +348,7 @@ type
 
     procedure UpdateEffect;
     procedure UpdateUI;
-    procedure SelectedNameView(Name: string);
+    procedure SelectedNameView(DeptRef: string);
     Function UpdateListviewData(CallingProcedure: string): Integer;
     procedure Empty_Controls(AParent: TFMXObject);
     procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
@@ -361,7 +362,7 @@ type
     Procedure UpdateLocationData;
     //
     procedure ImageDblClick(Sender: TObject);
-    procedure CalculateFlowLayoutHeight;
+    procedure CalculateFlowLayoutHeight(FLO: TFlowLayOut);
 
     procedure DoMapDispay(Lat, Long : string);
     //
@@ -373,6 +374,9 @@ type
     procedure ReadLogFile;
 
 
+    procedure CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
+
+    procedure ImageFullSizeDblClick(Sender: TObject);
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -458,6 +462,61 @@ begin
   end;
 end;
 
+procedure TForm1.CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
+var
+  ScaleFactor: Single;
+  Img: TImage;
+  Memo : TMemo;
+
+begin
+
+     // ImageContainer.Bitmap.Assign(Image);
+
+
+      if Image.Width > 1024 then
+      begin
+        ScaleFactor := Image.Width / 1024;
+        Image.Resize(Round(Image.Width / ScaleFactor), Round(Image.Height / ScaleFactor));
+      end;
+
+      writetolog('In CreateReviewThumbNails 1');
+
+           FLOThumbNails.BeginUpdate;
+
+            Img := TImage.Create(FLOThumbNails);//LOImagesTaken
+            Img.Parent := FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
+            Img.Align := TAlignLayout.None; // Allow free placement
+            Img.WrapMode := TImageWrapMode.Stretch; // Stretch the image to fit
+            Img.Width := 120; // Set width (adjust as needed)
+            Img.Height := 100; // Set height (adjust as needed)
+            Img.HitTest := True;
+            Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+            Img.tag := random(10000);
+
+            writetolog('In CreateReviewThumbNails 2');
+
+            Img.OnDblClick :=  ImageFullSizeDblClick;//ImageDblClick;
+
+              //
+//               Memo := TMemo.Create(FLOThumbNails);//LOImagesTaken
+//               Memo.Parent := FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
+//               Memo.Align := TAlignLayout.None; // Allow free placement
+//               Memo.Width := 120; // Set width (adjust as needed)
+//               Memo.Height := 20; // Set height (adjust as needed)
+//               Memo.HitTest := True;
+//               Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+               //Memo.Tag := Img.Tag;
+              //
+           // Img.Bitmap.Assign(ImageContainer.Bitmap);
+            Img.Bitmap.Assign(Image);
+
+            FLOThumbNails.EndUpdate;
+
+            CalculateFlowLayoutHeight(FLOThumbNails);
+
+            //VertScrollbox1.RealignContent;
+end;
+
 
 function TForm1.WriteSelectedDetailsToRecord: TImage_Memo_Store;
 var
@@ -529,8 +588,7 @@ begin
 
             end;
 
-            // Inc(x);
-          end;
+          end; //Image or Memo Found
 
           if (Image_Memo_Store[x].MemoTag =
                               Image_Memo_Store[x].ImageTag) then
@@ -544,7 +602,7 @@ begin
                     WriteToLog('x value after inc = ' + inttostr(x));
                 end;
 
-          end;//inc conditions
+          end;//inc conditions separated for clarity
 
 
 
@@ -841,6 +899,43 @@ begin
   //WebBrowser2.Navigate(URLString);
 end;
 
+procedure TForm1.ImageFullSizeDblClick(Sender: TObject);
+var
+  tagValue : integer;
+  BlobStream: TStream;
+  MemoryStream: TmemoryStream;
+begin
+
+  if Sender is TImage then
+  begin
+
+    TagValue := (sender as TImage).tag;
+
+    DM.FDConnection1.Connected := true;
+
+        DM.FDQDetails.sql.clear;
+        DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
+        DM.FDQDetails.sql.add('WHERE Image_tag = :pImage');
+
+        DM.FDQDetails.Params.ParamByName('pImage').AsInteger := TagValue;
+
+        DM.FDQDetails.Open;
+
+        writetolog('Records found  number = ' + inttostr(DM.FDQDetails.RecordCount));
+
+        BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('IMAGE_CONTENTS'), bmRead);
+        MemoryStream := TMemoryStream.Create;
+        MemoryStream.CopyFrom(BlobStream, 0);
+        MemoryStream.Position := 0;
+
+        ImageDisplay.Bitmap.LoadFromStream(MemoryStream);
+
+        writetolog('Reading new DB table for Image with Tag = ' + Inttostr(TagValue));
+
+    DM.FDConnection1.Connected := false;
+  end;
+
+end;
 
 procedure TForm1.ImageDblClick(Sender: TObject);
 var
@@ -855,31 +950,8 @@ begin
 
   if Sender is TImage then
   begin
-    //ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
+    ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
 
-    //Code blow to test writing of site_detail records - remove!!
-    TagValue := (sender as TImage).tag;
-
-    DM.FDConnection1.Connected := true;
-
-        DM.FDQDetails.sql.clear;
-        DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
-        DM.FDQDetails.sql.add('WHERE Image_tag = :pImage');
-
-        DM.FDQDetails.Params.ParamByName('pImage').AsInteger := TagValue;
-
-        DM.FDQDetails.Open;
-
-        BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('IMAGE_CONTENTS'), bmRead);
-        MemoryStream := TMemoryStream.Create;
-        MemoryStream.CopyFrom(BlobStream, 0);
-        MemoryStream.Position := 0;
-
-        ImageContainer.Bitmap.LoadFromStream(MemoryStream);
-
-        writetolog('Reading new DB table for Image');
-
-    DM.FDConnection1.Connected := false;
   end;
 
   for y := FlowLayout2.ControlsCount - 1 downto 0 do
@@ -949,14 +1021,14 @@ begin
 
             FlowLayout2.EndUpdate;
 
-            CalculateFlowLayoutHeight;
+            CalculateFlowLayoutHeight(FlowLayout2);
 
             VertScrollbox1.RealignContent;
 
 
 end;
 
-procedure TForm1.CalculateFlowLayoutHeight;
+procedure TForm1.CalculateFlowLayoutHeight(FLO: TFlowLayOut);
 var
   MaxY, I: Integer;
   Child: TControl;
@@ -964,15 +1036,15 @@ begin
   MaxY := 0;
 
   // Iterate through FlowLayout children and find the maximum Y + Height
-  for I := 0 to FlowLayout2.ControlsCount - 1 do
+  for I := 0 to FLO.ControlsCount - 1 do  //FlowLayout2
   begin
-    Child := TControl(FlowLayout2.Controls[I]);
+    Child := TControl(FLO.Controls[I]);
     if (Child.Position.Y + Child.Height) > MaxY then
       MaxY := Round(Child.Position.Y + Child.Height);
   end;
 
   // Update the FlowLayout height to fit its content
-  FlowLayout2.Height := MaxY;
+  FLO.Height := MaxY;
 
   // Force the VertScrollBox to update its scrollbar
   //VertScrollBox1.Realign;
@@ -1526,7 +1598,6 @@ procedure TForm1.BtnConfirmClick(Sender: TObject);
 var
   ImageStream: TMemoryStream;
   MemoStream : TMemoryStream;
-//  BlobStream, ImageStream: TStream;
   PKValue: integer;
 
   i, x : Integer;
@@ -1576,122 +1647,116 @@ begin
   for i := 0 to High(Image_Memo_StoreResult) do
   begin
 
-   try
+       try
 
-        WriteToLog('In array section elements = ' + inttostr(High(Image_Memo_StoreResult)));
+            WriteToLog('In array section elements = ' + inttostr(High(Image_Memo_StoreResult)));
 
-        if Image_Memo_StoreResult[i].ImageTag <> 0 then
-        begin
-           Image_Tag := Image_Memo_StoreResult[i].ImageTag;
-           Image_Name := Image_Memo_StoreResult[i].ImageName;
+            if Image_Memo_StoreResult[i].ImageTag <> 0 then
+            begin
+               Image_Tag := Image_Memo_StoreResult[i].ImageTag;
+               Image_Name := Image_Memo_StoreResult[i].ImageName;
 
-           WriteToLog('Image Name and tag done ' + inttostr(Image_Tag));
-               ImageStream := Image_Memo_StoreResult[i].ImageStream; // Use the existing stream
+               WriteToLog('Image Name and tag done ' + inttostr(Image_Tag));
+                   ImageStream := Image_Memo_StoreResult[i].ImageStream; // Use the existing stream
 
-            WriteToLog('Assignment to ImageStream Done');
+                WriteToLog('Assignment to ImageStream Done');
 
-           if Assigned(ImageStream) and (ImageStream.Size > 0) then
-           begin
-               ImageStream.Position := 0; // Reset stream position
+               if Assigned(ImageStream) and (ImageStream.Size > 0) then
+               begin
+                   ImageStream.Position := 0; // Reset stream position
 
-                WriteToLog('Image stream position set to 0');
+                    WriteToLog('Image stream position set to 0');
 
-                ImageToRecord.Bitmap.LoadFromStream(ImageStream); // Load the bitmap
+                    ImageToRecord.Bitmap.LoadFromStream(ImageStream); // Load the bitmap
 
-                WriteToLog('Bit Map loaded');
+                    WriteToLog('Bit Map loaded');
 
-           end
-           else
-           begin
-               WriteToLog('Stream is empty or nil for ImageTag: ' + IntToStr(Image_Memo_StoreResult[i].ImageTag));
-               ShowMessage('Stream is empty or nil for ImageTag: ' + IntToStr(Image_Memo_StoreResult[i].ImageTag));
-           end; //Image
+               end
+               else
+               begin
+                   WriteToLog('Stream is empty or nil for ImageTag: ' + IntToStr(Image_Memo_StoreResult[i].ImageTag));
+                   ShowMessage('Stream is empty or nil for ImageTag: ' + IntToStr(Image_Memo_StoreResult[i].ImageTag));
+               end; //Image
 
-        end; //tag
+            end; //tag
 
-         WriteToLog('Image done');
-
-
-         WriteToLog('Tag of Memo = ' + inttostr(Image_Memo_StoreResult[i].MemoTag));
-
-        if Image_Memo_StoreResult[i].MemoTag <> 0 then
-        begin
-           Memo_Tag := Image_Memo_StoreResult[i].MemoTag;
-           Memo_Name := Image_Memo_StoreResult[i].MemoName;
-
-           WriteToLog('Before Memo to Stream ' + Memo_Name);
-
-           MemoStream := Image_Memo_StoreResult[i].MemoStream;
-
-           if Assigned(MemoStream) and (MemoStream.Size > 0) then
-           begin
-
-             WriteToLog('In load memo');
-
-             MemoStream.Position := 0; // Reset stream position
-
-             WriteToLog('Memo position set to 0');
-
-             MemotoRecord.Lines.LoadFromStream(MemoStream);
-
-             WriteToLog(MemotoRecord.lines.text);
-
-           end;//Memo
-
-        end;//tag
-
-        DM.FDConnection1.Connected := true;
-
-        WriteToLog('Ready for Database write');
-
-        DM.FDQDetails.sql.clear;
-        DM.FDQDetails.sql.add('INSERT into Site_Detail (Site_Dept_Code, Image_Name, Image_Tag, Memo_Name, Memo_Tag, Image_Contents, Memo_Contents)');
-        DM.FDQDetails.sql.add('VALUES(:pSiteDeptCode, :pImageName, :pImageTag, :pMemoName, :pMemoTag, :pImageContents, :pMemoContents)');
-
-        DM.FDQDetails.Params.ParamByName('pSiteDeptCode').AsString := Site_Dept_Code;
+             WriteToLog('Image done');
 
 
-        DM.FDQDetails.Params.ParamByName('pImageName').AsString := Image_Name;
-        DM.FDQDetails.Params.ParamByName('pImageTag').AsInteger := Image_Tag;
+             WriteToLog('Tag of Memo = ' + inttostr(Image_Memo_StoreResult[i].MemoTag));
 
-        DM.FDQDetails.Params.ParamByName('pMemoName').AsString := Memo_Name;
-        DM.FDQDetails.Params.ParamByName('pMemoTag').AsInteger := Memo_tag;
-        DM.FDQDetails.ParamByName('pImageContents').LoadFromStream(ImageStream, ftBlob);
-        DM.FDQDetails.ParamByName('pMemoContents').LoadFromStream(MemoStream, ftBlob);
+            if Image_Memo_StoreResult[i].MemoTag <> 0 then
+            begin
+               Memo_Tag := Image_Memo_StoreResult[i].MemoTag;
+               Memo_Name := Image_Memo_StoreResult[i].MemoName;
+
+               WriteToLog('Before Memo to Stream ' + Memo_Name);
+
+               MemoStream := Image_Memo_StoreResult[i].MemoStream;
+
+               if Assigned(MemoStream) and (MemoStream.Size > 0) then
+               begin
+
+                 WriteToLog('In load memo');
+
+                 MemoStream.Position := 0; // Reset stream position
+
+                 WriteToLog('Memo position set to 0');
+
+                 MemotoRecord.Lines.LoadFromStream(MemoStream);
+
+                 WriteToLog(MemotoRecord.lines.text);
+
+               end;//Memo
+
+            end;//tag
+
+            DM.FDConnection1.Connected := true;
+
+            WriteToLog('Ready for Database write');
+
+            DM.FDQDetails.sql.clear;
+            DM.FDQDetails.sql.add('INSERT into Site_Detail (Site_Dept_Code, Image_Name, Image_Tag, Memo_Name, Memo_Tag, Image_Contents, Memo_Contents)');
+            DM.FDQDetails.sql.add('VALUES(:pSiteDeptCode, :pImageName, :pImageTag, :pMemoName, :pMemoTag, :pImageContents, :pMemoContents)');
+
+            DM.FDQDetails.Params.ParamByName('pSiteDeptCode').AsString := Site_Dept_Code;
 
 
+            DM.FDQDetails.Params.ParamByName('pImageName').AsString := Image_Name;
+            DM.FDQDetails.Params.ParamByName('pImageTag').AsInteger := Image_Tag;
 
-        WriteToLog(DM.FDQDetails.sql.text);
+            DM.FDQDetails.Params.ParamByName('pMemoName').AsString := Memo_Name;
+            DM.FDQDetails.Params.ParamByName('pMemoTag').AsInteger := Memo_tag;
+            DM.FDQDetails.ParamByName('pImageContents').LoadFromStream(ImageStream, ftBlob);
+            DM.FDQDetails.ParamByName('pMemoContents').LoadFromStream(MemoStream, ftBlob);
 
-        DM.FDQDetails.ExecSQL;
+            //WriteToLog(DM.FDQDetails.sql.text);
+            WriteToLog('Image Tag = ' + inttostr(Image_Tag));
 
-//
-//        DM.FDQDetails.sql.clear;
-//        DM.FDQDetails.sql.add('insert into "NAMES" (SITECODE, DEPARTMENT, PHOTO, MEMO_NOTE, LATITUDE, LONGITUDE)');
-//        DM.FDQDetails.sql.add('Values(:Site, :Department, :image, :MemoNote, :Latitude, :Longitude)');
-//
-//        DM.FDQDetails.Params.ParamByName('Site').AsString := LblSiteCode.text;
-//        DM.FDQDetails.Params.ParamByName('Department').AsString := EdNewLocation.text;
-//        DM.FDQDetails.ParamByName('image').LoadFromStream(MemoryStream, ftBlob);
-//        DM.FDQDetails.ParamByName('MemoNote').LoadFromStream(BlobStream, ftBlob);
-//
-//        DM.FDQDetails.ExecSQL;
+            DM.FDQDetails.ExecSQL;
 
-        DM.FDConnection1.Connected := false;
+            WriteToLog('Database write done');
 
-        PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
+            DM.FDConnection1.Connected := false;
 
-   finally
-      ImageStream.Free;
-      FRawBitmap.SetSize(0, 0);
-      ImageContainer.Bitmap.SetSize(0, 0);
-      ImageContainer.Bitmap.Assign(FRawBitmap);
-   end;
+            //PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
 
-  end;//Array
+       finally
+          ImageStream.Free;
+          FRawBitmap.SetSize(0, 0);
+          ImageContainer.Bitmap.SetSize(0, 0);
+          ImageContainer.Bitmap.Assign(FRawBitmap);
+       end;
+
+  end;//Array of Images and Memos to write to database
 
     WriteToLog('All Done');
     showmessage('Insert Done');
+
+    //All Data written to Dept detail, now update the Report screen
+    //No value returned from this function any more.
+    PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
+
 
 end;
 
@@ -2116,6 +2181,8 @@ begin
 end;
 
 procedure TForm1.BtnOKClick(Sender: TObject);
+var
+  ReftoDept: string;
 begin
 
   If (EdNewLocation.text = '') or (EdNewLocation.text = 'Enter Dept...') then
@@ -2132,11 +2199,14 @@ begin
         DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_CODE, AREA_DEPT_NAME)');
         DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
 
-        lblDeptCode.text := inttostr(random(1000));
+        //lblDeptCode.text := inttostr(random(1000));
+        //lblDeptCode.Text := Format('%05d', [Random(1000)]);
+        ReftoDept := Format('%.5d', [Random(1000)]);
+        lblDeptCode.Text := ReftoDept;
 
         DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
         DM.FDQLocations.Params.ParamByName('SiteName').AsString := LbSite_Name.Text;
-        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := lblDeptCode.text;
+        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := ReftoDept;//lblDeptCode.text;
         DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
 
         DM.FDQLocations.ExecSQL;
@@ -2339,52 +2409,12 @@ end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 var
-  i, x : Integer;
-  ImagetoRecord: TImage;
-  MemotoRecord: TMemo;
-  Image_Memo_Store : TImage_Memo_Store;
+  v: string;
 begin
 
-  x:= 1;
+  v := Format('%.5d', [Random(1000)]);
 
-  for i := 0 to FlowLayOut2.ControlsCount - 1 do
-  begin
-
-    SetLength(Image_Memo_Store, FlowLayOut2.ControlsCount +1);
-
-    if FlowLayOut2.Controls[i] is TImage then
-    begin
-      ImagetoRecord := TImage(FlowLayOut2.Controls[i]);
-
-        Showmessage('Image Tag ' + InttoStr(ImagetoRecord.tag));
-
-        Image_Memo_Store[x].ImageTag := ImagetoRecord.tag;
-
-        Showmessage( 'Image Tag ' + InttoStr(Image_Memo_Store[x].ImageTag));
-
-        inc(x);
-
-        Image_Memo_Store[x].ImageName := ImagetoRecord.Name;
-        Showmessage('Image Name ' + Image_Memo_Store[x].ImageName);
-        inc(x);
-
-       // Showmessage('Image After assign');
-
-
-
-
-    end;
-
-//    if FlowLayOut2.Controls[i] is TMemo then
-//    begin
-//      MemotoRecord := TMemo(FlowLayOut2.Controls[i]);
-//
-//        Showmessage('Memo Name ' + MemotoRecord.Name
-//        + ' Memo Tag ' + INttoStr(MemotoRecord.tag));
-//
-//    end;
-
-  end;
+  showmessage(v);
 
 end;
 
@@ -2499,14 +2529,14 @@ begin
 
 
       DM.FDQLocations.SQL.Clear;
-      DM.FDQLocations.SQL.Add('SELECT * FROM SITE_LOCATION');
+      DM.FDQLocations.SQL.Add('SELECT * FROM SITE_DETAIL');
       DM.FDQLocations.Open;
 
         while not DM.FDQLocations.EOF do
         begin
 
-          Showmessage(DM.FDQLocations.FieldByName('SITE_CODE').AsString
-              + ' ' + Inttostr(DM.FDQLocations.FieldByName('PK_KEY').AsInteger));
+          Showmessage(DM.FDQLocations.FieldByName('SITE_DEPT_CODE').AsString
+              + ' ' + Inttostr(DM.FDQLocations.FieldByName('IMAGE_TAG').AsInteger));
 
           DM.FDQLocations.Next;
         end;
@@ -2750,20 +2780,26 @@ end;
 procedure TForm1.ListView1Change(Sender: TObject);
 var
   name: string;
+  RefCode: string;
   ListItem: TListViewItem;
 begin
+
+  writetolog('Call ListView1Change');
 
   ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
 
   Name := Copy(ListItem.Text, 1, 5);
-  Name := Name + ListItem.Detail;
+  //Name := Name + ListItem.Detail;
 
-  showmessage(Name);
+  RefCode := Copy(ListItem.Detail, 1, 5);
 
+  RefCode := Name + '_' + RefCode;
+
+  showmessage(RefCode);
 
   {$IFDEF ANDROID}
     BtnPayVoiceDB.Enabled := true;
-    SelectedNameView(Name);
+    SelectedNameView(RefCode);  //Name
     //DisplayListofImages(Name); //Lookup Names table
   {$ENDIF}
 
@@ -2877,47 +2913,31 @@ begin
 end;
 
 
-procedure TForm1.SelectedNameView(Name: string);
+procedure TForm1.SelectedNameView(DeptRef: string);
 var
   BlobStream: TStream;
   FileStream: TFileStream;
   MemoryStream: TmemoryStream;
   RawBitMap: TBitMap;
-  SiteRef, DeptRef: string;
 begin
-
-  SiteRef := Copy(Name,1,5);
-  DeptRef := Copy(Name,6, Length(Name)-5);
-  //showmessage('Site Ref ' + SiteRef);
-  //showmessage('DeptRef ' + DeptRef);
-
 
   DM.FDConnection1.Connected := true;
 
-
-
   DM.FDQDetails.sql.clear;
-//  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-//  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
-//                            Trim(QuotedStr(SiteRef)));
-//  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
-//                            Trim(QuotedStr(DeptRef)));
 
   DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
-  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
-                            Trim(QuotedStr(SiteRef)));
-  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
+  DM.FDQDetails.sql.add(' WHERE SITE_DEPT_CODE = ' +
                             Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
-  //showmessage('validate');
+  showmessage('Records Found for ' + Name + ' ' + inttostr(DM.FDQDetails.RecordCount));
 
-  BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('PHOTO'), bmRead);
+  BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('IMAGE_CONTENTS'), bmRead);
 
-  RawBitMap := TBitMap.Create;
-  RawBitMap.SetSize(0,0);
-  ImageDisplay.Bitmap.SetSize(0, 0);
-  ImageDisplay.Bitmap.Assign(RawBitMap);
+//  RawBitMap := TBitMap.Create;
+//  RawBitMap.SetSize(0,0);
+//  ImageDisplay.Bitmap.SetSize(0, 0);
+//  ImageDisplay.Bitmap.Assign(RawBitMap);
 
   MemoryStream := TMemoryStream.Create;
   MemoryStream.CopyFrom(BlobStream, 0);
@@ -3013,6 +3033,7 @@ begin
 
                                {$IFDEF ANDROID}
                                 DoMapDispay(LBLLat.text, LBLLong.text);
+                                WriteToLog('Back from DoMapDisplay');
                                {$ENDIF}
 
 
@@ -3075,16 +3096,34 @@ end;
 Function TForm1.UpdateListviewData(CallingProcedure: string): Integer;
 var
  ListItem: TListViewItem;
+ ReftoImage: string;
+ BlobStream: TStream;
+ MemoryStream: TmemoryStream;
+ BitMap: TBitMap;
+ i: integer;
 begin
-  //showmessage('UpdateData ' + CallingProcedure);
+
+  writetolog('Call From ' + CallingProcedure + 'UpdateListviewData Start 1');
+
+  //writetoLog('This is executing from the initial FORM.Show!' + ' '+
+  //         'Need to move this logic to the transition to named TAB.' + ' '+
+  //         'Issue with exception somewhere in the code below');
 
   DM.FDConnection1.Connected := true;
 
+  //Get Dept from Master Sites
   DM.FDQLocations.sql.clear;
   DM.FDQLocations.sql.add('Select * FROM SITE_LOCATION');
   DM.FDQLocations.Open;
 
   ListView1.items.Clear;  //Was data 22-3-24
+
+  for i := FLOThumbNails.ChildrenCount - 1 downto 0 do
+  begin
+    FLOThumbNails.Children[i].Free;
+  end;
+
+
 
   While not dm.FDQLocations.EOF do
   begin
@@ -3093,45 +3132,66 @@ begin
     begin
       Text := DM.FDQLocations.fieldbyname('SITE_CODE').asstring + ' ' +
               DM.FDQLocations.fieldbyname('SITE_NAME').asString;
-      Detail := DM.FDQLocations.fieldbyname('AREA_DEPT_NAME').asString;
-
-//      ListItem := ListView1.Items.Add;
-//
-//      ListItem.Data['Text1'] := 'SubItem A';
-//      ListItem.Data['Text2'] := 'SubItem B';
-//      ListItem.Data['Text3'] := 'SubItem C';
-
-
-
+      Detail := DM.FDQLocations.fieldbyname('AREA_DEPT_CODE').asString + ' ' +
+       DM.FDQLocations.fieldbyname('AREA_DEPT_NAME').asString;
     end;
+
+    RefToImage := DM.FDQLocations.fieldbyname('SITE_CODE').asstring
+                  + '_' +
+                  DM.FDQLocations.fieldbyname('AREA_DEPT_CODE').asString;
+
+    writetolog('UpdateListviewData 2');
+
+        DM.FDQDetails.sql.clear;
+        DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
+        DM.FDQDetails.sql.add('WHERE SITE_DEPT_CODE = :SiteDeptCode');
+
+        DM.FDQDetails.Params.ParamByName('SiteDeptCode').asstring:= RefToImage;
+        DM.FDQDetails.Open;
+
+        writetolog('UpdateListviewData Records found = ' + inttostr(DM.FDQDetails.RecordCount));
+
+        While not DM.FDQDetails.EOF Do
+        begin
+
+            BlobStream :=
+             DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('IMAGE_CONTENTS'), bmRead);
+
+            MemoryStream := TMemoryStream.Create;
+            MemoryStream.CopyFrom(BlobStream, 0);
+            MemoryStream.Position := 0;
+
+            BitMap := TBitMap.create;
+            Bitmap.LoadFromStream(MemoryStream);
+
+            //
+
+            //ImageDisplay.Bitmap.LoadFromStream(MemoryStream);
+
+            writetolog('');
+            writetolog('UpdateListviewData 3');
+
+            writetolog('UpdateListviewData Before call CreateReviewThumbNails');
+
+            writetolog('RefToImage = ' + RefToImage);
+
+            //Create Thumb Nails for each record
+            //CreateReviewThumbNails(RefToImage, ImageDisplay.Bitmap);
+            CreateReviewThumbNails(RefToImage, Bitmap);
+
+            MemoryStream.Free;
+            BlobStream.Free;
+            BitMap.free;
+
+          DM.FDQDetails.Next;
+
+      end;//EOF
 
     DM.FDQLocations.Next;
   end;
 
-  //
 
-
-  // Assign data for custom rows or sub-items
-//  ListItem.Data['Text1'] := 'SubItem A';
-//  ListItem.Data['Text2'] := 'SubItem B';
-//  ListItem.Data['Text3'] := 'SubItem C';
-//
-//  showmessage(ListItem.Data['Text3'].AsString);
-
-
-  //
-
-
-
-
-  DM.FDQDetails.sql.clear;
-  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add('ORDER BY P_KEY DESC');
-  DM.FDQDetails.sql.add('ROWS 1');
-  DM.FDQDetails.Open;
-
-  result := DM.FDQDetails.fieldbyname('P_KEY').asInteger;
-
+//  result := DM.FDQDetails.fieldbyname('P_KEY').asInteger;
 
 
 end;
