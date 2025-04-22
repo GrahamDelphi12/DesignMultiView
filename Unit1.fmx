@@ -121,7 +121,7 @@ object Form1: TForm1
     Size.Width = 1084.000000000000000000
     Size.Height = 648.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 2
+    TabIndex = 1
     TabOrder = 0
     TabPosition = None
     OnChange = TabControl1Change
@@ -209,7 +209,6 @@ object Form1: TForm1
             TabOrder = 1
             Text = 'Hide Keyboard'
             TextSettings.Trimming = None
-            OnClick = Button5Click
           end
         end
         object PnlHostSiteSelect: TPanel
@@ -2480,7 +2479,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -3207,9 +3206,9 @@ object Form1: TForm1
           OnClick = Button4Click
         end
         object BtnDeleteSelected: TButton
-          Position.X = 664.000000000000000000
-          Position.Y = 16.000000000000000000
-          Size.Width = 124.000000000000000000
+          Position.X = 412.000000000000000000
+          Position.Y = 8.000000000000000000
+          Size.Width = 90.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 12
@@ -3226,12 +3225,33 @@ object Form1: TForm1
           OnClick = Button6Click
         end
         object BtnReadLog: TButton
-          Position.X = 376.000000000000000000
+          Position.X = 344.000000000000000000
           Position.Y = 8.000000000000000000
+          Size.Width = 49.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
           TabOrder = 14
-          Text = 'BtnReadLog'
+          Text = 'Log'
           TextSettings.Trimming = None
           OnClick = BtnReadLogClick
+        end
+        object EditParamLocation: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 15
+          Position.X = 600.000000000000000000
+          Position.Y = 16.000000000000000000
+          Size.Width = 65.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object EditParamDept: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          TabOrder = 16
+          Position.X = 712.000000000000000000
+          Position.Y = 16.000000000000000000
+          Size.Width = 65.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
         end
       end
     end
@@ -3240,7 +3260,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
