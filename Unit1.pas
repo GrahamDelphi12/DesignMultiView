@@ -30,7 +30,7 @@ uses
   FMX.Maps,
   System.Threading,
   DateUtils,
-  System.generics.collections;
+  System.generics.collections, System.Rtti, FMX.Grid.Style, FMX.Grid;
 
 
  type
@@ -77,8 +77,6 @@ type
     ComboBox1: TComboBox;
     ToolBar3: TToolBar;
     BtnDeleteAll: TButton;
-    BtnAnonSync: TButton;
-    BtnEmptyEdits: TButton;
     Button2: TButton;
     Button3: TButton;
     ImageList1: TImageList;
@@ -121,7 +119,6 @@ type
     BtnCurrImage: TButton;
     BtnCurrCood: TButton;
     BtnCurrNote: TButton;
-    Button4: TButton;
     TIStartpage: TTabItem;
     PlnStartHost: TPanel;
     PlnStartTitle: TPanel;
@@ -240,12 +237,14 @@ type
     Image3: TImage;
     Label3: TLabel;
     BtnCreateOrgRec: TButton;
-    Button6: TButton;
     BtnReadLog: TButton;
     LblDeptCode: TLabel;
     FLOThumbNails: TFlowLayout;
-    EditParamLocation: TEdit;
-    EditParamDept: TEdit;
+    SGOrg: TStringGrid;
+    SGLoc: TStringGrid;
+    SGDetail: TStringGrid;
+    BtnDatabase: TButton;
+    LblDeptName: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -258,9 +257,7 @@ type
     procedure ClearImageAction1Execute(Sender: TObject);
     procedure TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
     procedure BtnDeleteAllClick(Sender: TObject);
-    procedure BtnAnonSyncClick(Sender: TObject);
     procedure ListView1Change(Sender: TObject);
-    procedure BtnEmptyEditsClick(Sender: TObject);
     procedure BtnIncreaseSizeClick(Sender: TObject);
     procedure BtnReduceSizeClick(Sender: TObject);
     procedure PlnNotesResize(Sender: TObject);
@@ -281,7 +278,6 @@ type
     procedure BtnCurrImageClick(Sender: TObject);
     procedure BtnCurrNoteClick(Sender: TObject);
     procedure BtnCurrCoodClick(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
     procedure BtnCreateOrgRecClick(Sender: TObject);
     procedure BtnShowClick(Sender: TObject);
     procedure CBOrganisationsChange(Sender: TObject);
@@ -297,8 +293,8 @@ type
     procedure VertScrollBox1Gesture(Sender: TObject;
       const EventInfo: TGestureEventInfo; var Handled: Boolean);
     procedure BtnDeleteSelectedClick(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
     procedure BtnReadLogClick(Sender: TObject);
+    procedure BtnDatabaseClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -378,6 +374,9 @@ type
     procedure CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
 
     procedure ImageFullSizeDblClick(Sender: TObject);
+
+    procedure Cycle_Threads;
+
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -462,6 +461,61 @@ begin
     StringList.Free;                            // Free memory
   end;
 end;
+
+procedure TForm1.Cycle_Threads;
+begin
+
+   TThread.CreateAnonymousThread(
+    procedure
+    var
+      i: integer;
+      BlobStream: TStream;
+      FileStream: TFileStream;
+      MemoryStream: TmemoryStream;
+      RawBitMap: TBitMap;
+    begin
+
+        dm.FDConnection1.Connected := true;
+
+        dm.FDQDetails.sql.clear;
+        dm.FDQDetails.sql.add('Select * FROM "NAMES"');
+        dm.FDQDetails.Open;
+
+          While not dm.FDQDetails.EOF And (TerminateThread <> true) do
+          begin
+
+            BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('PHOTO'), bmRead);
+            MemoryStream := TMemoryStream.Create;
+            MemoryStream.CopyFrom(BlobStream, 0);
+            MemoryStream.Position := 0;
+
+            ImageContainer.Bitmap.LoadFromStream(MemoryStream);
+
+            label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
+                            + ' ' + dm.FDQDetails.FieldByName('SITECODE').asstring);
+
+            TThread.Sleep(2000);
+
+
+            dm.FDQDetails.Next;
+
+            MemoryStream.Free;
+            BlobStream.Free;
+
+          end;
+
+         TerminateThread := False;
+
+         FRawBitmap.SetSize(0, 0);
+         ImageContainer.Bitmap.SetSize(0, 0);
+         ImageContainer.Bitmap.Assign(FRawBitmap);
+         Label1.Text := 'Current Image';
+    end
+
+   ).Start;
+
+end;
+
 
 procedure TForm1.CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
 var
@@ -1533,60 +1587,6 @@ begin
 
 end;
 
-procedure TForm1.BtnAnonSyncClick(Sender: TObject);
-begin
-
-   TThread.CreateAnonymousThread(
-    procedure
-    var
-      i: integer;
-      BlobStream: TStream;
-      FileStream: TFileStream;
-      MemoryStream: TmemoryStream;
-      RawBitMap: TBitMap;
-    begin
-
-        dm.FDConnection1.Connected := true;
-
-        dm.FDQDetails.sql.clear;
-        dm.FDQDetails.sql.add('Select * FROM "NAMES"');
-        dm.FDQDetails.Open;
-
-          While not dm.FDQDetails.EOF And (TerminateThread <> true) do
-          begin
-
-            BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('PHOTO'), bmRead);
-            MemoryStream := TMemoryStream.Create;
-            MemoryStream.CopyFrom(BlobStream, 0);
-            MemoryStream.Position := 0;
-
-            ImageContainer.Bitmap.LoadFromStream(MemoryStream);
-
-            label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
-                            + ' ' + dm.FDQDetails.FieldByName('SITECODE').asstring);
-
-            TThread.Sleep(2000);
-
-
-            dm.FDQDetails.Next;
-
-            MemoryStream.Free;
-            BlobStream.Free;
-
-          end;
-
-         TerminateThread := False;
-
-         FRawBitmap.SetSize(0, 0);
-         ImageContainer.Bitmap.SetSize(0, 0);
-         ImageContainer.Bitmap.Assign(FRawBitmap);
-         Label1.Text := 'Current Image';
-    end
-
-   ).Start;
-
-end;
-
 procedure TForm1.BtnCancelClick(Sender: TObject);
 begin
 
@@ -1757,7 +1757,7 @@ begin
   end;//Array of Images and Memos to write to database
 
     WriteToLog('All Done');
-    showmessage('Insert Done');
+   // showmessage('Insert Done');
 
   for i := FlowLayOut2.ChildrenCount - 1 downto 0 do
   begin
@@ -1768,6 +1768,7 @@ begin
     //No value returned from this function any more.
     PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
 
+  NextTabAction1.Execute;
 
 end;
 
@@ -1783,10 +1784,17 @@ var
   MemoryStream: TMemoryStream;
   FileName: string;
   SQLAction: string;
+  Action: TCustomAction;
 begin
 
      NewLat := '';
      NewLong := '';
+
+     LbSite_Name.Text := '';
+     LblSiteCode.text := '';
+     LbLDeptCode.text := '';
+     LblDeptName.text := '';
+
 
      try
 
@@ -1794,12 +1802,12 @@ begin
 
         DM.FDQOrganisation.SQL.Clear;
 
-        DM.FDQOrganisation.SQL.Add('SELECT SITE_CODE FROM ORGANAISATION');
+        DM.FDQOrganisation.SQL.Add('SELECT * FROM ORGANAISATION');
         DM.FDQOrganisation.SQL.Add('WHERE SITE_CODE = :CheckSiteCode');
 
         DM.FDQOrganisation.Params.ParamByName('CheckSiteCode').AsString := LblSiteCode.text;
 
-        showmessage(DM.FDQOrganisation.sql.Text);
+        //showmessage(DM.FDQOrganisation.sql.Text);
 
         DM.FDQOrganisation.Open;
 
@@ -1807,8 +1815,11 @@ begin
         begin
            SQLAction := 'Update';
            NewCodeID := strtofloat(LblSiteCode.text);
+
         end else
            SQLAction := 'Insert';
+
+
 
         writetolog('Action on SQL is ' + SQLAction);
 
@@ -1828,7 +1839,7 @@ begin
 
             NewCodeID := strtofloat(LastCodeID) + 1;
 
-            showmessage('New Value Created ' + floattostr(NewCodeID));
+            //showmessage('New Value Created ' + floattostr(NewCodeID));
 
 
             DM.FDQOrganisation.sql.clear;
@@ -1911,9 +1922,9 @@ begin
 
         {$IFDEF ANDROID}
         WriteAudiotoDB(LblSiteCode.text); //; PKValue
-        {$ENDIF}
 
-         writetolog('After writing Audio file to DB');
+        writetolog('After writing Audio file to DB');
+        {$ENDIF}
 
         writetolog('Insert Done');
 
@@ -1924,13 +1935,26 @@ begin
 
       UpdateOrganisationData;
 
-      //UpdateLocationData;
+      NextTabAction1.Execute;
 
-      //Empty_Controls(FlowLayout4);//12-4-25
+                TThread.CreateAnonymousThread(
+           procedure
+           begin
 
-      writetolog('Before set lblSitecode to nothing');
+                 TThread.Synchronize(TThread.CurrentThread, procedure
+                  begin
 
-      LblSiteCode.text := '';
+                      LblSiteCode.text := '';
+                      LbSite_Name.Text := EdId.Text;
+                      LblSiteCode.text := FloattoStr(NewCodeID);
+                      writetolog('Site Name = ' + LbSite_Name.Text +
+                                 'Site Code = ' + LblSiteCode.text);
+                  end);
+
+           end
+          ).start;
+
+
 
       writetolog('All routines completed successfully');
 end;
@@ -2231,6 +2255,7 @@ begin
         //Refill Combobox
         UpdateLocationData;
 
+        LblDeptName.text := EdNewLocation.Text;//23-4-25
         EdNewLocation.Text := '';
 
         PnlPopup.visible := false;
@@ -2418,153 +2443,6 @@ begin
    TerminateThread:= True;
 end;
 
-procedure TForm1.Button4Click(Sender: TObject);
-begin
-
-  DM.FDConnection1.Connected := true;
-
-  DM.FDQOrganisation.SQL.Clear;
-  DM.FDQOrganisation.SQL.Add('SELECT * FROM ORGANAISATION');
-  DM.FDQOrganisation.Open;
-
-  While Not DM.FDQOrganisation.EOF Do
-  begin
-    showmessage(DM.FDQOrganisation.FieldbyName('Site_Code').asstring);
-    DM.FDQOrganisation.next;
-  end;
-
-  DM.FDQLocations.SQL.Clear;
-  DM.FDQLocations.SQL.Add('SELECT * FROM SITE_LOCATION');
-  DM.FDQLocations.SQL.Add('WHERE SITE_CODE = :CheckSiteCode');
-  DM.FDQLocations.Params.ParamByName('CheckSiteCode').asstring := EditParamLocation.text;
-  DM.FDQLocations.open;
-
-
-  While Not DM.FDQLocations.EOF Do
-  begin
-    showmessage(DM.FDQLocations.FieldbyName('Area_Dept_Code').asstring);
-    DM.FDQLocations.next;
-  end;
-
-  DM.FDQDetails.SQL.Clear;
-
-  DM.FDQDetails.SQL.Add('SELECT * FROM SITE_DETAIL');
-  DM.FDQDetails.SQL.Add('WHERE SITE_DEPT_CODE = :LocationDetails');
-  DM.FDQDetails.Params.ParamByName('LocationDetails').asstring :=
-                                 EditParamLocation.text + '_' + EditParamDept.text;
-  DM.FDQDetails.open;
-
-  While Not DM.FDQDetails.EOF Do
-  begin
-    showmessage('Image Name = ' + DM.FDQDetails.FieldbyName('IMAGE_NAME').asstring
-                + ' Site Dept Code = '
-                + DM.FDQDetails.FieldbyName('SITE_DEPT_CODE').Asstring);
-
-    DM.FDQDetails.next;
-  end;
-
-
-end;
-
-procedure TForm1.Button6Click(Sender: TObject);
-var
-  MemoryStream: TMemoryStream;
-  BlobStream: TStream;
-  PKValue: integer;
-
-  i, x, y : Integer;
-  ImagetoRecord: TImage;
-  MemotoRecord: TMemo;
-  Image_Memo_Store : TImage_Memo_Store; //Array
-begin
-
-  {$IFDEF ANDROID}
-    if Imagecontainer.Bitmap.isempty then
-    begin
-      showmessage('Image Required - take picture');
-      exit;
-    end;
-  {$ENDIF}
-
-  y := 0;
-
-  for i := 0 to FlowLayOut2.ControlsCount - 1 do
-  begin
-
-          if (FlowLayOut2.Controls[i] is TImage) OR
-             (FlowLayOut2.Controls[i] is TMemo) then
-          begin
-            inc(y);
-          end;
-  end;
-
-
-  x := 0;
-
-  SetLength(Image_Memo_Store, y);
-
-      for i := 0 to FlowLayOut2.ControlsCount - 1 do
-      begin
-
-          if (FlowLayOut2.Controls[i] is TImage) OR
-             (FlowLayOut2.Controls[i] is TMemo) then
-          begin
-
-            if FlowLayOut2.Controls[i] is TMemo then
-            begin
-              MemotoRecord := TMemo(FlowLayOut2.Controls[i]);
-
-              showmessage('Memo Name = ' + MemotoRecord.Name);
-
-              Image_Memo_Store[x].MemoTag := MemotoRecord.Tag;
-              Image_Memo_Store[x].MemoName := MemotoRecord.Name;
-
-              showmessage('Memo Name Assigned = ' + Image_Memo_Store[x].MemoName);
-
-            end;
-
-            if FlowLayOut2.Controls[i] is TImage then
-            begin
-              ImagetoRecord := TImage(FlowLayOut2.Controls[i]);
-
-              Image_Memo_Store[x].ImageTag := ImagetoRecord.Tag;
-              Image_Memo_Store[x].ImageName := ImagetoRecord.Name;
-            end;
-
-
-
-            Inc(x);
-
-          end;//if image or Memo
-
-      end;
-
-       showmessage('Array Size = ' + inttostr(High(Image_Memo_Store)+1));
-
-       for i := 0 to High(Image_Memo_Store) do
-       begin
-
-        if Image_Memo_Store[i].ImageTag <> 0 then
-        begin
-
-          ShowMessage('Image Name:' + Image_Memo_Store[i].ImageName + chr(13) +
-                      'Image Tag:' + inttostr(Image_Memo_Store[i].ImageTag));
-        end;
-
-        if Image_Memo_Store[i].MemoTag <> 0 then
-        begin
-
-          ShowMessage('Memo Name:' +         Image_Memo_Store[i].MemoName + chr(13) +
-                      'Memo Tag:' + inttostr(Image_Memo_Store[i].MemoTag));
-
-        end;
-
-
-       end;
-
-
-end;
-
 procedure TForm1.Button7Click(Sender: TObject);
 begin
 
@@ -2588,6 +2466,33 @@ begin
 
 
 end;
+
+procedure TForm1.BtnDatabaseClick(Sender: TObject);
+begin
+
+  DM.FDConnection1.Connected := true;
+
+  DM.FDQOrganisation.SQL.Clear;
+  DM.FDQOrganisation.SQL.Add('SELECT * FROM ORGANAISATION');
+  DM.FDQOrganisation.Open;
+
+  DM.PopulateStringGrid(SGOrg, DM.FDQOrganisation);
+
+  DM.FDQLocations.SQL.Clear;
+  DM.FDQLocations.SQL.Add('SELECT * FROM SITE_LOCATION');
+  DM.FDQLocations.open;
+
+  DM.PopulateStringGrid(SGLoc, DM.FDQLocations);
+
+  DM.FDQDetails.SQL.Clear;
+
+  DM.FDQDetails.SQL.Add('SELECT * FROM SITE_DETAIL');
+  DM.FDQDetails.open;
+
+  DM.PopulateStringGrid(SGDetail, DM.FDQDetails);
+  //535
+end;
+
 
 procedure TForm1.BtnSelectSiteClick(Sender: TObject);
 begin
@@ -2678,6 +2583,8 @@ begin
       DM.FDQLocations.Open;
 
         MemoDepartments.Lines.Clear;
+        MemoDepartments.Lines.Add('Departmemts Created List');
+        MemoDepartments.Lines.Add('');
 
         while not DM.FDQLocations.EOF do
         begin
@@ -2780,11 +2687,6 @@ begin
       BlobStream.Free;
      end;
 
-end;
-
-procedure TForm1.BtnEmptyEditsClick(Sender: TObject);
-begin
-  Empty_Controls(Form1);
 end;
 
 procedure TForm1.ListAllStyleElements(Control: TStyledControl);
@@ -3148,6 +3050,7 @@ begin
   LbSite_Name.Text := '';
   LblSiteCode.text := '';
   LbLDeptCode.text := '';
+  LblDeptName.text := '';
 
 end;
 
