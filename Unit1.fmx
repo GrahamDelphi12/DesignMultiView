@@ -1129,6 +1129,7 @@ object Form1: TForm1
                         Size.Width = 143.000000000000000000
                         Size.Height = 22.000000000000000000
                         Size.PlatformDefault = False
+                        OnEnter = EdIDEnter
                       end
                     end
                   end
@@ -2775,6 +2776,17 @@ object Form1: TForm1
             FlowDirection = LeftToRight
           end
         end
+        object BtnDeleteSelected: TButton
+          Position.X = 5.000000000000000000
+          Position.Y = 548.000000000000000000
+          Size.Width = 163.000000000000000000
+          Size.Height = 50.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 7
+          Text = 'Delete Selected'
+          TextSettings.Trimming = None
+          OnClick = BtnDeleteSelectedClick
+        end
       end
       object PlnNotes: TPanel
         Align = Left
@@ -2793,13 +2805,24 @@ object Form1: TForm1
           object MemoDepartments: TMemo
             Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
             DataDetectorTypes = []
+            ReadOnly = True
             Align = Client
             Size.Width = 145.000000000000000000
-            Size.Height = 147.000000000000000000
+            Size.Height = 125.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Viewport.Width = 141.000000000000000000
-            Viewport.Height = 143.000000000000000000
+            Viewport.Height = 121.000000000000000000
+          end
+          object CMBODepts: TComboBox
+            Align = Bottom
+            Position.Y = 125.000000000000000000
+            Size.Width = 145.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            OnChange = CMBODeptsChange
+            OnClosePopup = CMBODeptsClosePopup
           end
         end
         object PnlDeptCreate: TPanel
@@ -3157,17 +3180,6 @@ object Form1: TForm1
         Size.Height = 45.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 6
-        object BtnDeleteAll: TButton
-          Align = Left
-          Margins.Right = 10.000000000000000000
-          Size.Width = 145.000000000000000000
-          Size.Height = 45.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 8
-          Text = 'Delete All'
-          TextSettings.Trimming = None
-          OnClick = BtnDeleteAllClick
-        end
         object BtnConfirm: TButton
           Align = Right
           Images = ImageList1
@@ -3182,28 +3194,6 @@ object Form1: TForm1
           Text = 'Confirm'
           TextSettings.Trimming = None
           OnClick = BtnConfirmClick
-        end
-        object BtnDeleteSelected: TButton
-          Align = Left
-          Position.X = 155.000000000000000000
-          Size.Width = 133.000000000000000000
-          Size.Height = 45.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 9
-          Text = 'Delete Selected'
-          TextSettings.Trimming = None
-          OnClick = BtnDeleteSelectedClick
-        end
-        object BtnReadLog: TButton
-          Position.X = 680.000000000000000000
-          Position.Y = 8.000000000000000000
-          Size.Width = 123.000000000000000000
-          Size.Height = 29.000000000000000000
-          Size.PlatformDefault = False
-          TabOrder = 10
-          Text = 'Log'
-          TextSettings.Trimming = None
-          OnClick = BtnReadLogClick
         end
       end
     end
@@ -3521,15 +3511,38 @@ object Form1: TForm1
         Viewport.Height = 391.000000000000000000
       end
       object BtnDatabase: TButton
-        Position.X = 473.000000000000000000
-        Position.Y = 48.000000000000000000
-        Size.Width = 120.000000000000000000
-        Size.Height = 22.000000000000000000
+        Position.X = 657.000000000000000000
+        Position.Y = 41.000000000000000000
+        Size.Width = 152.000000000000000000
+        Size.Height = 44.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 5
         Text = 'Database List'
         TextSettings.Trimming = None
         OnClick = BtnDatabaseClick
+      end
+      object BtnReadLog: TButton
+        Position.X = 834.000000000000000000
+        Position.Y = 41.000000000000000000
+        Size.Width = 145.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 9
+        Text = 'Log'
+        TextSettings.Trimming = None
+        OnClick = BtnReadLogClick
+      end
+      object BtnDeleteAll: TButton
+        Margins.Right = 10.000000000000000000
+        Position.X = 834.000000000000000000
+        Position.Y = 97.000000000000000000
+        Size.Width = 145.000000000000000000
+        Size.Height = 40.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 8
+        Text = 'Delete All'
+        TextSettings.Trimming = None
+        OnClick = BtnDeleteAllClick
       end
     end
   end

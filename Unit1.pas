@@ -76,7 +76,6 @@ type
     BtnReduceSize: TButton;
     ComboBox1: TComboBox;
     ToolBar3: TToolBar;
-    BtnDeleteAll: TButton;
     Button2: TButton;
     Button3: TButton;
     ImageList1: TImageList;
@@ -191,7 +190,6 @@ type
     Image2: TImage;
     VertScrollBox1: TVertScrollBox;
     FlowLayout2: TFlowLayout;
-    BtnDeleteSelected: TButton;
     Layout2: TLayout;
     BtnOK: TButton;
     BtnCancel: TButton;
@@ -237,7 +235,6 @@ type
     Image3: TImage;
     Label3: TLabel;
     BtnCreateOrgRec: TButton;
-    BtnReadLog: TButton;
     LblDeptCode: TLabel;
     FLOThumbNails: TFlowLayout;
     SGOrg: TStringGrid;
@@ -245,6 +242,10 @@ type
     SGDetail: TStringGrid;
     BtnDatabase: TButton;
     LblDeptName: TLabel;
+    BtnReadLog: TButton;
+    BtnDeleteAll: TButton;
+    BtnDeleteSelected: TButton;
+    CMBODepts: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -295,6 +296,9 @@ type
     procedure BtnDeleteSelectedClick(Sender: TObject);
     procedure BtnReadLogClick(Sender: TObject);
     procedure BtnDatabaseClick(Sender: TObject);
+    procedure EdIDEnter(Sender: TObject);
+    procedure CMBODeptsClosePopup(Sender: TObject);
+    procedure CMBODeptsChange(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -345,7 +349,7 @@ type
 
     procedure UpdateEffect;
     procedure UpdateUI;
-    procedure SelectedNameView(DeptRef: string);
+    procedure SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string);
     Function UpdateListviewData(CallingProcedure: string): Integer;
     procedure Empty_Controls(AParent: TFMXObject);
     procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
@@ -371,9 +375,11 @@ type
     procedure ReadLogFile;
 
 
-    procedure CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
+    procedure CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap;
+                                     FLO: TFlowLayOut; CallingRoutine: string);
 
-    procedure ImageFullSizeDblClick(Sender: TObject);
+    procedure ImageFullSizeReportDblClick(Sender: TObject);
+    procedure ImageFullSizeDeptDblClick(Sender: TObject);
 
     procedure Cycle_Threads;
 
@@ -517,16 +523,14 @@ begin
 end;
 
 
-procedure TForm1.CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap);
+procedure TForm1.CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap;
+                                FLO: TFlowlayout; CallingRoutine: string);
 var
   ScaleFactor: Single;
   Img: TImage;
   Memo : TMemo;
-
+  Checkbox : TCheckBox;
 begin
-
-     // ImageContainer.Bitmap.Assign(Image);
-
 
       if Image.Width > 1024 then
       begin
@@ -534,12 +538,14 @@ begin
         Image.Resize(Round(Image.Width / ScaleFactor), Round(Image.Height / ScaleFactor));
       end;
 
-      writetolog('In CreateReviewThumbNails 1');
+      writetolog('In CreateReviewThumbNails 1' + FLO.Name);
 
-           FLOThumbNails.BeginUpdate;
+           //FLOThumbNails.BeginUpdate;
+           FLO.BeginUpdate;
 
-            Img := TImage.Create(FLOThumbNails);//LOImagesTaken
-            Img.Parent := FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
+           // Img := TImage.Create(FLOThumbNails);//LOImagesTaken
+            Img := TImage.Create(FLO);//LOImagesTaken
+            Img.Parent := FLO;//FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
             Img.Align := TAlignLayout.None; // Allow free placement
             Img.WrapMode := TImageWrapMode.Stretch; // Stretch the image to fit
             Img.Width := 120; // Set width (adjust as needed)
@@ -548,26 +554,49 @@ begin
             Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
             Img.tag := StrtoInt(SiteRefLookUp);//Maintain ref or original
 
-            writetolog('In CreateReviewThumbNails 2');
+            writetolog('In CreateReviewThumbNails 2'  + CallingRoutine);
 
-            Img.OnDblClick :=  ImageFullSizeDblClick;//ImageDblClick;
+            If CallingRoutine = 'Report_Tab' Then
+            begin
+              writetolog('Flow = ' + CallingRoutine);
+              Img.OnDblClick :=  ImageFullSizeReportDblClick;//ImageDblClick;
+            end else if
+              CallingRoutine = 'Dept_Tab' Then
+            begin
+              writetolog('Flow = ' + CallingRoutine);
+              Img.OnDblClick := ImageFullSizeDeptDblClick;
 
-              //
-//               Memo := TMemo.Create(FLOThumbNails);//LOImagesTaken
-//               Memo.Parent := FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
-//               Memo.Align := TAlignLayout.None; // Allow free placement
-//               Memo.Width := 120; // Set width (adjust as needed)
-//               Memo.Height := 20; // Set height (adjust as needed)
-//               Memo.HitTest := True;
-//               Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
-               //Memo.Tag := Img.Tag;
+              //New 28-4-25
+              Checkbox := TCheckBox.Create(FLO);
+              Checkbox.Parent := FLO;
+              Checkbox.Align := TAlignLayout.Top;
+              Checkbox.Text := 'Select'; // Set checkbox label
+              Checkbox.Tag := Img.Tag;
+            end;
+
+
+
+
+              //Re-enable 28-4-25
+               Memo := TMemo.Create(FLO);//LOImagesTaken
+               writetolog('Creating Memo');
+               Memo.Parent := FLO; //LOImagesTaken// Assign parent to FlowLayout
+               Memo.Align := TAlignLayout.None; // Allow free placement
+               Memo.Width := 120; // Set width (adjust as needed)
+               Memo.Height := 20; // Set height (adjust as needed)
+               Memo.HitTest := True;
+               Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+               Memo.Tag := Img.Tag;
+               writetolog('Memo Created');
               //
            // Img.Bitmap.Assign(ImageContainer.Bitmap);
+
+
             Img.Bitmap.Assign(Image);
 
-            FLOThumbNails.EndUpdate;
+            FLO.EndUpdate;
 
-            CalculateFlowLayoutHeight(FLOThumbNails);
+            CalculateFlowLayoutHeight(FLO);
 
             //VertScrollbox1.RealignContent;
 end;
@@ -795,6 +824,24 @@ end;
 
 
 
+procedure TForm1.EdIDEnter(Sender: TObject);
+begin
+
+  LbSite_Name.Text := '';
+  LblSiteCode.text := '';
+  LbLDeptCode.text := '';
+  LblDeptName.text := '';
+
+
+  EdID.text := '';
+  EdProjectRef.text := '';
+  EdContact.text := '';
+
+  EdEmail.text := '';
+  EdAddress.text := '';
+  MemoNote.Lines.clear;
+end;
+
 procedure TForm1.EdNewLocationClick(Sender: TObject);
 begin
   EdNewLocation.Text := '';
@@ -954,7 +1001,7 @@ begin
   //WebBrowser2.Navigate(URLString);
 end;
 
-procedure TForm1.ImageFullSizeDblClick(Sender: TObject);
+procedure TForm1.ImageFullSizeReportDblClick(Sender: TObject);
 var
   tagValue : integer;
   BlobStream: TStream;
@@ -984,6 +1031,44 @@ begin
         MemoryStream.Position := 0;
 
         ImageDisplay.Bitmap.LoadFromStream(MemoryStream);
+
+        writetolog('Reading new DB table for Image with Tag = ' + Inttostr(TagValue));
+
+    DM.FDConnection1.Connected := false;
+  end;
+
+end;
+
+procedure TForm1.ImageFullSizeDeptDblClick(Sender: TObject);
+var
+  tagValue : integer;
+  BlobStream: TStream;
+  MemoryStream: TmemoryStream;
+begin
+
+  if Sender is TImage then
+  begin
+
+    TagValue := (sender as TImage).tag;
+
+    DM.FDConnection1.Connected := true;
+
+        DM.FDQDetails.sql.clear;
+        DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
+        DM.FDQDetails.sql.add('WHERE Image_tag = :pImage');
+
+        DM.FDQDetails.Params.ParamByName('pImage').AsInteger := TagValue;
+
+        DM.FDQDetails.Open;
+
+        writetolog('Records found  number = ' + inttostr(DM.FDQDetails.RecordCount));
+
+        BlobStream := dm.FDQDetails.CreateBlobStream(dm.FDQDetails.FieldByName('IMAGE_CONTENTS'), bmRead);
+        MemoryStream := TMemoryStream.Create;
+        MemoryStream.CopyFrom(BlobStream, 0);
+        MemoryStream.Position := 0;
+
+        ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
         writetolog('Reading new DB table for Image with Tag = ' + Inttostr(TagValue));
 
@@ -1937,7 +2022,7 @@ begin
 
       NextTabAction1.Execute;
 
-                TThread.CreateAnonymousThread(
+          TThread.CreateAnonymousThread(
            procedure
            begin
 
@@ -1949,6 +2034,11 @@ begin
                       LblSiteCode.text := FloattoStr(NewCodeID);
                       writetolog('Site Name = ' + LbSite_Name.Text +
                                  'Site Code = ' + LblSiteCode.text);
+
+                      MemoDepartments.lines.Clear;
+
+                      //Fill memo and combo on Deprtment tab
+                      UpdateLocationData;
                   end);
 
            end
@@ -2052,6 +2142,11 @@ begin
   DM.FDQDetails.sql.clear;
   DM.FDQDetails.sql.add('DELETE From SITE_DETAIL');
   DM.FDQDetails.ExecSQL;
+
+  LbSite_Name.Text := '';
+  LblSiteCode.text := '';
+  LbLDeptCode.text := '';
+  LblDeptName.text := '';
 
 
   if CBOrganisations.Items.Count > 0 then
@@ -2234,14 +2329,12 @@ begin
         DM.FDQLocations.sql.add('insert into SITE_LOCATION (SITE_CODE, SITE_NAME, AREA_DEPT_CODE, AREA_DEPT_NAME)');
         DM.FDQLocations.sql.add('Values(:SiteCode, :SiteName, :DepartmentCode, :DepartmentName)');
 
-        //lblDeptCode.text := inttostr(random(1000));
-        //lblDeptCode.Text := Format('%05d', [Random(1000)]);
         ReftoDept := Format('%.5d', [Random(1000)]);
         lblDeptCode.Text := ReftoDept;
 
         DM.FDQLocations.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
         DM.FDQLocations.Params.ParamByName('SiteName').AsString := LbSite_Name.Text;
-        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := ReftoDept;//lblDeptCode.text;
+        DM.FDQLocations.Params.ParamByName('DepartmentCode').AsString := ReftoDept;
         DM.FDQLocations.ParamByName('DepartmentName').AsString := EdNewLocation.Text;
 
         DM.FDQLocations.ExecSQL;
@@ -2586,6 +2679,9 @@ begin
         MemoDepartments.Lines.Add('Departmemts Created List');
         MemoDepartments.Lines.Add('');
 
+        CMBODepts.Items.Clear;
+        LblDeptName.Text := '';
+
         while not DM.FDQLocations.EOF do
         begin
 
@@ -2593,11 +2689,15 @@ begin
           MemoDepartments.Lines.Add(DM.FDQLocations.FieldByName('SITE_NAME').AsString + ' ' +
                                     DM.FDQLocations.FieldByName('AREA_DEPT_NAME').AsString);
 
+          CMBODepts.Items.Add(DM.FDQLocations.FieldByName('AREA_DEPT_NAME').AsString);
 
           DM.FDQLocations.Next;
         end;
 
          writetolog('Memo update done');
+
+         If CMBODepts.Items.Count >0 then CMBODepts.ItemIndex := 0;
+
 
     except
       on E: Exception do
@@ -2741,7 +2841,7 @@ begin
 
   {$IFDEF ANDROID}
     BtnPayVoiceDB.Enabled := true;
-    SelectedNameView(RefCode);  //Name
+    SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab');  //Name
   {$ENDIF}
 
   SelectedNameMemo(Name);
@@ -2854,7 +2954,7 @@ begin
 end;
 
 
-procedure TForm1.SelectedNameView(DeptRef: string);
+procedure TForm1.SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string);
 var
   BlobStream: TStream;
   MemoryStream: TmemoryStream;
@@ -2865,9 +2965,10 @@ begin
 
   DM.FDConnection1.Connected := true;
 
-  for i := FLOThumbNails.ChildrenCount - 1 downto 0 do
+  //for i := FLOThumbNails.ChildrenCount - 1 downto 0 do
+  for i := FLO.ChildrenCount - 1 downto 0 do
   begin
-    FLOThumbNails.Children[i].Free;
+    FLO.Children[i].Free;
   end;
 
   DM.FDQDetails.sql.clear;
@@ -2893,8 +2994,11 @@ begin
       RefToImage := DM.FDQDetails.fieldbyName('Image_Tag').asInteger;
       writetolog('RefToImage = ' + Inttostr(RefToImage));
 
+      writetolog('Before CreateReviewThumbNail - FlowLayOut name = ' + Origin_Call);
+
       //Create Thumb Nails for each record
-      CreateReviewThumbNails(InttoStr(RefToImage), Bitmap);
+      //                     /27-4-25
+      CreateReviewThumbNails(InttoStr(RefToImage), Bitmap, FLO, Origin_Call); //FlowLayout2
 
       MemoryStream.Free;
       BlobStream.Free;
@@ -2982,7 +3086,8 @@ begin
                              WriteToLog('CBOrganisationsChange - Selected Site from Oraganisation Table = ' + ItemChosen);
                              //LblSiteCode.text + ' ' + LbSite_Name.Text);
 
-                             //18-4-24 UpdateLocationData;//Fill Memo with all Departments created
+                             //18-4-24
+                             UpdateLocationData;//Fill Memo with all Departments created
                                                 //Next Tab
                              //testing values
                              //LBLLat.text := '51.316965';
@@ -3024,6 +3129,51 @@ begin
   FRawBitmap.SetSize(0, 0);
   ImageContainer.Bitmap.SetSize(0, 0);
   ImageContainer.Bitmap.Assign(FRawBitmap);
+end;
+
+procedure TForm1.CMBODeptsChange(Sender: TObject);
+begin
+
+    if Assigned(CMBODepts) and (CMBODepts.ItemIndex >= 0) and
+                       (CMBODepts.ItemIndex < CMBODepts.Items.Count) then
+    begin
+
+
+       lblDeptCode.text := CMBODepts.Items[CMBODepts.ItemIndex];
+
+       DM.FDConnection1.Connected := true;
+       DM.FDQLocations.SQL.Clear;
+       DM.FDQLocations.SQL.Add('SELECT * FROM Site_Location');
+       DM.FDQLocations.SQL.Add('WHERE Site_Code = :SiteCode');
+       DM.FDQLocations.SQL.Add('AND Area_Dept_Name = :SiteDeptName');
+
+       DM.FDQLocations.Params.ParamByName('SiteCode').asstring := LblSiteCode.text;
+       DM.FDQLocations.Params.ParamByName('SiteDeptName').asstring := lblDeptCode.text;
+
+       DM.FDQLocations.Open;
+
+       LblDeptCode.Text := DM.FDQLocations.FieldByName('Area_Dept_Code').Asstring;
+
+       WriteToLog('CMBODeptsChange '
+                 + CMBODepts.Items[CBOrganisations.ItemIndex]
+                 + ' Dept Code =  ' + LblDeptCode.Text);
+
+    end;
+end;
+
+procedure TForm1.CMBODeptsClosePopup(Sender: TObject);
+var
+ Dept_Lookup: string;
+begin
+
+  Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
+  WriteToLog('CMBODeptsCloseUp ' + Dept_Lookup);
+
+
+  {$IFDEF ANDROID}
+    SelectedNameView(Dept_Lookup,FlowLayOut2, 'Dept_Tab');
+  {$ENDIF}
+
 end;
 
 procedure TForm1.ComboBox1Change(Sender: TObject);
@@ -3170,6 +3320,21 @@ begin
 
   //BtnPayVoiceDB.Enabled := false;
   //LblStatus.Text := '';
+
+//  LbSite_Name.Text := '';
+//  LblSiteCode.text := '';
+//  LbLDeptCode.text := '';
+//  LblDeptName.text := '';
+//
+//
+//  EdID.text := '';
+//  EdProjectRef.text := '';
+//  EdContact.text := '';
+//
+//  EdEmail.text := '';
+//  EdAddress.text := '';
+//  MemoNote.Lines.clear;
+
 end;
 
 end.
