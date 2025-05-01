@@ -84,8 +84,8 @@ begin
   Grid.ClearColumns;
   Query.Open;
 
-  // Debug: Log query record count
-  WritetoLog('Records Found: ' + IntToStr(Query.RecordCount));
+
+  //WritetoLog('Records Found: ' + IntToStr(Query.RecordCount));
   if Query.IsEmpty then Exit;  // Avoid proceeding if no data
 
   // Define column headers
@@ -106,7 +106,7 @@ begin
   begin
     for ColIndex := 0 to Query.FieldCount - 1 do
     begin
-      WritetoLog('Populating Grid.Cells[' + IntToStr(ColIndex) + ', ' + IntToStr(RowIndex) + ']');
+     // WritetoLog('Populating Grid.Cells[' + IntToStr(ColIndex) + ', ' + IntToStr(RowIndex) + ']');
       Grid.Cells[ColIndex, RowIndex] := Query.Fields[ColIndex].AsString;
     end;
 

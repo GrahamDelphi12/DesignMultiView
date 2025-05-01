@@ -134,7 +134,7 @@ object Form1: TForm1
     Size.Width = 1156.000000000000000000
     Size.Height = 648.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     TabPosition = None
     OnChange = TabControl1Change
@@ -152,7 +152,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -208,21 +208,6 @@ object Form1: TForm1
             TextSettings.Trimming = None
             OnClick = BtnShowClick
           end
-          object Button5: TButton
-            Align = Left
-            Margins.Left = 10.000000000000000000
-            Margins.Top = 5.000000000000000000
-            Margins.Right = 5.000000000000000000
-            Margins.Bottom = 5.000000000000000000
-            Position.X = 110.000000000000000000
-            Position.Y = 5.000000000000000000
-            Size.Width = 99.000000000000000000
-            Size.Height = 25.000000000000000000
-            Size.PlatformDefault = False
-            TabOrder = 1
-            Text = 'Hide Keyboard'
-            TextSettings.Trimming = None
-          end
         end
         object PnlHostSiteSelect: TPanel
           Align = Left
@@ -238,21 +223,21 @@ object Form1: TForm1
             Size.PlatformDefault = False
             TabIndex = 1
             TabOrder = 0
-            TabPosition = PlatformDefault
+            TabPosition = Dots
             OnChange = TabConHostSelectSiteChange
             Sizes = (
               481s
-              530s
+              556s
               481s
-              530s)
+              556s)
             object TIChooseSite: TTabItem
               CustomIcon = <
                 item
                 end>
               TextSettings.Trimming = None
               IsSelected = False
-              Size.Width = 83.000000000000000000
-              Size.Height = 26.000000000000000000
+              Size.Width = 8.000000000000000000
+              Size.Height = 8.000000000000000000
               Size.PlatformDefault = False
               StyleLookup = ''
               TabOrder = 0
@@ -266,13 +251,13 @@ object Form1: TForm1
                 Margins.Right = 10.000000000000000000
                 Margins.Bottom = 10.000000000000000000
                 Size.Width = 441.000000000000000000
-                Size.Height = 480.000000000000000000
+                Size.Height = 506.000000000000000000
                 Size.PlatformDefault = False
                 TabOrder = 1
                 object FlowLayout3: TFlowLayout
                   Align = Client
                   Size.Width = 441.000000000000000000
-                  Size.Height = 480.000000000000000000
+                  Size.Height = 506.000000000000000000
                   Size.PlatformDefault = False
                   TabOrder = 38
                   Justify = Left
@@ -1067,8 +1052,8 @@ object Form1: TForm1
                 end>
               TextSettings.Trimming = None
               IsSelected = True
-              Size.Width = 65.000000000000000000
-              Size.Height = 26.000000000000000000
+              Size.Width = 8.000000000000000000
+              Size.Height = 8.000000000000000000
               Size.PlatformDefault = False
               StyleLookup = ''
               TabOrder = 0
@@ -1082,7 +1067,7 @@ object Form1: TForm1
                 Margins.Right = 10.000000000000000000
                 Margins.Bottom = 10.000000000000000000
                 Size.Width = 441.000000000000000000
-                Size.Height = 480.000000000000000000
+                Size.Height = 506.000000000000000000
                 Size.PlatformDefault = False
                 TabOrder = 0
                 object FlowLayout4: TFlowLayout
@@ -1336,7 +1321,7 @@ object Form1: TForm1
                   Margins.Right = 36.000000000000000000
                   Margins.Bottom = 5.000000000000000000
                   Position.X = 25.000000000000000000
-                  Position.Y = 319.000000000000000000
+                  Position.Y = 345.000000000000000000
                   Size.Width = 380.000000000000000000
                   Size.Height = 106.000000000000000000
                   Size.PlatformDefault = False
@@ -2272,7 +2257,7 @@ object Form1: TForm1
                   Margins.Right = 35.000000000000000000
                   Margins.Bottom = 15.000000000000000000
                   Position.X = 30.000000000000000000
-                  Position.Y = 440.000000000000000000
+                  Position.Y = 466.000000000000000000
                   Size.Width = 376.000000000000000000
                   Size.Height = 25.000000000000000000
                   Size.PlatformDefault = False
@@ -2493,7 +2478,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -2754,21 +2739,21 @@ object Form1: TForm1
         end
         object VertScrollBox1: TVertScrollBox
           OnGesture = VertScrollBox1Gesture
+          Align = Client
           Margins.Left = 5.000000000000000000
           Margins.Top = 5.000000000000000000
           Margins.Right = 5.000000000000000000
           Margins.Bottom = 5.000000000000000000
-          Position.X = 5.000000000000000000
-          Position.Y = 95.000000000000000000
           Size.Width = 165.000000000000000000
-          Size.Height = 449.000000000000000000
+          Size.Height = 447.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 5
-          Viewport.Width = 149.000000000000000000
-          Viewport.Height = 449.000000000000000000
+          Viewport.Width = 165.000000000000000000
+          Viewport.Height = 447.000000000000000000
           object FlowLayout2: TFlowLayout
+            Align = Client
             Size.Width = 165.000000000000000000
-            Size.Height = 450.000000000000000000
+            Size.Height = 447.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 5
             Justify = Left
@@ -2777,10 +2762,15 @@ object Form1: TForm1
           end
         end
         object BtnDeleteSelected: TButton
+          Align = Bottom
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
           Position.X = 5.000000000000000000
-          Position.Y = 548.000000000000000000
-          Size.Width = 163.000000000000000000
-          Size.Height = 50.000000000000000000
+          Position.Y = 552.000000000000000000
+          Size.Width = 165.000000000000000000
+          Size.Height = 46.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 7
           Text = 'Delete Selected'
@@ -2972,23 +2962,6 @@ object Form1: TForm1
             Size.Height = 56.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 5
-            object BtnTerminate: TButton
-              Align = Left
-              Margins.Left = 10.000000000000000000
-              Margins.Top = 10.000000000000000000
-              Margins.Right = 10.000000000000000000
-              Margins.Bottom = 10.000000000000000000
-              Position.X = 10.000000000000000000
-              Position.Y = 10.000000000000000000
-              Size.Width = 135.000000000000000000
-              Size.Height = 36.000000000000000000
-              Size.PlatformDefault = False
-              TabOrder = 5
-              Text = 'Terminate Slides'
-              TextSettings.WordWrap = True
-              TextSettings.Trimming = None
-              OnClick = BtnTerminateClick
-            end
           end
           object Panel10: TPanel
             Align = Bottom
@@ -3015,7 +2988,7 @@ object Form1: TForm1
           Size.Width = 796.000000000000000000
           Size.Height = 488.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 0
+          TabIndex = 1
           TabOrder = 1
           TabPosition = None
           Sizes = (
@@ -3030,7 +3003,7 @@ object Form1: TForm1
               item
               end>
             TextSettings.Trimming = None
-            IsSelected = True
+            IsSelected = False
             Size.Width = 8.000000000000000000
             Size.Height = 8.000000000000000000
             Size.PlatformDefault = False
@@ -3072,7 +3045,7 @@ object Form1: TForm1
               item
               end>
             TextSettings.Trimming = None
-            IsSelected = False
+            IsSelected = True
             Size.Width = 8.000000000000000000
             Size.Height = 8.000000000000000000
             Size.PlatformDefault = False
@@ -3380,7 +3353,7 @@ object Form1: TForm1
           Size.Width = 102.000000000000000000
           Size.Height = 25.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 5
+          TabOrder = 3
           Text = 'Image Display'
           TextSettings.Trimming = None
           OnClick = BtnImageDisplayClick
@@ -3396,7 +3369,7 @@ object Form1: TForm1
           Size.Width = 102.000000000000000000
           Size.Height = 25.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 4
+          TabOrder = 2
           Text = 'Play Voice Note'
           TextSettings.Trimming = None
           OnClick = BtnPayVoiceDBClick
@@ -3411,36 +3384,10 @@ object Form1: TForm1
           Size.Width = 102.000000000000000000
           Size.Height = 25.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 3
+          TabOrder = 1
           Text = 'Note Display'
           TextSettings.Trimming = None
           OnClick = BtnNoteDisplayClick
-        end
-        object EdLat: TEdit
-          Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 2
-          Position.X = 621.000000000000000000
-          Position.Y = 8.000000000000000000
-          Size.Width = 100.000000000000000000
-          Size.Height = 25.000000000000000000
-          Size.PlatformDefault = False
-        end
-        object EdLong: TEdit
-          Touch.InteractiveGestures = [LongTap, DoubleTap]
-          TabOrder = 1
-          Position.X = 717.000000000000000000
-          Position.Y = 4.000000000000000000
-          Size.Width = 123.000000000000000000
-          Size.Height = 19.000000000000000000
-          Size.PlatformDefault = False
-        end
-        object Button7: TButton
-          Position.X = 360.000000000000000000
-          Position.Y = 5.000000000000000000
-          TabOrder = 6
-          Text = 'Button7'
-          TextSettings.Trimming = None
-          OnClick = Button7Click
         end
       end
     end
