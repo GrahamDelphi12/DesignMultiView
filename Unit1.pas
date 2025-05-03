@@ -96,20 +96,9 @@ type
     LocationSensor1: TLocationSensor;
     TabControl2: TTabControl;
     TabItemImage: TTabItem;
-    ImageDisplay: TImage;
-    TabItemNote: TTabItem;
-    TabItem9: TTabItem;
-    Layout1: TLayout;
     PnlLelf: TPanel;
     ListView1: TListView;
     PnlBottom: TPanel;
-    BtnImageDisplay: TButton;
-    BtnPayVoiceDB: TButton;
-    BtnNoteDisplay: TButton;
-    PlnTopMemo: TPanel;
-    BtnEditNote: TButton;
-    PnlHostMemo: TPanel;
-    MemoNote: TMemo;
     PnlImage_Memo: TPanel;
     FLImage_Memo: TFlowLayout;
     BtnCurrImage: TButton;
@@ -231,7 +220,6 @@ type
     Label3: TLabel;
     BtnCreateOrgRec: TButton;
     LblDeptCode: TLabel;
-    FLOThumbNails: TFlowLayout;
     SGOrg: TStringGrid;
     SGLoc: TStringGrid;
     SGDetail: TStringGrid;
@@ -241,6 +229,15 @@ type
     BtnDeleteAll: TButton;
     BtnDeleteSelected: TButton;
     CMBODepts: TComboBox;
+    Button4: TButton;
+    Edit1: TEdit;
+    Memo2: TMemo;
+    PnlFlowDisp: TPanel;
+    FLOThumbNails: TFlowLayout;
+    PnlImage: TPanel;
+    ImageDisplay: TImage;
+    PnlMemo: TPanel;
+    MemReportImage: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -261,14 +258,11 @@ type
     procedure BtnStopRecClick(Sender: TObject);
     procedure BtnPlayRecClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-    procedure BtnPayVoiceDBClick(Sender: TObject);
     procedure NextTabAction1Update(Sender: TObject);
     procedure Switch1Switch(Sender: TObject);
     procedure LocationSensor1LocationChanged(Sender: TObject; const OldLocation,
       NewLocation: TLocationCoord2D);
     procedure TabItem9MouseEnter(Sender: TObject);
-    procedure BtnImageDisplayClick(Sender: TObject);
-    procedure BtnNoteDisplayClick(Sender: TObject);
     procedure BtnEditNoteClick(Sender: TObject);
     procedure BtnCurrImageClick(Sender: TObject);
     procedure BtnCurrNoteClick(Sender: TObject);
@@ -292,6 +286,8 @@ type
     procedure EdIDEnter(Sender: TObject);
     procedure CMBODeptsClosePopup(Sender: TObject);
     procedure CMBODeptsChange(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure ImageContainerClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -369,7 +365,8 @@ type
 
 
     procedure CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap;
-                                     FLO: TFlowLayOut; CallingRoutine: string);
+                                     FLO: TFlowLayOut; CallingRoutine: string;
+                                     RefToMemo: Integer; StringListMemo: TStringList);
 
     procedure ImageFullSizeReportDblClick(Sender: TObject);
     procedure ImageFullSizeDeptDblClick(Sender: TObject);
@@ -378,6 +375,10 @@ type
     procedure MemoFullSizeDeptClick(Sender: TObject);
 
     procedure SortListView(ListView: TListView);
+
+    Procedure ShowPopup;
+
+    procedure BtnSaveClick(Sender: TObject);
 
     procedure Cycle_Threads;
 
@@ -390,6 +391,10 @@ type
 var
   Form1: TForm1;
   ScaleState: single;
+
+  Popup: TPopup;
+  MemoBox: TMemo;
+  BtnSave: TButton;
 
 const
   DefaultFontSize : Real = 14;
@@ -462,6 +467,61 @@ begin
 
   finally
     StringList.Free;                            // Free memory
+  end;
+end;
+
+
+
+procedure TForm1.ShowPopup;
+begin
+  // Create the popup
+  Popup := TPopup.Create(nil);
+  Popup.Width := 400;
+  Popup.Height := 300;
+  Popup.PlacementTarget := MemoShowNote;  // Position relative to Edit1
+  Popup.Placement := TPlacement.BottomCenter;
+  Popup.IsOpen := True;
+
+  // Create a Memo for input
+  MemoBox := TMemo.Create(Popup);
+  MemoBox.Parent := Popup;
+  MemoBox.Align := TAlignLayout.Client;
+  MemoBox.Text := MemoShowNote.Text;
+
+  // Create a Save button
+  BtnSave := TButton.Create(Popup);
+  BtnSave.Parent := Popup;
+  BtnSave.Align := TAlignLayout.Bottom;
+  BtnSave.Text := 'Save';
+  BtnSave.OnClick := BtnSaveClick;
+
+  Popup.IsOpen := True;  // Show the popup
+end;
+
+procedure TForm1.BtnSaveClick(Sender: TObject);
+var
+  tagValue: integer;
+  i: integer;
+begin
+  MemoShowNote.Text := MemoBox.Text;
+  Popup.IsOpen := False;
+
+  if Sender is TButton then
+  begin
+    TagValue := ImageContainer.tag;
+    writetolog('tag = ' + inttostr(TagValue));
+
+      for i := 0 to FlowLayOut2.ControlsCount - 1 do
+      begin
+
+         if (FlowLayOut2.Controls[i] is TMemo) and
+         (FlowLayOut2.Controls[i].Tag = TagValue) then
+         begin
+           TMemo(FlowLayOut2.Controls[i]).Text := memoShowNote.Text;
+         end;
+
+      end;
+
   end;
 end;
 
@@ -544,7 +604,8 @@ end;
 
 
 procedure TForm1.CreateReviewThumbNails(SiteRefLookUp: string; Image: TBitMap;
-                                FLO: TFlowlayout; CallingRoutine: string);
+                                FLO: TFlowlayout; CallingRoutine: string;
+                                RefToMemo: Integer; StringListMemo: TStringList);
 var
   ScaleFactor: Single;
   Img: TImage;
@@ -558,12 +619,10 @@ begin
         Image.Resize(Round(Image.Width / ScaleFactor), Round(Image.Height / ScaleFactor));
       end;
 
-      writetolog('In CreateReviewThumbNails 1' + FLO.Name);
+      //writetolog('In CreateReviewThumbNails 1' + FLO.Name);
 
-           //FLOThumbNails.BeginUpdate;
            FLO.BeginUpdate;
 
-           // Img := TImage.Create(FLOThumbNails);//LOImagesTaken
             Img := TImage.Create(FLO);//LOImagesTaken
             Img.Parent := FLO;//FLOThumbNails; //LOImagesTaken// Assign parent to FlowLayout
             Img.Align := TAlignLayout.None; // Allow free placement
@@ -574,7 +633,7 @@ begin
             Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
             Img.tag := StrtoInt(SiteRefLookUp);//Maintain ref or original
 
-            writetolog('In CreateReviewThumbNails 2'  + CallingRoutine);
+            //writetolog('In CreateReviewThumbNails 2'  + CallingRoutine);
 
             If CallingRoutine = 'Report_Tab' Then
             begin
@@ -596,7 +655,6 @@ begin
 
               Img.Bitmap.Assign(Image);
 
-
               //Re-enable 28-4-25
                Memo := TMemo.Create(FLO);//LOImagesTaken
                writetolog('Creating Memo');
@@ -609,13 +667,18 @@ begin
                Memo.Tag := Img.Tag;
                writetolog('Memo Created');
 
+
+               Memo.Lines.Assign(StringListMemo);
+
+
+
                If CallingRoutine = 'Report_Tab' Then
                begin
                  writetolog('Memo = ' + CallingRoutine);
-                 Memo.OnDblClick :=  MemoFullSizeReportClick;
+                 //Memo.OnDblClick :=  MemoFullSizeReportClick;
                end else if
                  CallingRoutine = 'Dept_Tab' Then
-                 Memo.OnDblClick :=  MemoFullSizeDeptClick;
+                 //Memo.OnDblClick :=  MemoFullSizeDeptClick;
                begin
 
                end;
@@ -865,7 +928,7 @@ begin
 
   EdEmail.text := '';
   EdAddress.text := '';
-  MemoNote.Lines.clear;
+  //MemoNote.Lines.clear;
 end;
 
 procedure TForm1.EdNewLocationClick(Sender: TObject);
@@ -1031,6 +1094,8 @@ procedure TForm1.ImageFullSizeReportDblClick(Sender: TObject);
 var
   tagValue : integer;
   BlobStream: TStream;
+  BlobStreamMemo: TStream;
+  StringList:TStringList;
   MemoryStream: TmemoryStream;
 begin
 
@@ -1060,6 +1125,17 @@ begin
 
         writetolog('Reading new DB table for Image with Tag = ' + Inttostr(TagValue));
 
+        //3-5-25
+        BlobStreamMemo := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_CONTENTS'), bmRead);
+
+        StringList:= TStringList.create;
+        StringList.LoadFromStream(BlobStreamMemo);
+
+        MemReportImage.lines.Clear;
+        MemReportImage.Lines.Assign(StringList);
+        //
+
+
     DM.FDConnection1.Connected := false;
   end;
 
@@ -1070,6 +1146,9 @@ var
   tagValue : integer;
   BlobStream: TStream;
   MemoryStream: TmemoryStream;
+
+  BlobStreamMemo: TStream;
+  Stringlist: TStringList;
 begin
 
   if Sender is TImage then
@@ -1095,12 +1174,28 @@ begin
         MemoryStream.Position := 0;
 
         ImageContainer.Bitmap.LoadFromStream(MemoryStream);
+        ImageContainer.tag := TagValue;  //3-6-25
 
         writetolog('Reading new DB table for Image with Tag = ' + Inttostr(TagValue));
+
+        //3-5-25
+        BlobStreamMemo := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_CONTENTS'), bmRead);
+
+        StringList:= TStringList.create;
+        StringList.LoadFromStream(BlobStreamMemo);
+
+        MemoShowNote.lines.Clear;
+        MemoShowNote.Lines.Assign(StringList);
+        //
 
     DM.FDConnection1.Connected := false;
   end;
 
+end;
+
+procedure TForm1.ImageContainerClick(Sender: TObject);
+begin
+  ShowPopup;
 end;
 
 procedure TForm1.ImageDblClick(Sender: TObject);
@@ -1826,11 +1921,19 @@ begin
 
                  WriteToLog('In load memo');
 
+                 //Chat GTP
+//                 Stream := TMemoryStream.Create;
+//                 Memo.Lines.SaveToStream(Stream);  // Save Memo content to stream
+//                 Stream.Position := 0;
+                 //
+
+
                  MemoStream.Position := 0; // Reset stream position
 
                  WriteToLog('Memo position set to 0');
 
-                 MemotoRecord.Lines.LoadFromStream(MemoStream);
+                 //MemotoRecord.Lines.LoadFromStream(MemoStream);  //3-5-24
+                 MemotoRecord.Lines.SaveToStream(MemoStream);
 
                  WriteToLog(MemotoRecord.lines.text);
 
@@ -2346,11 +2449,6 @@ begin
 
 end;
 
-procedure TForm1.BtnNoteDisplayClick(Sender: TObject);
-begin
-  Tabcontrol2.TabIndex := 1;
-end;
-
 procedure TForm1.BtnOKClick(Sender: TObject);
 var
   ReftoDept: string;
@@ -2405,13 +2503,6 @@ begin
 
         PnlPopup.visible := false;
   end;
-
-end;
-
-procedure TForm1.BtnPayVoiceDBClick(Sender: TObject);
-begin
-
-  PlayNote(RecordingRef);    //Need this vali=ue from the ListView to get the PK value
 
 end;
 
@@ -2583,6 +2674,40 @@ begin
 
 end;
 
+procedure TForm1.Button4Click(Sender: TObject);
+var
+  BlobStream: TStream;
+  Stringlist: TStringList;
+  SiteRef : Integer;
+begin
+
+  SiteRef := StrtoInt(Edit1.text);
+
+  DM.FDConnection1.Connected := true;
+
+
+  DM.FDQDetails.sql.clear;
+  DM.FDQDetails.sql.add('Select * FROM SITE_DETAIL');
+  DM.FDQDetails.sql.add(' WHERE P_KEY = ' +
+                            InttoStr(SiteRef));
+  DM.FDQDetails.Open;
+
+  Try
+    BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_CONTENTS'), bmRead);
+
+    StringList:= TStringList.create;
+    StringList.LoadFromStream(BlobStream);
+
+    Memo2.lines.Clear;
+    Memo2.Lines.Assign(StringList);
+
+  Finally
+    StringList.free;
+    BlobStream.Free;
+  End;
+
+end;
+
 procedure TForm1.BtnDatabaseClick(Sender: TObject);
 begin
 
@@ -2748,11 +2873,6 @@ begin
 
 end;
 
-procedure TForm1.BtnImageDisplayClick(Sender: TObject);
-begin
-  Tabcontrol2.TabIndex := 0;
-end;
-
 procedure TForm1.BtnIncreaseSizeClick(Sender: TObject);
 begin
 
@@ -2769,46 +2889,46 @@ begin
 end;
 
 procedure TForm1.BtnEditNoteClick(Sender: TObject);
-var
-  name: string;
-  ListItem: TListViewItem;
-  BlobStream: TStream;
-  SiteRef, DeptRef : string;
+//var
+//  name: string;
+//  ListItem: TListViewItem;
+//  BlobStream: TStream;
+//  SiteRef, DeptRef : string;
 begin
-
-  ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
-  Name := ListItem.Text;
-
-  SiteRef := Copy(Name,1,5);
-  DeptRef := ListItem.Detail;
-
- // showmessage('Site Ref ' + SiteRef);
- // showmessage('DeptRef ' + DeptRef);
-
-
-     try
-
-       BlobStream := TStringStream.Create(MemoNote.Text, TEncoding.UTF8);
-
-
-        DM.FDConnection1.Connected := true;
-
-        DM.FDQDetails.SQL.Clear;
-        DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
-        DM.FDQDetails.SQL.Add(' WHERE SITECODE = :Site');
-        DM.FDQDetails.SQL.Add(' AND DEPARTMENT = :Dept');
-
-        DM.FDQDetails.Params.ParamByName('Site').AsString := SiteRef;
-        DM.FDQDetails.Params.ParamByName('Dept').AsString := DeptRef;
-        DM.FDQDetails.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
-
-        DM.FDQDetails.ExecSQL;
-
-        DM.FDConnection1.Connected := false;
-
-     finally
-      BlobStream.Free;
-     end;
+//
+//  ListItem := TListViewItem(ListView1.Items[ListView1.Itemindex]);
+//  Name := ListItem.Text;
+//
+//  SiteRef := Copy(Name,1,5);
+//  DeptRef := ListItem.Detail;
+//
+// // showmessage('Site Ref ' + SiteRef);
+// // showmessage('DeptRef ' + DeptRef);
+//
+//
+//     try
+//
+//       BlobStream := TStringStream.Create(MemoNote.Text, TEncoding.UTF8);
+//
+//
+//        DM.FDConnection1.Connected := true;
+//
+//        DM.FDQDetails.SQL.Clear;
+//        DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET MEMO_NOTE = :Note');
+//        DM.FDQDetails.SQL.Add(' WHERE SITECODE = :Site');
+//        DM.FDQDetails.SQL.Add(' AND DEPARTMENT = :Dept');
+//
+//        DM.FDQDetails.Params.ParamByName('Site').AsString := SiteRef;
+//        DM.FDQDetails.Params.ParamByName('Dept').AsString := DeptRef;
+//        DM.FDQDetails.Params.ParamByName('Note').LoadFromStream(BlobStream, ftBlob);
+//
+//        DM.FDQDetails.ExecSQL;
+//
+//        DM.FDConnection1.Connected := false;
+//
+//     finally
+//      BlobStream.Free;
+//     end;
 
 end;
 
@@ -2863,7 +2983,7 @@ begin
   //showmessage(RefCode);
 
   {$IFDEF ANDROID}
-    BtnPayVoiceDB.Enabled := true;
+  //  BtnPayVoiceDB.Enabled := true;
     SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab');  //Name
   {$ENDIF}
 
@@ -2955,34 +3075,34 @@ begin
 
 
   //Need Ite and Departent to ensure correct record
-  DM.FDQDetails.sql.clear;
-  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
-  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
-                            Trim(QuotedStr(SiteRef)));
-  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
-                            Trim(QuotedStr(DeptRef)));
-  DM.FDQDetails.Open;
-
-  Try
-    BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_NOTE'), bmRead);
-
-    StringList:= TStringList.create;
-
-    StringList.LoadFromStream(BlobStream);
-
-    MemoNote.lines.Clear;
-
-    MemoNote.Lines.Assign(StringList);
-
-  Finally
-    StringList.free;
-    BlobStream.Free;
-  End;
-
-  //Reference to Recording 23-3-24
-  RecordingRef := inttostr(DM.FDQDetails.FieldByName('P_KEY').AsInteger);
-
-  DM.FDConnection1.Connected := false;
+//  DM.FDQDetails.sql.clear;
+//  DM.FDQDetails.sql.add('Select * FROM "NAMES"');
+//  DM.FDQDetails.sql.add(' WHERE SITECODE = ' +
+//                            Trim(QuotedStr(SiteRef)));
+//  DM.FDQDetails.sql.add(' AND DEPARTMENT = ' +
+//                            Trim(QuotedStr(DeptRef)));
+//  DM.FDQDetails.Open;
+//
+//  Try
+//    BlobStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_NOTE'), bmRead);
+//
+//    StringList:= TStringList.create;
+//
+//    StringList.LoadFromStream(BlobStream);
+//
+//    MemoNote.lines.Clear;
+//
+//    MemoNote.Lines.Assign(StringList);
+//
+//  Finally
+//    StringList.free;
+//    BlobStream.Free;
+//  End;
+//
+//  //Reference to Recording 23-3-24
+//  RecordingRef := inttostr(DM.FDQDetails.FieldByName('P_KEY').AsInteger);
+//
+//  DM.FDConnection1.Connected := false;
 
 end;
 
@@ -2991,9 +3111,12 @@ procedure TForm1.SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call
 var
   BlobStream: TStream;
   MemoryStream: TmemoryStream;
+  BlobMemoStream : TStream;
   BitMap : TBitMap;
+  StringListMemo: TStringList;
   i: integer;
   RefToImage: integer;
+  RefToMemo: integer;
 begin
 
   DM.FDConnection1.Connected := true;
@@ -3025,17 +3148,26 @@ begin
       Bitmap.LoadFromStream(MemoryStream);
 
       RefToImage := DM.FDQDetails.fieldbyName('Image_Tag').asInteger;
-      //writetolog('RefToImage = ' + Inttostr(RefToImage));
+      RefToMemo := DM.FDQDetails.fieldbyName('Memo_Tag').asInteger;
+      //
+      BlobMemoStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_CONTENTS'), bmRead);
 
-      //writetolog('Before CreateReviewThumbNail - FlowLayOut name = ' + Origin_Call);
+      StringListMemo:= TStringList.create;
+      StringListMemo.LoadFromStream(BlobMemoStream);
+
+      //Memo2.lines.Clear;
+      //Memo2.Lines.Assign(StringListMemo);
+
 
       //Create Thumb Nails for each record
       //27-4-25
-      CreateReviewThumbNails(InttoStr(RefToImage), Bitmap, FLO, Origin_Call); //FlowLayout2
+      CreateReviewThumbNails(InttoStr(RefToImage), Bitmap, FLO, Origin_Call, RefToMemo, StringListMemo);
 
       MemoryStream.Free;
       BlobStream.Free;
       BitMap.free;
+      BlobMemoStream.free;
+      StringListMemo.Free;
 
       //Reference to Recording 23-3-24 - 11-4-25 recast to string;
       RecordingRef := InttoStr(DM.FDQDetails.FieldByName('P_KEY').AsInteger);

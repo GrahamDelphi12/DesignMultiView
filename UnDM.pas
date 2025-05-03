@@ -85,7 +85,7 @@ begin
   Query.Open;
 
 
-  //WritetoLog('Records Found: ' + IntToStr(Query.RecordCount));
+  WritetoLog('Records Found: ' + IntToStr(Query.RecordCount));
   if Query.IsEmpty then Exit;  // Avoid proceeding if no data
 
   // Define column headers
@@ -93,7 +93,9 @@ begin
   begin
     NewColumn := TStringColumn.Create(Grid);
     NewColumn.Header := Query.Fields[ColIndex].FieldName;
-    If NewColumn.Header = 'IMAGE_NAME' then NewColumn.Width := NewColumn.Width + 70;
+    If NewColumn.Header = 'IMAGE_NAME' then NewColumn.Width := NewColumn.Width + 100;
+    If NewColumn.Header = 'MEMO_NAME' then NewColumn.Width := NewColumn.Width + 100;
+
     Grid.AddObject(NewColumn);
   end;
 
