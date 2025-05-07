@@ -237,7 +237,7 @@ type
     PnlMemo: TPanel;
     MemReportImage: TMemo;
     LblStatus: TLabel;
-    Button3: TButton;
+    RadioButton1: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);

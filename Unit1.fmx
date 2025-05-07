@@ -3158,12 +3158,11 @@ object Form1: TForm1
           TextSettings.Trimming = None
           OnClick = BtnConfirmClick
         end
-        object Button3: TButton
-          Position.X = 736.000000000000000000
-          Position.Y = 24.000000000000000000
-          TabOrder = 2
-          Text = 'Button3'
-          TextSettings.Trimming = None
+        object RadioButton1: TRadioButton
+          Position.X = 712.000000000000000000
+          Position.Y = 32.000000000000000000
+          TabOrder = 3
+          Text = 'RadioButton1'
         end
       end
     end
