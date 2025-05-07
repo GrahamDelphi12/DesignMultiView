@@ -237,6 +237,7 @@ type
     PnlMemo: TPanel;
     MemReportImage: TMemo;
     LblStatus: TLabel;
+    Button3: TButton;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -1825,7 +1826,7 @@ var
   Site_Dept_Code : string;
 begin
 
-
+   //7-5-25
    If (LblDeptName.text = '') or (LblDeptCode.Text = '') then
    begin
       showmessage('Add Department First');

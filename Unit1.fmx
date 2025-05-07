@@ -134,7 +134,7 @@ object Form1: TForm1
     Size.Width = 1156.000000000000000000
     Size.Height = 648.000000000000000000
     Size.PlatformDefault = False
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     TabPosition = None
     OnChange = TabControl1Change
@@ -152,7 +152,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = True
+      IsSelected = False
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -2478,7 +2478,7 @@ object Form1: TForm1
         item
         end>
       TextSettings.Trimming = None
-      IsSelected = False
+      IsSelected = True
       Size.Width = 8.000000000000000000
       Size.Height = 8.000000000000000000
       Size.PlatformDefault = False
@@ -3157,6 +3157,13 @@ object Form1: TForm1
           Text = 'Confirm'
           TextSettings.Trimming = None
           OnClick = BtnConfirmClick
+        end
+        object Button3: TButton
+          Position.X = 736.000000000000000000
+          Position.Y = 24.000000000000000000
+          TabOrder = 2
+          Text = 'Button3'
+          TextSettings.Trimming = None
         end
       end
     end
