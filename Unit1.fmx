@@ -3158,12 +3158,6 @@ object Form1: TForm1
           TextSettings.Trimming = None
           OnClick = BtnConfirmClick
         end
-        object RadioButton1: TRadioButton
-          Position.X = 712.000000000000000000
-          Position.Y = 32.000000000000000000
-          TabOrder = 3
-          Text = 'RadioButton1'
-        end
       end
     end
     object TabItem2: TTabItem
@@ -3351,13 +3345,13 @@ object Form1: TForm1
         CanFocus = True
         ClipChildren = True
         Position.X = 18.000000000000000000
-        Position.Y = 280.000000000000000000
+        Position.Y = 312.000000000000000000
         Size.Width = 579.000000000000000000
-        Size.Height = 289.000000000000000000
+        Size.Height = 257.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 4
         Viewport.Width = 575.000000000000000000
-        Viewport.Height = 264.000000000000000000
+        Viewport.Height = 232.000000000000000000
       end
       object BtnDatabase: TButton
         Position.X = 657.000000000000000000
@@ -3419,6 +3413,27 @@ object Form1: TForm1
         TabOrder = 12
         Viewport.Width = 207.000000000000000000
         Viewport.Height = 77.000000000000000000
+      end
+      object Label1: TLabel
+        Position.X = 24.000000000000000000
+        Position.Y = 136.000000000000000000
+        Text = 'Organisations'
+        TabOrder = 13
+      end
+      object Label22: TLabel
+        Position.X = 608.000000000000000000
+        Position.Y = 128.000000000000000000
+        Text = 'Departments'
+        TabOrder = 14
+      end
+      object Label23: TLabel
+        Position.X = 18.000000000000000000
+        Position.Y = 287.000000000000000000
+        Size.Width = 213.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Image and Momo Reference'
+        TabOrder = 15
       end
     end
   end

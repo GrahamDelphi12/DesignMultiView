@@ -237,7 +237,9 @@ type
     PnlMemo: TPanel;
     MemReportImage: TMemo;
     LblStatus: TLabel;
-    RadioButton1: TRadioButton;
+    Label1: TLabel;
+    Label22: TLabel;
+    Label23: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -338,7 +340,8 @@ type
 
     procedure UpdateEffect;
     procedure UpdateUI;
-    procedure SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string);
+    procedure SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string;
+                               CallingRoutine: string);
     Function UpdateListviewData(CallingProcedure: string): Integer;
     procedure Empty_Controls(AParent: TFMXObject);
     procedure ComponentDefaultFont(AParent: TFMXObject; ScaleFactor: real);
@@ -381,6 +384,8 @@ type
     procedure BtnSaveClick(Sender: TObject);
 
     procedure Cycle_Threads;
+
+    procedure WriteThumbImagetoDatabase(ImageContainer: TImage; Img_tag: integer; Image_Name: string);
 
   public
     { Public declarations }
@@ -470,7 +475,59 @@ begin
   end;
 end;
 
+procedure TForm1.WriteThumbImagetoDatabase(ImageContainer: TImage; Img_Tag: Integer; Image_Name: string);
+var
+  ImageStream: TMemoryStream;
+  Site_Dept_Code: string;
+begin
 
+
+   If (LblDeptName.text = '') or (LblDeptCode.Text = '') then
+   begin
+      showmessage('Add Department First');
+      exit;
+   end;
+
+   Site_Dept_Code:= LblSiteCode.text + '_' + LblDeptCode.text;
+
+
+          WriteToLog('Before LoadStream');
+
+
+         if Assigned(ImageContainer.Bitmap) then
+         begin
+          ImageStream := TMemoryStream.Create;
+          ImageContainer.Bitmap.SaveToStream(ImageStream);
+          ImageStream.Position := 0; // Reset before reading
+         end
+         else WriteToLog('Bitmap is nil');
+
+           WriteToLog('After LoadStream');
+
+           DM.FDConnection1.Connected := true;
+
+           WriteToLog('Ready for Database Image write');
+
+
+            DM.FDQDetails.sql.clear;
+            DM.FDQDetails.sql.add('INSERT into Site_Detail (Site_Dept_Code, Image_Name, Image_Tag, Image_Contents)');
+            DM.FDQDetails.sql.add('VALUES(:pSiteDeptCode, :pImageName, :pImageTag, :pImageContents)');
+
+            DM.FDQDetails.Params.ParamByName('pSiteDeptCode').AsString := Site_Dept_Code;
+
+            DM.FDQDetails.Params.ParamByName('pImageName').AsString := Image_Name;
+            DM.FDQDetails.Params.ParamByName('pImageTag').AsInteger := Img_Tag;
+            DM.FDQDetails.ParamByName('pImageContents').LoadFromStream(ImageStream, ftBlob);
+
+
+            DM.FDQDetails.ExecSQL;
+
+            WriteToLog('Database Image write done');
+
+            DM.FDConnection1.Connected := false;
+
+            ImageStream.Free;
+end;
 
 procedure TForm1.ShowPopup;
 begin
@@ -1063,6 +1120,8 @@ end;
 
 
 procedure TForm1.TabControl1Change(Sender: TObject);
+var
+  Dept_Lookup: string;
 begin
 //5-5-25
 //  If TabItem2.IsSelected Then
@@ -1070,6 +1129,33 @@ begin
 //   UpdateListviewData('TabControl1Change');//2-4-25
 //  end;
 
+
+  {$IFDEF ANDROID}
+    If TabItem2.IsSelected then
+    begin
+      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
+      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'PreviousTabAction1Update');
+    end;
+  {$ENDIF}
+
+
+//Moved from OnUpdate 7-5-25
+
+  {$IFDEF ANDROID}
+    If TIStartPage.IsSelected then
+    begin
+      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
+      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
+    end;
+
+    //Moved from TabControlChange 5-5-25
+    If TabItem2.IsSelected Then
+    begin
+        MemoShowNote.Text := '';
+        UpdateListviewData('NextTabAction1Update');//2-4-25
+    end;
+
+  {$ENDIF}
 end;
 
 procedure TForm1.TabItem9MouseEnter(Sender: TObject);
@@ -1298,6 +1384,7 @@ begin
             VertScrollbox1.RealignContent;
 
 
+            WriteThumbImagetoDatabase(Img, Img.tag, Img.Name);
 end;
 
 procedure TForm1.CalculateFlowLayoutHeight(FLO: TFlowLayOut);
@@ -1826,7 +1913,7 @@ var
   Site_Dept_Code : string;
 begin
 
-   //7-5-25
+
    If (LblDeptName.text = '') or (LblDeptCode.Text = '') then
    begin
       showmessage('Add Department First');
@@ -2323,6 +2410,7 @@ var
   AssociatedImage: TImage;
   Checkbox: TCheckbox;
   AssociatedMemo: TMemo;
+  Site_Dept_Code: string;
 begin
   DeletionList := TList<TCheckBox>.Create; // Temporary list
   try
@@ -2350,6 +2438,23 @@ begin
                (TImage(FlowLayout2.Controls[y]).Tag = Checkbox.Tag) then
             begin
               AssociatedImage := TImage(FlowLayout2.Controls[y]);
+
+
+              Site_Dept_Code:= LblSiteCode.text + '_' + LblDeptCode.text;
+
+              //Prepare Database
+              WriteToLog('Deletions Start ' + DateTimetoStr(Now));
+              DM.FDQDetails.sql.clear;
+              DM.FDQDetails.sql.add('DELETE FROM Site_Detail');
+              DM.FDQDetails.sql.add('WHERE Site_Dept_Code = :pToDelete');
+              DM.FDQDetails.sql.add('AND IMAGE_TAG = :pTag');
+
+              DM.FDQDetails.Params.ParamByName('pToDelete').Asstring := Site_Dept_Code;
+              DM.FDQDetails.Params.ParamByName('pTag').AsInteger := TImage(FlowLayout2.Controls[y]).Tag;
+              DM.FDQDetails.ExecSQL;
+
+              WriteToLog('Deletion done');
+
               Break;
             end;
           end;
@@ -2992,7 +3097,7 @@ begin
 
   {$IFDEF ANDROID}
   //  BtnPayVoiceDB.Enabled := true;                         //Disable
-    SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab');  //5-5-24
+    SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab', 'Listiew1Change');  //5-5-24
   {$ENDIF}                                                   //Updates previous Thumbnails
 
   SelectedNameMemo(Name);
@@ -3042,27 +3147,27 @@ begin
 end;
 
 procedure TForm1.NextTabAction1Update(Sender: TObject);
-var
-  Dept_Lookup: string;
+//var
+//  Dept_Lookup: string;
 begin
-
-
-  {$IFDEF ANDROID}
-    If TIStartPage.IsSelected then
-    begin
-      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
-      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab');
-    end;
-
-    //Moved from TabControlChange 5-5-25
-    If TabItem2.IsSelected Then
-    begin
-        //ShowMessage('User selected YES') ;
-        MemoShowNote.Text := '';
-        UpdateListviewData('NextTabAction1Update');//2-4-25
-    end;
-
-  {$ENDIF}
+//
+//
+//  {$IFDEF ANDROID}
+//    If TIStartPage.IsSelected then
+//    begin
+//      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
+//      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
+//    end;
+//
+//    //Moved from TabControlChange 5-5-25
+//    If TabItem2.IsSelected Then
+//    begin
+//        //ShowMessage('User selected YES') ;
+//        MemoShowNote.Text := '';
+//        UpdateListviewData('NextTabAction1Update');//2-4-25
+//    end;
+//
+//  {$ENDIF}
 end;
 
 procedure TForm1.SelectedNameMemo(Name: string);
@@ -3123,7 +3228,8 @@ begin
 end;
 
 
-procedure TForm1.SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string);
+procedure TForm1.SelectedNameView(DeptRef: string; FLO: TFlowLayOut; Origin_Call: string;
+                                  CallingRoutine: string);
 var
   BlobStream: TStream;
   MemoryStream: TmemoryStream;
@@ -3137,7 +3243,6 @@ begin
 
   DM.FDConnection1.Connected := true;
 
-  //for i := FLOThumbNails.ChildrenCount - 1 downto 0 do
   for i := FLO.ChildrenCount - 1 downto 0 do
   begin
     FLO.Children[i].Free;
@@ -3149,12 +3254,12 @@ begin
                             Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
-  if DM.FDQDetails.RecordCount > 0 then
-  begin
-  BtnTakephoto.Enabled := true;
-  BtnNextScreen.Enabled := true;//NextScreen
-  end;
-  //showmessage('Records Found for ' + Name + ' ' + inttostr(DM.FDQDetails.RecordCount));
+//  if DM.FDQDetails.RecordCount > 0 then
+//  begin
+//  BtnTakephoto.Enabled := true;
+//  BtnNextScreen.Enabled := true;//NextScreen
+//  end;
+  writetolog(CallingRoutine + ' Records Found for ' + DeptRef + ' ' + inttostr(DM.FDQDetails.RecordCount));
 
   While Not DM.FDQDetails.EOF Do
   Begin
@@ -3344,6 +3449,8 @@ begin
                  + CMBODepts.Items[CBOrganisations.ItemIndex]
                  + ' Dept Code =  ' + LblDeptCode.Text);
 
+
+
     end;
 end;
 
@@ -3357,7 +3464,7 @@ begin
 
 
   {$IFDEF ANDROID}
-    SelectedNameView(Dept_Lookup,FlowLayOut2, 'Dept_Tab');
+    SelectedNameView(Dept_Lookup,FlowLayOut2, 'Dept_Tab', 'CMBODeptsClosePopUp');
   {$ENDIF}
 
 end;
@@ -3507,20 +3614,18 @@ begin
 end;
 
 procedure TForm1.PreviousTabAction1Update(Sender: TObject);
-var
-  Dept_Lookup: string;
+//var
+//  Dept_Lookup: string;
 begin
 
-  //BtnPayVoiceDB.Enabled := false;
-
-  //30-4-25
-  {$IFDEF ANDROID}
-    If TabItem2.IsSelected then
-    begin
-      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
-      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab');
-    end;
-  {$ENDIF}
+//
+//  {$IFDEF ANDROID}
+//    If TabItem2.IsSelected then
+//    begin
+//      Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
+//      SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'PreviousTabAction1Update');
+//    end;
+//  {$ENDIF}
 
 
 end;
