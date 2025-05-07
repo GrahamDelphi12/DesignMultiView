@@ -26,20 +26,6 @@ object Form1: TForm1
       Text = 'Button1'
       TextSettings.Trimming = None
     end
-    object LblStatus: TLabel
-      Align = Right
-      Margins.Left = 10.000000000000000000
-      Margins.Top = 10.000000000000000000
-      Margins.Right = 10.000000000000000000
-      Margins.Bottom = 10.000000000000000000
-      Position.X = 902.000000000000000000
-      Position.Y = 10.000000000000000000
-      Size.Width = 244.000000000000000000
-      Size.Height = 21.000000000000000000
-      Size.PlatformDefault = False
-      Text = 'Status'
-      TabOrder = 1
-    end
     object LbSite_Name: TLabel
       Align = Left
       StyledSettings = [Family, Size, FontColor]
@@ -50,7 +36,7 @@ object Form1: TForm1
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
       Text = 'LbSite_Name'
-      TabOrder = 12
+      TabOrder = 11
     end
     object LblSiteCode: TLabel
       Align = Left
@@ -66,7 +52,7 @@ object Form1: TForm1
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
       Text = 'LblSiteCode'
-      TabOrder = 11
+      TabOrder = 10
     end
     object LblDeptCode: TLabel
       Align = Left
@@ -79,7 +65,7 @@ object Form1: TForm1
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
       Text = 'LblDeptCode'
-      TabOrder = 13
+      TabOrder = 12
     end
     object LblDeptName: TLabel
       Align = Left
@@ -91,7 +77,21 @@ object Form1: TForm1
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
       Text = 'LblDeptName'
-      TabOrder = 14
+      TabOrder = 13
+    end
+    object LblStatus: TLabel
+      Align = Right
+      Margins.Left = 10.000000000000000000
+      Margins.Top = 10.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.X = 872.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 274.000000000000000000
+      Size.Height = 21.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Status'
+      TabOrder = 1
     end
   end
   object ToolBar2: TToolBar
@@ -114,7 +114,7 @@ object Form1: TForm1
       TabOrder = 2
       TextSettings.Trimming = None
     end
-    object Button3: TButton
+    object BtnNextScreen: TButton
       Action = NextTabAction1
       Align = Right
       ImageIndex = -1
@@ -221,7 +221,7 @@ object Form1: TForm1
             Size.Width = 481.000000000000000000
             Size.Height = 556.000000000000000000
             Size.PlatformDefault = False
-            TabIndex = 1
+            TabIndex = 0
             TabOrder = 0
             TabPosition = Dots
             OnChange = TabConHostSelectSiteChange
@@ -235,7 +235,7 @@ object Form1: TForm1
                 item
                 end>
               TextSettings.Trimming = None
-              IsSelected = False
+              IsSelected = True
               Size.Width = 8.000000000000000000
               Size.Height = 8.000000000000000000
               Size.PlatformDefault = False
@@ -1051,7 +1051,7 @@ object Form1: TForm1
                 item
                 end>
               TextSettings.Trimming = None
-              IsSelected = True
+              IsSelected = False
               Size.Width = 8.000000000000000000
               Size.Height = 8.000000000000000000
               Size.PlatformDefault = False
@@ -2970,17 +2970,6 @@ object Form1: TForm1
             Size.Height = 24.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 6
-            object Label1: TLabel
-              Align = Left
-              Margins.Left = 10.000000000000000000
-              Position.X = 10.000000000000000000
-              Size.Width = 132.000000000000000000
-              Size.Height = 24.000000000000000000
-              Size.PlatformDefault = False
-              TextSettings.HorzAlign = Center
-              Text = 'Current Image'
-              TabOrder = 4
-            end
           end
         end
         object TabCont_Image_Memo: TTabControl

@@ -77,17 +77,15 @@ type
     ComboBox1: TComboBox;
     ToolBar3: TToolBar;
     Button2: TButton;
-    Button3: TButton;
+    BtnNextScreen: TButton;
     ImageList1: TImageList;
     Label6: TLabel;
     Label7: TLabel;
     MediaPlayer1: TMediaPlayer;
     Timer1: TTimer;
-    LblStatus: TLabel;
     BtnConfirm: TButton;
     Panel9: TPanel;
     Panel10: TPanel;
-    Label1: TLabel;
     TabCont_Image_Memo: TTabControl;
     TabItem4: TTabItem;
     TabItem5: TTabItem;
@@ -238,6 +236,7 @@ type
     ImageDisplay: TImage;
     PnlMemo: TPanel;
     MemReportImage: TMemo;
+    LblStatus: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -508,6 +507,7 @@ begin
 
   if Sender is TButton then
   begin
+    ImageContainer.Repaint;//tag not getting updated!
     TagValue := ImageContainer.tag;
     writetolog('tag = ' + inttostr(TagValue));
 
@@ -577,8 +577,8 @@ begin
 
             ImageContainer.Bitmap.LoadFromStream(MemoryStream);
 
-            label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
-                            + ' ' + dm.FDQDetails.FieldByName('SITECODE').asstring);
+           // label1.text := (inttostr(dm.FDQDetails.FieldByName('P_KEY').asinteger)
+           //                 + ' ' + dm.FDQDetails.FieldByName('SITECODE').asstring);
 
             TThread.Sleep(2000);
 
@@ -595,7 +595,7 @@ begin
          FRawBitmap.SetSize(0, 0);
          ImageContainer.Bitmap.SetSize(0, 0);
          ImageContainer.Bitmap.Assign(FRawBitmap);
-         Label1.Text := 'Current Image';
+         //Label1.Text := 'Current Image';
     end
 
    ).Start;
@@ -637,12 +637,12 @@ begin
 
             If CallingRoutine = 'Report_Tab' Then
             begin
-              writetolog('Flow = ' + CallingRoutine);
+             // writetolog('Flow = ' + CallingRoutine);
               Img.OnDblClick :=  ImageFullSizeReportDblClick;//ImageDblClick;
             end else if
               CallingRoutine = 'Dept_Tab' Then
             begin
-              writetolog('Flow = ' + CallingRoutine);
+             // writetolog('Flow = ' + CallingRoutine);
               Img.OnDblClick := ImageFullSizeDeptDblClick;
 
               //New 28-4-25
@@ -657,15 +657,15 @@ begin
 
               //Re-enable 28-4-25
                Memo := TMemo.Create(FLO);//LOImagesTaken
-               writetolog('Creating Memo');
+              // writetolog('Creating Memo');
                Memo.Parent := FLO; //LOImagesTaken// Assign parent to FlowLayout
                Memo.Align := TAlignLayout.None; // Allow free placement
                Memo.Width := 120; // Set width (adjust as needed)
                Memo.Height := 20; // Set height (adjust as needed)
                Memo.HitTest := True;
-               Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
+               //Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
                Memo.Tag := Img.Tag;
-               writetolog('Memo Created');
+               //writetolog('Memo Created');
 
 
                Memo.Lines.Assign(StringListMemo);
@@ -674,7 +674,7 @@ begin
 
                If CallingRoutine = 'Report_Tab' Then
                begin
-                 writetolog('Memo = ' + CallingRoutine);
+                // writetolog('Memo = ' + CallingRoutine);
                  //Memo.OnDblClick :=  MemoFullSizeReportClick;
                end else if
                  CallingRoutine = 'Dept_Tab' Then
@@ -702,7 +702,12 @@ var
 begin
 
   x := 0;
+
+  FlowLayOut2.BeginUpdate;
+
+
   SetLength(Image_Memo_Store, Trunc(FlowLayOut2.ControlsCount/3));
+
 
 
       for i := 0 to FlowLayOut2.ControlsCount - 1 do
@@ -722,9 +727,12 @@ begin
 
                 if Assigned(ImagetoRecord.Bitmap) then
                 begin
-                    Image_Memo_Store[x].ImageStream := TMemoryStream.Create;
+                  WriteToLog('BitMap Begin');
+                  if not Assigned(Image_Memo_Store[x].ImageStream) then
+                     Image_Memo_Store[x].ImageStream := TMemoryStream.Create;
+                    Image_Memo_Store[x].ImageStream.Clear;
                     ImagetoRecord.Bitmap.SaveToStream(Image_Memo_Store[x].ImageStream);
-
+                  WriteToLog('BitMap End');
                 end else
                 begin
                  WriteToLog('Bitmap is nil for Image: ' + ImagetoRecord.Name);
@@ -732,30 +740,30 @@ begin
 
              end;
 
-            WriteToLog('In procedure: Check for Memo');
+            //WriteToLog('In procedure: Check for Memo');
 
             if FlowLayOut2.Controls[i] is TMemo then
             begin
 
-              WriteToLog('In procedure: Have Memo');
+             // WriteToLog('In procedure: Have Memo');
 
               MemotoRecord := TMemo(FlowLayOut2.Controls[i]);
 
-              WriteToLog('In procedure: MemoRecord.tag = ' + inttostr(MemotoRecord.Tag));
+            //  WriteToLog('In procedure: MemoRecord.tag = ' + inttostr(MemotoRecord.Tag));
 
               Image_Memo_Store[x].MemoTag := MemotoRecord.Tag;
               Image_Memo_Store[x].MemoName := MemotoRecord.Name;
 
-              WriteToLog('In procedure: Tag = ' + inttostr(Image_Memo_Store[x].MemoTag)
-                         + ' Name = ' + Image_Memo_Store[x].MemoName) ;
+             // WriteToLog('In procedure: Tag = ' + inttostr(Image_Memo_Store[x].MemoTag)
+             //            + ' Name = ' + Image_Memo_Store[x].MemoName) ;
 
               if Assigned(MemotoRecord) then
               begin
-                 WriteToLog('In procedure: Memo assigned');
+              //   WriteToLog('In procedure: Memo assigned');
                  Image_Memo_Store[x].MemoStream := TMemoryStream.Create;
                  MemotoRecord.Lines.SaveToStream(Image_Memo_Store[x].MemoStream);
-                 WriteToLog('In procedure: Memo assignment completed for Tag = '
-                             + inttostr(Image_Memo_Store[x].MemoTag));
+              //   WriteToLog('In procedure: Memo assignment completed for Tag = '
+              //               + inttostr(Image_Memo_Store[x].MemoTag));
 
               end;
 
@@ -769,10 +777,10 @@ begin
 
                 if (Image_Memo_Store[x].MemoTag <> 0) then
                 begin
-                    WriteToLog('Image ' + inttostr(Image_Memo_Store[x].ImageTag));
-                    WriteToLog('Mmeo ' + inttostr(Image_Memo_Store[x].MemoTag));
+                  //  WriteToLog('Image ' + inttostr(Image_Memo_Store[x].ImageTag));
+                  //  WriteToLog('Mmeo ' + inttostr(Image_Memo_Store[x].MemoTag));
                     Inc(x);
-                    WriteToLog('x value after inc = ' + inttostr(x));
+                  //  WriteToLog('x value after inc = ' + inttostr(x));
                 end;
 
           end;//inc conditions separated for clarity
@@ -780,6 +788,8 @@ begin
 
 
       end; //flow
+
+      Flowlayout2.EndUpdate;
 
       result := Image_Memo_Store;
 
@@ -1053,11 +1063,11 @@ end;
 
 procedure TForm1.TabControl1Change(Sender: TObject);
 begin
-
-  If TabItem2.IsSelected Then
-  begin
-   UpdateListviewData('TabControl1Change');//2-4-25
-  end;
+//5-5-25
+//  If TabItem2.IsSelected Then
+//  begin
+//   UpdateListviewData('TabControl1Change');//2-4-25
+//  end;
 
 end;
 
@@ -1815,13 +1825,6 @@ var
   Site_Dept_Code : string;
 begin
 
-//  {$IFDEF ANDROID}
-//    if Imagecontainer.Bitmap.isempty then
-//    begin
-//      showmessage('Image Required - take picture');
-//      exit;
-//    end;
-//  {$ENDIF}
 
    If (LblDeptName.text = '') or (LblDeptCode.Text = '') then
    begin
@@ -1839,14 +1842,14 @@ begin
    DM.FDQDetails.Params.ParamByName('pToDelete').Asstring := Site_Dept_Code;
    DM.FDQDetails.ExecSQL;
 
-   WriteToLog('Deletions Finish ' + DateTimetoStr(Now));
+   //WriteToLog('Deletions Finish ' + DateTimetoStr(Now));
 
-   WriteToLog('Deletion done for ' + Site_Dept_Code);
+   WriteToLog('Deletion done for ' + Site_Dept_Code + DateTimetoStr(Now));
 
-  Image_Memo_StoreResult := WriteSelectedDetailsToRecord;
 
-  //WriteToLog('Back from WriteSelectedDetailsToRecord');
+   Image_Memo_StoreResult := WriteSelectedDetailsToRecord;
 
+   WriteToLog('Result Structure Created ' + DateTimetoStr(Now));
 
   ImagetoRecord := TImage.Create(self);
 
@@ -1905,43 +1908,38 @@ begin
              //WriteToLog('Image done');
 
 
-             WriteToLog('Tag of Memo = ' + inttostr(Image_Memo_StoreResult[i].MemoTag));
+            // WriteToLog('Tag of Memo = ' + inttostr(Image_Memo_StoreResult[i].MemoTag));
 
             if Image_Memo_StoreResult[i].MemoTag <> 0 then
             begin
                Memo_Tag := Image_Memo_StoreResult[i].MemoTag;
                Memo_Name := Image_Memo_StoreResult[i].MemoName;
 
-               WriteToLog('Before Memo to Stream ' + Memo_Name);
+             //  WriteToLog('Before Memo to Stream ' + Memo_Name);
 
                MemoStream := Image_Memo_StoreResult[i].MemoStream;
 
                if Assigned(MemoStream) and (MemoStream.Size > 0) then
                begin
 
-                 WriteToLog('In load memo');
-
-                 //Chat GTP
-//                 Stream := TMemoryStream.Create;
-//                 Memo.Lines.SaveToStream(Stream);  // Save Memo content to stream
-//                 Stream.Position := 0;
-                 //
-
+             //    WriteToLog('In load memo');
 
                  MemoStream.Position := 0; // Reset stream position
 
-                 WriteToLog('Memo position set to 0');
+             //    WriteToLog('Memo position set to 0');
 
                  //MemotoRecord.Lines.LoadFromStream(MemoStream);  //3-5-24
                  MemotoRecord.Lines.SaveToStream(MemoStream);
 
-                 WriteToLog(MemotoRecord.lines.text);
+             //    WriteToLog(MemotoRecord.lines.text);
 
                end;//Memo
 
             end;//tag
 
             DM.FDConnection1.Connected := true;
+
+            WriteToLog('Process Array Finished ' + DateTimetoStr(Now));
 
             WriteToLog('Ready for Database write');
 
@@ -1962,7 +1960,7 @@ begin
             DM.FDQDetails.ParamByName('pMemoContents').LoadFromStream(MemoStream, ftBlob);
 
             //WriteToLog(DM.FDQDetails.sql.text);
-            WriteToLog('Image Tag = ' + inttostr(Image_Tag));
+            //WriteToLog('Image Tag = ' + inttostr(Image_Tag));
 
             DM.FDQDetails.ExecSQL;
 
@@ -1981,25 +1979,32 @@ begin
 
   end;//Array of Images and Memos to write to database
 
-  WriteToLog('Process array Complete ' + DateTimetoStr(Now));
+  //WriteToLog('Process array Complete ' + DateTimetoStr(Now));
 
     WriteToLog('All Done');
    // showmessage('Insert Done');
+
 
   for i := FlowLayOut2.ChildrenCount - 1 downto 0 do
   begin
     FlowLayOut2.Children[i].Free;
   end;
 
+
+
+
     //All Data written to Dept detail, now update the Report screen
     //No value returned from this function any more.
-    WriteToLog('Call UpdateListviewData ' + datetimetostr(Now));
+    //Needed to display new picture in Rreport ListView
+    WriteToLog('Database process complete Call UpdateListviewData ' + datetimetostr(Now));
     PKValue := UpdateListviewData('BtnConfirmClick');  //Returns Newly inserted PK Value
 
     WriteToLog('Back from UpdateListviewData ' + datetimetostr(Now));
 
 
-  NextTabAction1.Execute;
+
+
+    NextTabAction1.Execute;
 
 end;
 
@@ -2500,6 +2505,8 @@ begin
 //          FlowLayOut2.Children[i].Free;
 //        end;
 
+        BtnTakePhoto.Enabled := true;
+        BtnNextScreen.Enabled := true;
 
         PnlPopup.visible := false;
   end;
@@ -2983,9 +2990,9 @@ begin
   //showmessage(RefCode);
 
   {$IFDEF ANDROID}
-  //  BtnPayVoiceDB.Enabled := true;
-    SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab');  //Name
-  {$ENDIF}
+  //  BtnPayVoiceDB.Enabled := true;                         //Disable
+    SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab');  //5-5-24
+  {$ENDIF}                                                   //Updates previous Thumbnails
 
   SelectedNameMemo(Name);
 
@@ -3037,15 +3044,23 @@ procedure TForm1.NextTabAction1Update(Sender: TObject);
 var
   Dept_Lookup: string;
 begin
-    // BtnPayVoiceDB.Enabled := false;
-   //  LblStatus.Text := '';
-     //30-4-25
+
+
   {$IFDEF ANDROID}
     If TIStartPage.IsSelected then
     begin
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab');
     end;
+
+    //Moved from TabControlChange 5-5-25
+    If TabItem2.IsSelected Then
+    begin
+        //ShowMessage('User selected YES') ;
+        MemoShowNote.Text := '';
+        UpdateListviewData('NextTabAction1Update');//2-4-25
+    end;
+
   {$ENDIF}
 end;
 
@@ -3133,6 +3148,11 @@ begin
                             Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
+  if DM.FDQDetails.RecordCount > 0 then
+  begin
+  BtnTakephoto.Enabled := true;
+  BtnNextScreen.Enabled := true;//NextScreen
+  end;
   //showmessage('Records Found for ' + Name + ' ' + inttostr(DM.FDQDetails.RecordCount));
 
   While Not DM.FDQDetails.EOF Do
@@ -3379,7 +3399,7 @@ var
  i: integer;
 begin
 
-  writetolog('Call From ' + CallingProcedure + 'UpdateListviewData Start 1');
+  writetolog('Call From ' + CallingProcedure + ' UpdateListviewData Start 1');
 
   DM.FDConnection1.Connected := true;
 
@@ -3436,6 +3456,8 @@ begin
     BTnShow.Visible := false;
     LblDeptCode.text := '';
     LblDeptName.text := '';
+    BtnTakephoto.Enabled := false;
+    //BtnNextScreen.Enabled := false;
 
   FlowLayout2 := TFlowLayout.Create(VertScrollBox1); // Create FlowLayout dynamically
   FlowLayout2.Parent := VertScrollBox1;              // Assign parent to the scroll box
