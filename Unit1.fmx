@@ -3014,20 +3014,20 @@ object Form1: TForm1
               Margins.Right = 5.000000000000000000
               Margins.Bottom = 5.000000000000000000
               Size.Width = 786.000000000000000000
-              Size.Height = 478.000000000000000000
+              Size.Height = 428.000000000000000000
               Size.PlatformDefault = False
               OnClick = ImageContainerClick
-              object MemoShowNote: TMemo
-                Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-                DataDetectorTypes = []
-                Align = MostTop
-                Size.Width = 786.000000000000000000
-                Size.Height = 50.000000000000000000
-                Size.PlatformDefault = False
-                TabOrder = 0
-                Viewport.Width = 782.000000000000000000
-                Viewport.Height = 46.000000000000000000
-              end
+            end
+            object MemoShowNote: TMemo
+              Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+              DataDetectorTypes = []
+              Align = MostTop
+              Size.Width = 796.000000000000000000
+              Size.Height = 50.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 0
+              Viewport.Width = 792.000000000000000000
+              Viewport.Height = 46.000000000000000000
             end
           end
           object TabItem5: TTabItem
@@ -3220,14 +3220,14 @@ object Form1: TForm1
           ExplicitSize.cy = 26.000000000000000000
           object PnlFlowDisp: TPanel
             Align = Left
-            Size.Width = 105.000000000000000000
+            Size.Width = 165.000000000000000000
             Size.Height = 588.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             object FLOThumbNails: TFlowLayout
-              Position.Y = 8.000000000000000000
-              Size.Width = 97.000000000000000000
-              Size.Height = 580.000000000000000000
+              Align = Client
+              Size.Width = 165.000000000000000000
+              Size.Height = 588.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
               Justify = Left
@@ -3237,7 +3237,7 @@ object Form1: TForm1
           end
           object PnlImage: TPanel
             Align = Client
-            Size.Width = 751.000000000000000000
+            Size.Width = 691.000000000000000000
             Size.Height = 588.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 1
@@ -3250,13 +3250,13 @@ object Form1: TForm1
               Margins.Top = 5.000000000000000000
               Margins.Right = 5.000000000000000000
               Margins.Bottom = 5.000000000000000000
-              Size.Width = 741.000000000000000000
+              Size.Width = 681.000000000000000000
               Size.Height = 536.000000000000000000
               Size.PlatformDefault = False
             end
             object PnlMemo: TPanel
               Align = Top
-              Size.Width = 751.000000000000000000
+              Size.Width = 691.000000000000000000
               Size.Height = 42.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
@@ -3267,11 +3267,11 @@ object Form1: TForm1
                 Align = Client
                 Margins.Left = 79.000000000000000000
                 Margins.Right = 79.000000000000000000
-                Size.Width = 593.000000000000000000
+                Size.Width = 533.000000000000000000
                 Size.Height = 42.000000000000000000
                 Size.PlatformDefault = False
                 TabOrder = 0
-                Viewport.Width = 589.000000000000000000
+                Viewport.Width = 529.000000000000000000
                 Viewport.Height = 38.000000000000000000
               end
             end

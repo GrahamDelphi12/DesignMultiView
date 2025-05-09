@@ -175,7 +175,6 @@ type
     Layout2: TLayout;
     BtnOK: TButton;
     BtnCancel: TButton;
-    MemoShowNote: TMemo;
     ListBox1: TListBox;
     ListBoxItem1: TListBoxItem;
     Switch1: TSwitch;
@@ -240,6 +239,7 @@ type
     Label1: TLabel;
     Label22: TLabel;
     Label23: TLabel;
+    MemoShowNote: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -387,6 +387,8 @@ type
 
     procedure WriteThumbImagetoDatabase(ImageContainer: TImage; Img_tag: integer; Image_Name: string);
 
+    procedure ClearThumb_ImageDisplay(FLO: TFlowLayOut; ImgHolder: TImage);
+
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -473,6 +475,20 @@ begin
   finally
     StringList.Free;                            // Free memory
   end;
+end;
+
+procedure TForm1.ClearThumb_ImageDisplay(FLO: TFlowLayOut; ImgHolder: TImage);
+var
+  I: integer;
+begin
+
+  for i := FLO.ChildrenCount - 1 downto 0 do
+  begin
+    FLO.Children[i].Free;
+  end;
+
+  ImgHolder.Bitmap.Clear(TAlphaColors.Null);
+
 end;
 
 procedure TForm1.WriteThumbImagetoDatabase(ImageContainer: TImage; Img_Tag: Integer; Image_Name: string);
@@ -690,7 +706,7 @@ begin
             Img.HitTest := True;
             Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
             Img.tag := StrtoInt(SiteRefLookUp);//Maintain ref or original
-
+            Img.Margins.Left := 25;
             //writetolog('In CreateReviewThumbNails 2'  + CallingRoutine);
 
             If CallingRoutine = 'Report_Tab' Then
@@ -709,6 +725,7 @@ begin
               Checkbox.Align := TAlignLayout.Top;
               Checkbox.Text := 'Select'; // Set checkbox label
               Checkbox.Tag := Img.Tag;
+              CheckBox.Margins.Left := 25;
             end;
 
               Img.Bitmap.Assign(Image);
@@ -723,6 +740,7 @@ begin
                Memo.HitTest := True;
                //Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
                Memo.Tag := Img.Tag;
+               Memo.Margins.Left := 25;
                //writetolog('Memo Created');
 
 
@@ -1123,39 +1141,24 @@ procedure TForm1.TabControl1Change(Sender: TObject);
 var
   Dept_Lookup: string;
 begin
-//5-5-25
-//  If TabItem2.IsSelected Then
-//  begin
-//   UpdateListviewData('TabControl1Change');//2-4-25
-//  end;
 
-
-  {$IFDEF ANDROID}
     If TabItem2.IsSelected then
     begin
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'PreviousTabAction1Update');
+
+      MemoShowNote.Text := '';
+      UpdateListviewData('NextTabAction1Update');//2-4-25
     end;
-  {$ENDIF}
 
-
-//Moved from OnUpdate 7-5-25
-
-  {$IFDEF ANDROID}
     If TIStartPage.IsSelected then
     begin
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
+      ClearThumb_ImageDisplay(FlowLayOut2, ImageContainer);
     end;
 
-    //Moved from TabControlChange 5-5-25
-    If TabItem2.IsSelected Then
-    begin
-        MemoShowNote.Text := '';
-        UpdateListviewData('NextTabAction1Update');//2-4-25
-    end;
 
-  {$ENDIF}
 end;
 
 procedure TForm1.TabItem9MouseEnter(Sender: TObject);
@@ -2924,6 +2927,10 @@ begin
 
     try
 
+      {$IFDEF MSWINDOWS}
+        //showmessage('In UpdateLocationData');
+      {$ENDIF}
+
       DM.FDConnection1.Connected := true;
 
       DM.FDQLocations.SQL.Clear;
@@ -2957,13 +2964,19 @@ begin
 
          writetolog('Memo update done');
 
-         If CMBODepts.Items.Count >0 then CMBODepts.ItemIndex := 0;
+         //showmessage('Before CMBODepts');
 
+         If Assigned(CMBODepts) AND
+         (CMBODepts.ItemIndex >=0)
+           then CMBODepts.ItemIndex := 0;
+         //showmessage('After CMBODepts');
 
     except
       on E: Exception do
         ShowMessage('An error occurred: ' + E.Message);
     end;
+
+    //showmessage('In UpdateLocationData Finished');
 
 end;
 
@@ -3097,6 +3110,7 @@ begin
 
   {$IFDEF ANDROID}
   //  BtnPayVoiceDB.Enabled := true;                         //Disable
+    ClearThumb_ImageDisplay(FLOThumbNails, ImageDisplay);
     SelectedNameView(RefCode, FLOThumbNails, 'Report_Tab', 'Listiew1Change');  //5-5-24
   {$ENDIF}                                                   //Updates previous Thumbnails
 
@@ -3254,6 +3268,7 @@ begin
                             Trim(QuotedStr(DeptRef)));
   DM.FDQDetails.Open;
 
+
 //  if DM.FDQDetails.RecordCount > 0 then
 //  begin
 //  BtnTakephoto.Enabled := true;
@@ -3275,7 +3290,7 @@ begin
 
       RefToImage := DM.FDQDetails.fieldbyName('Image_Tag').asInteger;
       RefToMemo := DM.FDQDetails.fieldbyName('Memo_Tag').asInteger;
-      //
+
       BlobMemoStream := DM.FDQDetails.CreateBlobStream(DM.FDQDetails.FieldByName('MEMO_CONTENTS'), bmRead);
 
       StringListMemo:= TStringList.create;
@@ -3284,9 +3299,6 @@ begin
       //Memo2.lines.Clear;
       //Memo2.Lines.Assign(StringListMemo);
 
-
-      //Create Thumb Nails for each record
-      //27-4-25
       CreateReviewThumbNails(InttoStr(RefToImage), Bitmap, FLO, Origin_Call, RefToMemo, StringListMemo);
 
       MemoryStream.Free;
@@ -3377,6 +3389,11 @@ begin
                              WriteToLog('CBOrganisationsChange - Selected Site from Oraganisation Table = ' + ItemChosen);
                              //LblSiteCode.text + ' ' + LbSite_Name.Text);
 
+                             {$IFDEF MSWINDOWS}
+                               showmessage('CBOrganisationsChange - Selected Site from Oraganisation Table = ' + ItemChosen);
+                             {$ENDIF}
+
+
                              //18-4-24
                              UpdateLocationData;//Fill Memo with all Departments created
                                                 //Next Tab
@@ -3429,7 +3446,6 @@ begin
                        (CMBODepts.ItemIndex < CMBODepts.Items.Count) then
     begin
 
-
        lblDeptName.text := CMBODepts.Items[CMBODepts.ItemIndex];
 
        DM.FDConnection1.Connected := true;
@@ -3445,13 +3461,15 @@ begin
 
        LblDeptCode.Text := DM.FDQLocations.FieldByName('Area_Dept_Code').Asstring;
 
+      // showmessage('Change 2');
+
        WriteToLog('CMBODeptsChange '
-                 + CMBODepts.Items[CBOrganisations.ItemIndex]
                  + ' Dept Code =  ' + LblDeptCode.Text);
 
-
-
+      //showmessage('Change 3');
     end;
+
+   // showmessage('CMBODeptsChange Complete');
 end;
 
 procedure TForm1.CMBODeptsClosePopup(Sender: TObject);
@@ -3462,10 +3480,11 @@ begin
   Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
   WriteToLog('CMBODeptsCloseUp ' + Dept_Lookup);
 
-
-  {$IFDEF ANDROID}
+ // {$IFDEF ANDROID}
+    ClearThumb_ImageDisplay(FlowLayOut2, ImageContainer);
     SelectedNameView(Dept_Lookup,FlowLayOut2, 'Dept_Tab', 'CMBODeptsClosePopUp');
-  {$ENDIF}
+    BtnTakePhoto.Enabled := true;
+ // {$ENDIF}
 
 end;
 
