@@ -31,7 +31,8 @@ uses
   System.Threading,
   DateUtils,
   System.generics.collections, System.Rtti, FMX.Grid.Style, FMX.Grid,
-  System.Generics.Defaults;
+  System.Generics.Defaults,
+  FMX.VirtualKeyBoard;
 
  type
    TImage_Memo = record
@@ -97,9 +98,6 @@ type
     PnlBottom: TPanel;
     PnlImage_Memo: TPanel;
     FLImage_Memo: TFlowLayout;
-    BtnCurrImage: TButton;
-    BtnCurrCood: TButton;
-    BtnCurrNote: TButton;
     TIStartpage: TTabItem;
     PlnStartHost: TPanel;
     PlnStartTitle: TPanel;
@@ -228,7 +226,6 @@ type
     Edit1: TEdit;
     Memo2: TMemo;
     PnlFlowDisp: TPanel;
-    FLOThumbNails: TFlowLayout;
     PnlImage: TPanel;
     ImageDisplay: TImage;
     PnlMemo: TPanel;
@@ -238,6 +235,10 @@ type
     Label22: TLabel;
     Label23: TLabel;
     MemoShowNote: TMemo;
+    BtnApplyAddress: TButton;
+    VertScrollBox2: TVertScrollBox;
+    FLOThumbNails: TFlowLayout;
+    LblImageRef: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -263,9 +264,6 @@ type
       NewLocation: TLocationCoord2D);
     procedure TabItem9MouseEnter(Sender: TObject);
     procedure BtnEditNoteClick(Sender: TObject);
-    procedure BtnCurrImageClick(Sender: TObject);
-    procedure BtnCurrNoteClick(Sender: TObject);
-    procedure BtnCurrCoodClick(Sender: TObject);
     procedure BtnCreateOrgRecClick(Sender: TObject);
     procedure BtnShowClick(Sender: TObject);
     procedure CBOrganisationsChange(Sender: TObject);
@@ -287,6 +285,7 @@ type
     procedure CMBODeptsChange(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure ImageContainerClick(Sender: TObject);
+    procedure BtnApplyAddressClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -390,6 +389,8 @@ type
 
     procedure BatchUpdate_ThumbStrip;
 
+    procedure ShowVirtualKeyboard(AControl: TControl);
+
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -477,6 +478,20 @@ begin
     StringList.Free;                            // Free memory
   end;
 end;
+
+
+
+procedure TForm1.ShowVirtualKeyboard(AControl: TControl);
+var
+  VKService: IFMXVirtualKeyboardService;
+begin
+  if TPlatformServices.Current.SupportsPlatformService(IFMXVirtualKeyboardService, IInterface(VKService)) then
+  begin
+    VKService.ShowVirtualKeyboard(AControl);
+    AControl.SetFocus;
+  end;
+end;
+
 
 //NOT USED AS TOO SLOW ONE SECOND PER IMAGE!
 //Direct DB write
@@ -739,7 +754,9 @@ begin
 
             DM.FDQDetails.ExecSQL;
 
-            WriteToLog('Database Image write done');
+            WriteToLog('Database Image write done' + inttostr(Img_Tag));
+            LblImageRef.text := inttostr(Img_Tag);//10/5/2025
+            MemoShowNote.Lines.Clear;//10-5-25
 
             DM.FDConnection1.Connected := false;
 
@@ -817,6 +834,10 @@ begin
   BtnSave.OnClick := BtnSaveClick;
 
   Popup.IsOpen := True;  // Show the popup
+
+  //11-5-24
+  ShowVirtualKeyboard(MemoBox);
+
 end;
 
 procedure TForm1.BtnSaveClick(Sender: TObject);
@@ -829,8 +850,10 @@ begin
 
   if Sender is TButton then
   begin
-    ImageContainer.Repaint;//tag not getting updated!
-    TagValue := ImageContainer.tag;
+    //ImageContainer.Repaint;//tag not getting updated!
+    //TagValue := ImageContainer.tag;
+    //10-5-25
+    TagValue := strtoint(LblImageRef.text);
     writetolog('tag = ' + inttostr(TagValue));
 
       for i := 0 to FlowLayOut2.ControlsCount - 1 do
@@ -845,6 +868,9 @@ begin
            TMemo(FlowLayOut2.Controls[i]).Text := MemoShowNote.Text;
 
            WriteThumbMemotoDatabase(memoShowNote, TagValue, '');
+
+           MemoShowNote.Lines.Clear;//10-5-25
+           ImageContainer.Bitmap := nil;//10-5-25
 
          end;
 
@@ -991,10 +1017,11 @@ begin
                Memo.Align := TAlignLayout.None; // Allow free placement
                Memo.Width := 120; // Set width (adjust as needed)
                Memo.Height := 20; // Set height (adjust as needed)
-               Memo.HitTest := True;
+               Memo.HitTest := false;
                //Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
                Memo.Tag := Img.Tag;
                Memo.Margins.Left := 25;
+               Memo.ReadOnly := true;//10-5-25
                //writetolog('Memo Created');
 
 
@@ -1144,7 +1171,16 @@ end;
 
 procedure TForm1.Switch1Switch(Sender: TObject);
 begin
+
+
+
  {$IFDEF ANDROID}
+
+  if Switch1.IsChecked then
+  BtnApplyAddress.Enabled := true
+  else BtnApplyAddress.Enabled := false;
+
+
   if Switch1.IsChecked then
   begin
     var PermissionAccessCoarseLocation := JStringToString(TJManifest_permission.JavaClass.ACCESS_COARSE_LOCATION);
@@ -1410,6 +1446,7 @@ begin
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
       ClearThumb_ImageDisplay(FlowLayOut2, ImageContainer);
+      LblImageRef.text := '';
     end;
 
 
@@ -1487,7 +1524,8 @@ begin
 
         MemReportImage.lines.Clear;
         MemReportImage.Lines.Assign(StringList);
-        //
+
+       // If CheckBox
 
 
     DM.FDConnection1.Connected := false;
@@ -1503,6 +1541,7 @@ var
 
   BlobStreamMemo: TStream;
   Stringlist: TStringList;
+  i: integer;
 begin
 
   if Sender is TImage then
@@ -1540,7 +1579,26 @@ begin
 
         MemoShowNote.lines.Clear;
         MemoShowNote.Lines.Assign(StringList);
-        //
+
+        //10-5-25
+        LblImageRef.text := inttostr(TagValue);
+
+        //10-5-25
+        for i := FlowLayout2.ControlsCount - 1 downto 0 do
+        begin
+            if (FlowLayout2.Controls[i] is TCheckbox) and
+               (TCheckbox(FlowLayout2.Controls[i]).Tag = TagValue) then
+            begin
+               TCheckbox(FlowLayout2.Controls[i]).IsChecked := true;
+            end else
+            if (FlowLayout2.Controls[i] is TCheckbox) and
+               (TCheckbox(FlowLayout2.Controls[i]).Tag <> TagValue)
+            then begin
+               TCheckbox(FlowLayout2.Controls[i]).IsChecked := false;
+            end;
+        end;
+
+
 
     DM.FDConnection1.Connected := false;
   end;
@@ -1549,13 +1607,20 @@ end;
 
 procedure TForm1.ImageContainerClick(Sender: TObject);
 begin
-  ShowPopup;
+
+  if Assigned(ImageContainer.Bitmap) and
+            not ImageContainer.Bitmap.IsEmpty then
+  begin
+    ShowPopup;
+  end;
+
 end;
 
 procedure TForm1.ImageDblClick(Sender: TObject);
 var
   y: Integer;
   MemoInstance: TMemo;
+  CheckInstance: TCheckbox;
   tagValue : integer;
   BlobStream: TStream;
   MemoryStream: TmemoryStream;
@@ -1566,8 +1631,11 @@ begin
   if Sender is TImage then
   begin
     ImageContainer.Bitmap.Assign((Sender as TImage).Bitmap);
-
+    lblImageRef.text := inttoStr(TImage(Sender).Tag);//10-5-25
   end;
+
+
+
 
   for y := FlowLayout2.ControlsCount - 1 downto 0 do
   begin
@@ -1583,7 +1651,31 @@ begin
         Break; // Exit the loop after finding the match
       end;
     end;
-  end;
+
+  end;//Flow
+
+
+                //11-5-25
+          for y := FlowLayout2.ControlsCount - 1 downto 0 do
+          begin
+            if (FlowLayout2.Controls[y] is TCheckbox) then
+            begin
+
+               CheckInstance := TCheckbox(FlowLayout2.Controls[y]);
+
+               If (TCheckBox(Sender).Tag = CheckInstance.Tag) then
+               begin
+                 TCheckbox(FlowLayout2.Controls[y]).IsChecked := true;
+               end else
+               if (TCheckBox(Sender).Tag <> CheckInstance.Tag) then
+               begin
+                 TCheckbox(FlowLayout2.Controls[y]).IsChecked := false;
+               end;
+
+            end;
+          end;
+
+
 end;
 
 procedure TForm1.TakePhotoFromCameraAction1DidFinishTaking(Image: TBitmap);
@@ -1592,6 +1684,7 @@ var
   Img: TImage;
   Checkbox : TCheckBox;
   Memo : TMemo;
+  i: integer;
 begin
   if Image.Width > 1024 then
   begin
@@ -1604,6 +1697,17 @@ begin
 
            FlowLayout2.BeginUpdate;
 
+           //11-5-25
+            for i := FlowLayout2.ControlsCount - 1 downto 0 do
+            begin
+                if (FlowLayout2.Controls[i] is TCheckbox) and
+                   (TCheckbox(FlowLayout2.Controls[i]).IsChecked = true)
+                then begin
+                   TCheckbox(FlowLayout2.Controls[i]).IsChecked := false;
+                end;
+            end;
+
+
 
             Img := TImage.Create(FlowLayout2);//LOImagesTaken
             Img.Parent := FlowLayout2; //LOImagesTaken// Assign parent to FlowLayout
@@ -1614,23 +1718,28 @@ begin
             Img.HitTest := True;
             Img.name := 'Image_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
             Img.tag := random(10000);
+            Img.Margins.Left := 25;//10-5-25
 
             Img.OnDblClick :=  ImageDblClick;
 
              Checkbox := TCheckBox.Create(FlowLayout2);
              Checkbox.Parent := FlowLayout2;
              Checkbox.Align := TAlignLayout.Top;
-             Checkbox.Text := 'Select'; // Set checkbox label
+             Checkbox.Text := 'Selected';
+             Checkbox.IsChecked := true;//10-5-25
              Checkbox.Tag := Img.Tag;
+             Checkbox.Margins.Left := 25;//10-5-25
               //
                Memo := TMemo.Create(FlowLayout2);//LOImagesTaken
                Memo.Parent := FlowLayout2; //LOImagesTaken// Assign parent to FlowLayout
                Memo.Align := TAlignLayout.None; // Allow free placement
                Memo.Width := 120; // Set width (adjust as needed)
                Memo.Height := 20; // Set height (adjust as needed)
-               Memo.HitTest := True;
+               //Memo.HitTest := True;
                Memo.name := 'Memo_' + FormatDateTime('yyyyMMdd_HHmmsszzz', Now);
                Memo.Tag := Img.Tag;
+               Memo.Margins.Left := 25;//10-5-25
+               Memo.ReadOnly := true;
               //
             Img.Bitmap.Assign(ImageContainer.Bitmap);
 
@@ -2148,6 +2257,20 @@ begin
 
 end;
 
+procedure TForm1.BtnApplyAddressClick(Sender: TObject);
+var
+  Address: string;
+begin
+
+  Address:= ListBoxItemFeaturename.ItemData.Detail + ', ' +
+            ListBoxItemSubLocality.ItemData.Detail + ', ' +
+            ListBoxItemPostalCode.ItemData.Detail;
+
+  If Address <> '' then
+       EdAddress.Text := Address;
+
+end;
+
 procedure TForm1.BtnCancelClick(Sender: TObject);
 begin
 
@@ -2254,6 +2377,7 @@ begin
 
         writetolog('Before Execute = ' + DM.FDQOrganisation.sql.Text) ;
 
+
         DM.FDQOrganisation.Params.ParamByName('SiteCode').AsString := FloattoStr(NewCodeID);
 
         DM.FDQOrganisation.Params.ParamByName('SiteName').AsString := EdId.Text;
@@ -2279,11 +2403,12 @@ begin
         end;
 
 
-        if NewLat <> '' then
-        begin
+       
           NewLat := ListBoxItemLatitude.ItemData.Detail;
           NewLong := ListBoxItemLongitude.ItemData.Detail;
 
+        if NewLat <> '' then
+        begin
           DM.FDQOrganisation.Params.ParamByName('Latitude').AsFloat := StrtoFloat(NewLat);
           DM.FDQOrganisation.Params.ParamByName('Longitude').AsFloat := StrtoFloat(NewLong);
         end else
@@ -2343,21 +2468,6 @@ begin
 
 
       writetolog('All routines completed successfully');
-end;
-
-procedure TForm1.BtnCurrCoodClick(Sender: TObject);
-begin
-  TabCont_Image_Memo.TabIndex := 2;
-end;
-
-procedure TForm1.BtnCurrImageClick(Sender: TObject);
-begin
-  TabCont_Image_Memo.TabIndex := 0;
-end;
-
-procedure TForm1.BtnCurrNoteClick(Sender: TObject);
-begin
-  TabCont_Image_Memo.TabIndex := 1;
 end;
 
 procedure TForm1.WriteAudiotoDB(PK: String);//integer)
@@ -2665,10 +2775,14 @@ begin
 
         lblDeptCode.text := ReftoDept;
 
-//        for i := FlowLayOut2.ChildrenCount - 1 downto 0 do
-//        begin
-//          FlowLayOut2.Children[i].Free;
-//        end;
+
+        for i := FlowLayOut2.ChildrenCount - 1 downto 0 do
+        begin
+          FlowLayOut2.Children[i].Free;
+        end;
+
+        If Assigned(ImageContainer.Bitmap) then
+           ImageContainer.Bitmap := nil;
 
         BtnTakePhoto.Enabled := true;
         BtnNextScreen.Enabled := true;
