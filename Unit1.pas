@@ -23,6 +23,9 @@ uses
       Androidapi.JNI.Media,
       Androidapi.JNI.JavaTypes,
       Androidapi.JNI.Os,
+      Androidapi.JNI.GraphicsContentViewText,
+      Androidapi.JNIBridge, FMX.Helpers.Android,
+      Androidapi.JNI.Net,
   {$ENDIF}
   System.Sensors,
   System.Sensors.Components,
@@ -239,6 +242,15 @@ type
     VertScrollBox2: TVertScrollBox;
     FLOThumbNails: TFlowLayout;
     LblImageRef: TLabel;
+    BtnOrgEdit: TButton;
+    BtnOrgConfirm: TButton;
+    Ed_Org_SiteName: TEdit;
+    Ed_Org_Address: TEdit;
+    Ed_Org_Email: TEdit;
+    Ed_Org_Ref: TEdit;
+    Ed_Org_Contact: TEdit;
+    Ed_Lat: TEdit;
+    Ed_Long: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -286,6 +298,8 @@ type
     procedure Button4Click(Sender: TObject);
     procedure ImageContainerClick(Sender: TObject);
     procedure BtnApplyAddressClick(Sender: TObject);
+    procedure BtnOrgEditClick(Sender: TObject);
+    procedure BtnOrgConfirmClick(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -391,6 +405,11 @@ type
 
     procedure ShowVirtualKeyboard(AControl: TControl);
 
+    {$IFDEF ANDROID}
+      function IsConnectedToInternet: Boolean;
+    {$ENDIF}
+
+
   public
     { Public declarations }
     constructor Create(AOwner: TComponent); override;
@@ -479,7 +498,38 @@ begin
   end;
 end;
 
+{$IFDEF ANDROID}
+function TForm1.IsConnectedToInternet: Boolean;
+var
+  ConnectivityManager: JConnectivityManager;
+  NetworkInfo: JNetworkInfo;
 
+begin
+
+  //RequestNetworkPermission;
+    PermissionsService.RequestPermissions(['android.permission.ACCESS_NETWORK_STATE'],
+    procedure(const APermissions: TClassicStringDynArray; const AGrantResults: TClassicPermissionStatusDynArray)
+    begin
+      if not (Length(AGrantResults) > 0) and (AGrantResults[0] = TPermissionStatus.Granted) then
+      begin
+        writetolog('Network Connection - Permission denied!');
+        ShowMessage('Permission denied!');
+      end;
+    end);
+
+  ConnectivityManager := TJConnectivityManager.Wrap(
+    (TAndroidHelper.Context.getSystemService(TJContext.JavaClass.CONNECTIVITY_SERVICE) as ILocalObject).GetObjectID);
+
+  if ConnectivityManager <> nil then
+  begin
+    NetworkInfo := ConnectivityManager.getActiveNetworkInfo;
+    Result := (NetworkInfo <> nil) and NetworkInfo.isConnected;
+  end
+  else
+    Result := False;
+
+end;
+{$ENDIF}
 
 procedure TForm1.ShowVirtualKeyboard(AControl: TControl);
 var
@@ -1378,14 +1428,15 @@ begin
   ListBox1.Visible := true else
   Listbox1.Visible := false;
 
-  If TIChooseSite.IsSelected then
+  {$IFDEF ANDRIOD}
+  If (TIChooseSite.IsSelected) AND (IsConnectedtoInternet = True) then
   Begin
     //showmessage('choose site');
     WebBrowser1.Visible := true;
    // DoMapDispay('','');
   End else
     WebBrowser1.Visible := false;
-
+  {$ENDIF}
 
 
   If TIAddSite.IsSelected then
@@ -1443,6 +1494,13 @@ begin
 
     If TIStartPage.IsSelected then
     begin
+    {$IFDEF ANDROID}
+      If IsConnectedToInternet then
+        writetoLog('Connected to Internet')
+      else
+        writetoLog('Not Connected to Internet');
+    {$ENDIF}
+
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
       ClearThumb_ImageDisplay(FlowLayOut2, ImageContainer);
@@ -2266,8 +2324,28 @@ begin
             ListBoxItemSubLocality.ItemData.Detail + ', ' +
             ListBoxItemPostalCode.ItemData.Detail;
 
-  If Address <> '' then
+
+  If (TIAddSite.IsSelected = true) then
+  begin
+
+    If Address <> '' then
+    begin
        EdAddress.Text := Address;
+    end;
+
+  end;
+
+  If (TIChooseSite.IsSelected = true) then
+  begin
+
+    If Address <> '' then
+    begin
+       Ed_Org_Address.Text := Address;
+       writetolog('Copy in - ' + Address);
+    end;
+
+  end;
+
 
 end;
 
@@ -2309,28 +2387,23 @@ begin
         DM.FDQOrganisation.SQL.Clear;
 
         DM.FDQOrganisation.SQL.Add('SELECT * FROM ORGANAISATION');
-        DM.FDQOrganisation.SQL.Add('WHERE SITE_CODE = :CheckSiteCode');
+        DM.FDQOrganisation.SQL.Add('WHERE SITE_NAME = :CheckSiteName');
 
-        DM.FDQOrganisation.Params.ParamByName('CheckSiteCode').AsString := LblSiteCode.text;
-
-        //showmessage(DM.FDQOrganisation.sql.Text);
+        DM.FDQOrganisation.Params.ParamByName('CheckSiteName').AsString := EDId.Text;
 
         DM.FDQOrganisation.Open;
 
-        If (DM.FDQOrganisation.recordcount = 1) then
+        If (DM.FDQOrganisation.recordcount >= 1)
+        OR (EDId.Text = '')
+        then
         begin
-           SQLAction := 'Update';
-           NewCodeID := strtofloat(LblSiteCode.text);
 
-        end else
-           SQLAction := 'Insert';
-
-
+           showmessage('Site Code Already Exists or is empty - Quitting');
+           exit;
+        end;
+        //else  showmessage('Will Insert ' + EDId.Text) ;
 
         writetolog('Action on SQL is ' + SQLAction);
-
-        If SQLAction = 'Insert' then
-        begin
 
             DM.FDQOrganisation.SQL.Clear;
 
@@ -2354,26 +2427,7 @@ begin
             DM.FDQOrganisation.sql.add('Values(:SiteCode, :SiteName, :SiteAddress, :SiteEmail,' +
                                        ':SitePhone, :SiteContact, :SiteProject, :SiteNote, ' +
                                        ':Latitude, :Longitude, :Voice)');
-        end else//Update
-        begin
 
-
-            DM.FDQOrganisation.sql.clear;
-
-            DM.FDQOrganisation.sql.add('UPDATE ORGANAISATION SET ' +
-                                        'SITE_NAME = :SiteName, ' +
-                                        'ADDRESS = :SiteAddress, ' +
-                                        'EMAIL = :SiteEmail, ' +
-                                        'PHONE = :SitePhone, ' +
-                                        'CONTACT = :SiteContact, ' +
-                                        'PROJECT_REF = :SiteProject, '+
-                                        'NOTE = :SiteNote, ' +
-                                        'LATITUDE = :Latitude, ' +
-                                        'LONGITUDE = :Longitude, ' +
-                                        'VOICENOTE = :Voice');
-            DM.FDQOrganisation.sql.add('WHERE SITE_CODE = :SiteCode');
-
-        end;//update
 
         writetolog('Before Execute = ' + DM.FDQOrganisation.sql.Text) ;
 
@@ -2402,8 +2456,6 @@ begin
           DM.FDQOrganisation.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
         end;
 
-
-       
           NewLat := ListBoxItemLatitude.ItemData.Detail;
           NewLong := ListBoxItemLongitude.ItemData.Detail;
 
@@ -2792,6 +2844,222 @@ begin
 
 end;
 
+procedure TForm1.BtnOrgConfirmClick(Sender: TObject);
+var
+  BlobStream: TStream;
+  PKValue: integer;
+  LastCodeID: string;
+  NewCodeID: double;
+  index_Item: integer;
+  NewLat, NewLong: string;
+  MemoryStream: TMemoryStream;
+  FileName: string;
+  SQLAction: string;
+  Action: TCustomAction;
+begin
+
+     try
+            DM.FDQOrganisation.sql.clear;
+
+            DM.FDQOrganisation.sql.add('UPDATE ORGANAISATION SET ' +
+                                        'SITE_NAME = :SiteName, ' +
+                                        'ADDRESS = :SiteAddress, ' +
+                                        'EMAIL = :SiteEmail, ' +
+                                        'PHONE = :SitePhone, ' +
+                                        'CONTACT = :SiteContact, ' +
+                                        'PROJECT_REF = :SiteProject, '+
+                                        'NOTE = :SiteNote, ' +
+                                        'LATITUDE = :Latitude, ' +
+                                        'LONGITUDE = :Longitude, ' +
+                                        'VOICENOTE = :Voice');
+            DM.FDQOrganisation.sql.add('WHERE SITE_CODE = :SiteCode');
+
+
+        writetolog('Before Execute = ' + DM.FDQOrganisation.sql.Text) ;
+
+
+        DM.FDQOrganisation.Params.ParamByName('SiteCode').AsString := LblSiteCode.Text;
+
+        DM.FDQOrganisation.Params.ParamByName('SiteName').AsString := LblSite_Name.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteAddress').AsString := LblAddress.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteEmail').AsString := LblEmail.Text;
+
+        DM.FDQOrganisation.Params.ParamByName('SiteContact').AsString := LblContact.Text;
+        DM.FDQOrganisation.Params.ParamByName('SiteProject').AsString := LblProjectref.Text;
+
+        BlobStream := TStringStream.Create(MemProjectDescription.Text, TEncoding.UTF8);
+        DM.FDQOrganisation.ParamByName('SiteNote').LoadFromStream(BlobStream, ftBlob);
+
+
+
+        MemoryStream := TMemoryStream.Create;
+
+        If FileExists(TPath.Combine(TPath.GetDocumentsPath, 'recording.3gp')) then
+        begin
+          FileName := TPath.Combine(TPath.GetDocumentsPath, 'recording.3gp');
+
+
+          MemoryStream.LoadFromFile(FileName);
+          MemoryStream.Position := 0;
+          DM.FDQOrganisation.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
+        end;
+
+
+          NewLat := ListBoxItemLatitude.ItemData.Detail;
+          NewLong := ListBoxItemLongitude.ItemData.Detail;
+          //NewLat := LblLat.text;
+          //NewLong := LblLong.text;
+
+        if NewLat <> '' then
+        begin
+          DM.FDQOrganisation.Params.ParamByName('Latitude').AsFloat := StrtoFloat(NewLat);
+          DM.FDQOrganisation.Params.ParamByName('Longitude').AsFloat := StrtoFloat(NewLong);
+        end else
+        begin
+          DM.FDQOrganisation.Params.ParamByName('Latitude').AsFloat := 0.00;
+          DM.FDQOrganisation.Params.ParamByName('Longitude').AsFloat := 0.00;
+        end;
+
+
+        DM.FDQOrganisation.ExecSQL;
+
+        writetolog('INSERT DONE');
+
+        DM.FDConnection1.Connected := false;
+
+        writetolog('Before writing Audio file to DB');
+
+        {$IFDEF ANDROID}
+        WriteAudiotoDB(LblSiteCode.text); //; PKValue
+
+        writetolog('After writing Audio file to DB');
+        {$ENDIF}
+
+        writetolog('Insert Done');
+
+     finally
+       BlobStream.Free;
+       MemoryStream.Free;
+     end;
+end;
+
+procedure TForm1.BtnOrgEditClick(Sender: TObject);
+begin
+
+  if LblSite_Name.Visible then
+  begin
+    LblSite_Name.Visible := false;
+    Ed_Org_SiteName.Text := LblSite_Name.Text;
+    Ed_Org_SiteName.visible := true;
+    BtnOrgConfirm.Enabled := false;
+  end else
+  begin
+    Ed_Org_SiteName.Visible := false;
+    LblSite_Name.Text := Ed_Org_SiteName.Text;
+    LblSite_Name.Visible := true;
+    BtnOrgConfirm.Enabled := true;
+  end;
+
+  if LblAddress.Visible then
+  begin
+    LblAddress.Visible := false;
+    Ed_Org_Address.Text := LblAddress.Text;
+    Ed_Org_Address.visible := true;
+  end else
+  begin
+    Ed_Org_Address.Visible := false;
+    LblAddress.Text := Ed_Org_Address.Text;
+    LblAddress.Visible := true;
+  end;
+
+  if LblEmail.Visible then
+  begin
+    LblEmail.Visible := false;
+    Ed_Org_Email.Text := LblEmail.Text;
+    Ed_Org_Email.visible := true;
+  end else
+  begin
+    Ed_Org_Email.Visible := false;
+    LblEmail.Text := Ed_Org_Email.Text;
+    LblEmail.Visible := true;
+  end;
+
+  if LblProjectRef.Visible then
+  begin
+    LblProjectRef.Visible := false;
+    Ed_Org_Ref.Text := LblProjectRef.Text;
+    Ed_Org_Ref.visible := true;
+  end else
+  begin
+    Ed_Org_Ref.Visible := false;
+    LblProjectRef.Text := Ed_Org_Ref.Text;
+    LblProjectRef.Visible := true;
+  end;
+
+  if LblContact.Visible then
+  begin
+    LblContact.Visible := false;
+    Ed_Org_Contact.Text := LblContact.Text;
+    Ed_Org_Contact.visible := true;
+  end else
+  begin
+    Ed_Org_Contact.Visible := false;
+    LblContact.Text := Ed_Org_Contact.Text;
+    LblContact.Visible := true;
+  end;
+
+         //   NewLat := ListBoxItemLatitude.ItemData.Detail;
+         // NewLong := ListBoxItemLongitude.ItemData.Detail;
+  if LblLat.Visible then
+  begin
+    LblLat.Visible := false;
+    Ed_Lat.Text := LblLat.Text;
+    Ed_Lat.visible := true;
+  end else
+  begin
+    Ed_Lat.Visible := false;
+    LblLat.Text := ListBoxItemLatitude.ItemData.Detail;
+    LblLat.Visible := true;
+  end;
+
+  if LblLong.Visible then
+  begin
+    LblLong.Visible := false;
+    Ed_Long.Text := LblLong.Text;
+    Ed_Long.visible := true;
+  end else
+  begin
+    Ed_Long.Visible := false;
+    LblLong.Text := ListBoxItemLongitude.ItemData.Detail;
+    LblLong.Visible := true;
+  end;
+
+
+  MemProjectDescription.ReadOnly := not MemProjectDescription.ReadOnly;
+  MemProjectDescription.HitTest := not MemProjectDescription.HitTest;
+
+  {$IFDEF ANDROID}
+  If IsConnectedtoInternet = True then
+  Begin
+
+    If (TIChooseSite.IsSelected) and (BtnOrgConfirm.Enabled = true)  then
+    begin
+      WebBrowser1.Visible := true;
+      ListBox1.Visible := false;
+    end else
+    begin
+      WebBrowser1.Visible := false;
+      ListBox1.Visible := true;
+    end;
+
+
+  End
+   Else writetolog('No Internet');
+
+  {$ENDIF}
+
+end;
+
 procedure TForm1.PlayNote(PK_Record:String);
 var
   MemoryStream: TMemorystream;
@@ -3025,7 +3293,8 @@ begin
   TabConHostSelectSite.TabIndex := 0;
 
   if Assigned(CBOrganisations) and (CBOrganisations.ItemIndex >= 0) and
-                       (CBOrganisations.ItemIndex < CBOrganisations.Items.Count) then
+                       (CBOrganisations.ItemIndex < CBOrganisations.Items.Count)
+  then
   CBOrganisations.ItemIndex := 1;
 
 end;
@@ -3540,7 +3809,13 @@ begin
                                   BlobStream := DM.FDQOrganisation.CreateBlobStream(
                                                        DM.FDQOrganisation.FieldByName('NOTE'), bmRead);//ok
 
+
+                                  //if BlobStream.size > 0 then showmessage('Memo ' + inttostr(BlobStream.size))
+                                  //else showmessage('No Data');
+
                                   StringList:= TStringList.create;
+                                  BlobStream.Position := 0;
+
                                   StringList.LoadFromStream(BlobStream);
 
                                   MemProjectDescription.lines.Clear;
@@ -3559,7 +3834,7 @@ begin
                              //LblSiteCode.text + ' ' + LbSite_Name.Text);
 
                              {$IFDEF MSWINDOWS}
-                               showmessage('CBOrganisationsChange - Selected Site from Oraganisation Table = ' + ItemChosen);
+                              // showmessage('CBOrganisationsChange - Selected Site from Oraganisation Table = ' + ItemChosen);
                              {$ENDIF}
 
 

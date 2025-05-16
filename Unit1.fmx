@@ -337,6 +337,12 @@ object Form1: TForm1
                       Text = 'Site Name'
                       TabOrder = 44
                     end
+                    object Ed_Org_SiteName: TEdit
+                      Touch.InteractiveGestures = [LongTap, DoubleTap]
+                      TabOrder = 46
+                      Position.X = 224.000000000000000000
+                      Position.Y = 8.000000000000000000
+                    end
                   end
                   object LOAddressShow: TLayout
                     Margins.Left = 25.000000000000000000
@@ -372,6 +378,12 @@ object Form1: TForm1
                       Text = 'Address'
                       TabOrder = 39
                     end
+                    object Ed_Org_Address: TEdit
+                      Touch.InteractiveGestures = [LongTap, DoubleTap]
+                      TabOrder = 40
+                      Position.X = 224.000000000000000000
+                      Position.Y = 6.000000000000000000
+                    end
                   end
                   object LOEmailShow: TLayout
                     Margins.Left = 25.000000000000000000
@@ -405,6 +417,12 @@ object Form1: TForm1
                       Size.PlatformDefault = False
                       Text = 'Email'
                       TabOrder = 39
+                    end
+                    object Ed_Org_Email: TEdit
+                      Touch.InteractiveGestures = [LongTap, DoubleTap]
+                      TabOrder = 40
+                      Position.X = 224.000000000000000000
+                      Position.Y = 8.000000000000000000
                     end
                   end
                   object LOProjectShow: TLayout
@@ -440,6 +458,12 @@ object Form1: TForm1
                       Text = 'Reference'
                       TabOrder = 40
                     end
+                    object Ed_Org_Ref: TEdit
+                      Touch.InteractiveGestures = [LongTap, DoubleTap]
+                      TabOrder = 41
+                      Position.X = 224.000000000000000000
+                      Position.Y = 6.000000000000000000
+                    end
                   end
                   object LOContaxtShow: TLayout
                     Margins.Left = 25.000000000000000000
@@ -474,6 +498,12 @@ object Form1: TForm1
                       Text = 'Contact'
                       TabOrder = 39
                     end
+                    object Ed_Org_Contact: TEdit
+                      Touch.InteractiveGestures = [LongTap, DoubleTap]
+                      TabOrder = 40
+                      Position.X = 224.000000000000000000
+                      Position.Y = 6.000000000000000000
+                    end
                   end
                   object LOProjectNotesShow: TLayout
                     Margins.Left = 25.000000000000000000
@@ -502,7 +532,9 @@ object Form1: TForm1
                     object MemProjectDescription: TMemo
                       Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
                       DataDetectorTypes = []
+                      ReadOnly = True
                       Align = Right
+                      HitTest = False
                       Margins.Left = 5.000000000000000000
                       Margins.Top = 5.000000000000000000
                       Margins.Right = 20.000000000000000000
@@ -535,6 +567,11 @@ object Form1: TForm1
                       Size.PlatformDefault = False
                       Text = 'LblLat'
                       TabOrder = 0
+                      object Ed_Lat: TEdit
+                        Touch.InteractiveGestures = [LongTap, DoubleTap]
+                        TabOrder = 4
+                        Position.X = 40.000000000000000000
+                      end
                     end
                     object LblLong: TLabel
                       Align = Left
@@ -545,6 +582,11 @@ object Form1: TForm1
                       Size.PlatformDefault = False
                       Text = 'LblLong'
                       TabOrder = 1
+                      object Ed_Long: TEdit
+                        Touch.InteractiveGestures = [LongTap, DoubleTap]
+                        TabOrder = 4
+                        Position.X = 72.000000000000000000
+                      end
                     end
                   end
                   object BtnPlay: TButton
@@ -1032,6 +1074,37 @@ object Form1: TForm1
                       OnClick = BtnPlayRecClick
                     end
                   end
+                  object BtnOrgEdit: TButton
+                    Margins.Left = 25.000000000000000000
+                    Margins.Top = 5.000000000000000000
+                    Margins.Right = 10.000000000000000000
+                    Margins.Bottom = 5.000000000000000000
+                    Position.X = 195.000000000000000000
+                    Position.Y = 397.000000000000000000
+                    Size.Width = 135.000000000000000000
+                    Size.Height = 45.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 46
+                    Text = 'Organisation Edit'
+                    TextSettings.Trimming = None
+                    OnClick = BtnOrgEditClick
+                  end
+                  object BtnOrgConfirm: TButton
+                    Enabled = False
+                    Margins.Left = 25.000000000000000000
+                    Margins.Top = 5.000000000000000000
+                    Margins.Right = 10.000000000000000000
+                    Margins.Bottom = 5.000000000000000000
+                    Position.X = 25.000000000000000000
+                    Position.Y = 452.000000000000000000
+                    Size.Width = 135.000000000000000000
+                    Size.Height = 45.000000000000000000
+                    Size.PlatformDefault = False
+                    TabOrder = 47
+                    Text = 'Confirm'
+                    TextSettings.Trimming = None
+                    OnClick = BtnOrgConfirmClick
+                  end
                 end
               end
               object BtnAddNewSite: TButton
@@ -1106,7 +1179,7 @@ object Form1: TForm1
                         Touch.InteractiveGestures = [LongTap, DoubleTap]
                         TabOrder = 4
                         Position.X = 178.000000000000000000
-                        Position.Y = 4.000000000000000000
+                        Position.Y = 2.000000000000000000
                         Margins.Left = 5.000000000000000000
                         Margins.Top = 15.000000000000000000
                         Margins.Right = 5.000000000000000000
@@ -1114,6 +1187,7 @@ object Form1: TForm1
                         Size.Width = 143.000000000000000000
                         Size.Height = 22.000000000000000000
                         Size.PlatformDefault = False
+                        CharCase = ecUpperCase
                         OnEnter = EdIDEnter
                       end
                     end
