@@ -2545,12 +2545,6 @@ begin
 
             DM.FDConnection1.Connected := true;
 
-    //        DM.FDQDetails.SQL.Clear;
-    //        DM.FDQDetails.SQL.Add('UPDATE "NAMES" SET RECORDING = :Voice');
-    //        DM.FDQDetails.SQL.Add('WHERE P_KEY = :PK');
-    //        DM.FDQDetails.Params.ParamByName('PK').AsInteger := PK;
-    //        DM.FDQDetails.Params.ParamByName('Voice').LoadFromStream(MemoryStream, ftBlob);
-
             //11-4/-25
             DM.FDQOrganisation.SQL.Clear;
             DM.FDQOrganisation.SQL.Add('UPDATE ORGANAISATION SET NOTE = :Voice');
@@ -3018,7 +3012,9 @@ begin
   end else
   begin
     Ed_Lat.Visible := false;
-    LblLat.Text := ListBoxItemLatitude.ItemData.Detail;
+      If ListBoxItemLatitude.ItemData.Detail <> '' then
+      LblLat.Text := ListBoxItemLatitude.ItemData.Detail
+      else LblLat.Text := Ed_Lat.Text;
     LblLat.Visible := true;
   end;
 
@@ -3030,7 +3026,9 @@ begin
   end else
   begin
     Ed_Long.Visible := false;
-    LblLong.Text := ListBoxItemLongitude.ItemData.Detail;
+      If ListBoxItemLongitude.ItemData.Detail <> '' then
+      LblLong.Text := ListBoxItemLongitude.ItemData.Detail
+      else LblLong.Text := Ed_Long.Text;
     LblLong.Visible := true;
   end;
 
