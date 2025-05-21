@@ -103,10 +103,6 @@ type
     FLImage_Memo: TFlowLayout;
     TIStartpage: TTabItem;
     PlnStartHost: TPanel;
-    PlnStartTitle: TPanel;
-    Label8: TLabel;
-    PnlHostCreateRecord: TPanel;
-    BtnShow: TButton;
     PnlHostSiteSelect: TPanel;
     PnlHostSitePhoto: TPanel;
     TabConHostSelectSite: TTabControl;
@@ -165,7 +161,6 @@ type
     PnlPopup: TPanel;
     BtnShowAddDept: TButton;
     EdNewLocation: TEdit;
-    PlnVoice: TPanel;
     BtnTakePhoto: TButton;
     FloatAnimation1: TFloatAnimation;
     Image2: TImage;
@@ -191,7 +186,6 @@ type
     ListBoxItemSubAdminArea: TListBoxItem;
     ListBoxItemSubThoroughfare: TListBoxItem;
     ListBoxItemThoroughfare: TListBoxItem;
-    WebBrowser1: TWebBrowser;
     LONavCoods: TLayout;
     LblLat: TLabel;
     LblLong: TLabel;
@@ -200,20 +194,6 @@ type
     MemMainNotes: TMemo;
     MemoRecordNote: TMemo;
     BtnPlay: TButton;
-    Image5: TImage;
-    LOVoiceNotes: TLayout;
-    BtnPlayRec: TButton;
-    Layout5: TLayout;
-    Image1: TImage;
-    Label21: TLabel;
-    BtnStopRec: TButton;
-    Layout4: TLayout;
-    Image4: TImage;
-    Label4: TLabel;
-    BtnStartRec: TButton;
-    Layout3: TLayout;
-    Image3: TImage;
-    Label3: TLabel;
     BtnCreateOrgRec: TButton;
     LblDeptCode: TLabel;
     SGOrg: TStringGrid;
@@ -251,6 +231,24 @@ type
     Ed_Org_Contact: TEdit;
     Ed_Lat: TEdit;
     Ed_Long: TEdit;
+    MapSiteView: TMapView;
+    LblNote: TLabel;
+    LOCoord: TLayout;
+    Ed_NewLat: TEdit;
+    Ed_Newlong: TEdit;
+    BtnStartRec: TButton;
+    Layout3: TLayout;
+    Image3: TImage;
+    Label3: TLabel;
+    BtnPlayRec: TButton;
+    Layout5: TLayout;
+    Image1: TImage;
+    Label21: TLabel;
+    BtnStopRec: TButton;
+    Layout4: TLayout;
+    Image4: TImage;
+    Label4: TLabel;
+    LblChoose: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure PreviousTabAction1Update(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -277,7 +275,6 @@ type
     procedure TabItem9MouseEnter(Sender: TObject);
     procedure BtnEditNoteClick(Sender: TObject);
     procedure BtnCreateOrgRecClick(Sender: TObject);
-    procedure BtnShowClick(Sender: TObject);
     procedure CBOrganisationsChange(Sender: TObject);
     procedure TabConHostSelectSiteChange(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
@@ -300,6 +297,7 @@ type
     procedure BtnApplyAddressClick(Sender: TObject);
     procedure BtnOrgEditClick(Sender: TObject);
     procedure BtnOrgConfirmClick(Sender: TObject);
+    procedure MapSiteViewCameraChanged(Sender: TObject);
   private const
     StoragePermission = 'android.permission.WRITE_EXTERNAL_STORAGE';
     //Audio
@@ -944,6 +942,12 @@ begin
 
 end;
 
+procedure TForm1.MapSiteViewCameraChanged(Sender: TObject);
+begin
+ //  CameraInfo.Text := Format('Location Coordinates: %3.3f, %3.3f Zoom = %2f', [TMapView(Sender).Location.Latitude,
+ //   TMapView(Sender).Location.Longitude, TMapView(Sender).Zoom]);
+end;
+
 procedure TForm1.MemoFullSizeDeptClick(Sender: TObject);
 begin
   TabCont_Image_Memo.TabIndex := 1;
@@ -1428,14 +1432,21 @@ begin
   ListBox1.Visible := true else
   Listbox1.Visible := false;
 
-  {$IFDEF ANDRIOD}
-  If (TIChooseSite.IsSelected) AND (IsConnectedtoInternet = True) then
-  Begin
-    //showmessage('choose site');
-    WebBrowser1.Visible := true;
-   // DoMapDispay('','');
-  End else
-    WebBrowser1.Visible := false;
+  {$IFDEF ANDROID}
+    If (TIChooseSite.IsSelected) AND
+    (IsConnectedtoInternet = True)
+    then
+    Begin
+      MapSiteView.Visible := true;
+      writetolog('TIChooseSite.IsSelected');
+    End;
+
+    IF (TIAddSite.IsSelected = True) AND
+    (IsConnectedtoInternet = True)
+    then
+    begin
+      MapSiteView.Visible := false;
+    end;
   {$ENDIF}
 
 
@@ -1463,17 +1474,22 @@ procedure TForm1.DoMapDispay(Lat, Long : string);
 var
   URLString: string;
   LatVal, LongVal: double;
+  MarkerDesc: TMapMarkerDescriptor;
 begin
-
 
     LatVal := StrToFloat(Lat);
     LongVal := StrtoFloat(Long);
 
-   // URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [51.316965 , -2.534651]);
-    URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [LatVal , LongVal]);
+   // URLString := Format('https://maps.google.com/maps?q=%2.6f,%2.6f', [LatVal , LongVal]);
+    MapSiteView.Location := TMapCoordinate.Create(LatVal, LongVal);
+    MapSiteView.Zoom := 16.45;
 
 
-    WebBrowser1.Navigate(URLString);
+    MarkerDesc := TMapMarkerDescriptor.Create(TMapCoordinate.Create(LatVal, LongVal),'Site Location');
+    MarkerDesc.Snippet := LblSite_Name.text;
+    MapSiteView.AddMarker(MarkerDesc);
+
+   // WebBrowser1.Navigate(URLString);
 
 end;
 
@@ -1483,12 +1499,16 @@ var
   Dept_Lookup: string;
 begin
 
+
+
+
     If TabItem2.IsSelected then
     begin
       Dept_Lookup := LblSiteCode.text + '_' + LblDeptCode.Text;
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'PreviousTabAction1Update');
 
       MemoShowNote.Text := '';
+
       UpdateListviewData('NextTabAction1Update');//2-4-25
     end;
 
@@ -1505,9 +1525,13 @@ begin
       SelectedNameView(Dept_Lookup, FlowLayOut2, 'Dept_Tab', 'NextTabActionUpdate');
       ClearThumb_ImageDisplay(FlowLayOut2, ImageContainer);
       LblImageRef.text := '';
+
+      LblDeptCode.Text := '';  //21-5-25
+      LblDeptName.Text := '';  //21-5-25
     end;
 
-
+      //21-5-25
+      If assigned(CMBODepts) then CMBODepts.ItemIndex := -1;
 end;
 
 procedure TForm1.TabItem9MouseEnter(Sender: TObject);
@@ -2333,6 +2357,9 @@ begin
        EdAddress.Text := Address;
     end;
 
+    Ed_NewLat.Text := ListBoxItemLatitude.ItemData.Detail;
+    Ed_NewLong.text := ListboxItemLongitude.ItemData.Detail
+
   end;
 
   If (TIChooseSite.IsSelected = true) then
@@ -2379,6 +2406,11 @@ begin
      LbLDeptCode.text := '';
      LblDeptName.text := '';
 
+     If (EDId.Text = '') then
+     begin
+       showmessage('Site Code is empty - Quitting');
+       exit;
+     end;
 
      try
 
@@ -2394,11 +2426,10 @@ begin
         DM.FDQOrganisation.Open;
 
         If (DM.FDQOrganisation.recordcount >= 1)
-        OR (EDId.Text = '')
         then
         begin
 
-           showmessage('Site Code Already Exists or is empty - Quitting');
+           showmessage('Site Code Already Exists - Quitting');
            exit;
         end;
         //else  showmessage('Will Insert ' + EDId.Text) ;
@@ -2931,6 +2962,7 @@ begin
 
         writetolog('Insert Done');
 
+
      finally
        BlobStream.Free;
        MemoryStream.Free;
@@ -3032,9 +3064,20 @@ begin
     LblLong.Visible := true;
   end;
 
+  if (LblNote.Visible = true) then
+  begin
+    LblNote.Visible := false;
+    MemProjectDescription.Text := LblNote.Text;
+    MemProjectDescription.visible := true;
+  end else
+  begin
+    MemProjectDescription.Visible := false;
+    LblNote.Text := MemProjectDescription.Text;
+    LblNote.Visible := true;
+  end;
 
-  MemProjectDescription.ReadOnly := not MemProjectDescription.ReadOnly;
-  MemProjectDescription.HitTest := not MemProjectDescription.HitTest;
+  //MemProjectDescription.ReadOnly := not MemProjectDescription.ReadOnly;
+  //MemProjectDescription.HitTest := not MemProjectDescription.HitTest;
 
   {$IFDEF ANDROID}
   If IsConnectedtoInternet = True then
@@ -3042,11 +3085,15 @@ begin
 
     If (TIChooseSite.IsSelected) and (BtnOrgConfirm.Enabled = true)  then
     begin
-      WebBrowser1.Visible := true;
+      MapSiteView.Visible := true;
       ListBox1.Visible := false;
+
+      //19-5-25 Update Display
+      DoMapDispay(LblLat.Text,LblLong.Text);
+
     end else
     begin
-      WebBrowser1.Visible := false;
+      MapSiteView.Visible := false;
       ListBox1.Visible := true;
     end;
 
@@ -3303,14 +3350,6 @@ begin
     PnlPopup.visible := true;
 end;
 
-procedure TForm1.BtnShowClick(Sender: TObject);
-begin
-  if TabConHostSelectSite.TabIndex = 0 then
-     TabConHostSelectSite.TabIndex := 1
-  else
-     TabConHostSelectSite.TabIndex := 0
-end;
-
 Procedure TForm1.UpdateOrganisationData;
 begin
 
@@ -3380,7 +3419,7 @@ begin
       DM.FDQLocations.Open;
 
         MemoDepartments.Lines.Clear;
-        MemoDepartments.Lines.Add('Departmemts Created List');
+        MemoDepartments.Lines.Add('Department List');
         MemoDepartments.Lines.Add('');
 
         CMBODepts.Items.Clear;
@@ -3600,8 +3639,8 @@ procedure TForm1.NextTabAction1Update(Sender: TObject);
 //var
 //  Dept_Lookup: string;
 begin
-//
-//
+
+// IMPLEMTENTED IN TABCONTROL Change event - not needed 21-5-25
 //  {$IFDEF ANDROID}
 //    If TIStartPage.IsSelected then
 //    begin
@@ -3816,8 +3855,10 @@ begin
 
                                   StringList.LoadFromStream(BlobStream);
 
-                                  MemProjectDescription.lines.Clear;
-                                  MemProjectDescription.Lines.Assign(StringList);
+                                //  MemProjectDescription.lines.Clear;
+                                //  MemProjectDescription.Lines.Assign(StringList);
+                                //21-5-25
+                                  lblNote.text := StringList.text;
 
                               finally
                                  StringList.Free;
@@ -4022,16 +4063,25 @@ begin
     ComponentDefaultFont(Form1, 12);  //12
 
     PnlPopup.Visible := false;
-    BTnShow.Visible := false;
     LblDeptCode.text := '';
     LblDeptName.text := '';
+    Ed_Org_SiteName.Visible := false;
+    Ed_Org_Address.Visible := false;
+    Ed_Org_Email.Visible := false;
+    Ed_Org_Ref.Visible := false;
+    Ed_Org_Contact.Visible := false;
+    Ed_Lat.Visible := false;
+    Ed_Long.Visible := false;
+    MemProjectdescription.Visible := false;
+
     BtnTakephoto.Enabled := false;
-    //BtnNextScreen.Enabled := false;
+
 
   FlowLayout2 := TFlowLayout.Create(VertScrollBox1); // Create FlowLayout dynamically
   FlowLayout2.Parent := VertScrollBox1;              // Assign parent to the scroll box
 
-   TIStartPage.IsSelected := true;
+
+  TIStartPage.IsSelected := true;
 end;
 
 procedure TForm1.PlnNotesResize(Sender: TObject);
